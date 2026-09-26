@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum ArticleCategory {
+  NEWS
+  LONGREAD
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+// перйеменвати на articlesubcategory
+enum Subcategory {
+  AIR
+  LAND
+  CYBER
+  SPACE
+  NAVAL
+  UAV
+}
+
+model User {
+  id String @id @default(uuid())
+
+  email String  @unique
+  login String  @unique
+  fullName  String @map("full_name")
+  password  String
+
+  role  UserRole  @default(USER)
+
+  articles Article[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Article {
+  id String @id @default(uuid())
+
+  authorId  String @map("author_id")
+  author User @relation(fields: [authorId], references: [id])
+
+  category ArticleCategory
+  subcategory Subcategory?
+  status ArticleStatus @default(PUBLISHED)
+
+  isFeatured Boolean @default(false) @map("is_featured")
+  isWarInUkraine Boolean @default(false) @map("is_war_in_ukraine")
+
+  mainPicture String @map("main_picture")
+
+  slug  String  @unique
+  title String
+  description String @db.Text()
+  body String @db.Text()
+
+  tags String[]
+
+  source     String?
+  sourceLink String? @map("source_link")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("articles")
+}
