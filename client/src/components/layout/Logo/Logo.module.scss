@@ -1,0 +1,33 @@
+@use 'variables' as *;
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  color: var(--color-text);
+}
+
+.logo__mark {
+  width: 1.35em;
+  height: 1.35em;
+  flex-shrink: 0;
+}
+
+// Плитка — кольору акценту (однаковий в обох темах), літери завжди білі
+.logo__tile {
+  fill: var(--color-accent);
+}
+
+.logo__letters {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.logo__name {
+  font-weight: $fw-extrabold;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}

@@ -1,0 +1,20 @@
+// ─────────────────────────────────────────────────────────
+// breakpoints.scss
+// Breakpoint values and the media-query mixin. These stay as
+// SCSS $variables: CSS custom properties can't be used inside
+// @media conditions.
+//
+// Mobile-first: bp-up($bp) applies styles from $bp and wider.
+// ─────────────────────────────────────────────────────────
+
+$bp-sm: 640px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+$bp-2xl: 1440px;
+
+@mixin bp-up($bp) {
+  @media (min-width: $bp) {
+    @content;
+  }
+}

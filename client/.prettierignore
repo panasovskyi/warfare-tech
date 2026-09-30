@@ -1,0 +1,3 @@
+# Prettier 3 already skips everything in .gitignore (.next, node_modules, next-env.d.ts).
+# npm owns the lockfile format: Prettier would collapse its arrays and npm would expand them back.
+package-lock.json

@@ -1,0 +1,10 @@
+import { IconBase, type IconProps } from '@/components/icons/IconBase';
+
+// Мікросхема
+export const CyberIcon: React.FC<IconProps> = (props) => (
+  <IconBase {...props}>
+    <rect x='7' y='7' width='10' height='10' rx='1.5' />
+    <rect x='10' y='10' width='4' height='4' rx='0.5' />
+    <path d='M10 3.5V7M14 3.5V7M10 17v3.5M14 17v3.5M3.5 10H7M3.5 14H7M17 10h3.5M17 14h3.5' />
+  </IconBase>
+);

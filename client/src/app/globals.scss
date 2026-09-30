@@ -1,0 +1,149 @@
+// ─────────────────────────────────────────────────────────
+// globals.scss
+// Color tokens as CSS custom properties (var()), not SCSS
+// $variables — $vars are resolved once at compile time and
+// can never change again, so a light/dark toggle couldn't
+// touch them at runtime. Custom properties live in the actual
+// CSS output and can be reassigned per-theme just by swapping
+// the [data-theme] attribute on <html>, no rebuild needed.
+//
+// Later, in Next.js: import this once (e.g. in app/layout.tsx
+// or pages/_app.tsx) so the tokens are available globally, and
+// toggle themes with something like
+// document.documentElement.dataset.theme = 'dark'.
+// ─────────────────────────────────────────────────────────
+
+@use 'variables' as *;
+
+:root {
+  // Surfaces
+  --color-bg: #ffffff;
+  --color-surface: #f6f6f4; // panels: featured band, newsletter card
+  --color-surface-2: #eeece5; // secondary surface: image/thumbnail placeholders
+
+  // Text
+  --color-ink: #0e0e0f;
+  --color-ink-rgb: 14, 14, 15;
+  --color-text: var(--color-ink);
+  --color-text-muted: #54565a;
+  --color-text-faint: #9ca3af;
+
+  // Borders
+  --color-border: #eeeeec;
+
+  // Accent (links, tags, buttons on hover, CTAs)
+  --color-accent: #ff5a1f;
+  --color-accent-rgb: 255, 90, 31;
+  --color-accent-hover: #e14512;
+
+  // Buttons
+  --color-button-bg: var(--color-ink);
+  --color-button-text: #ffffff;
+
+  // Category tags (kept constant across themes — only tints change)
+  --color-cat-air: #2f6fed;
+  --color-cat-air-tint: #e9eef2;
+  --color-cat-land: #16a34a;
+  --color-cat-land-tint: #eaf1ec;
+  --color-cat-cyber: #e11d48;
+  --color-cat-cyber-tint: #f3e9ee;
+  --color-cat-naval: #0891b2;
+  --color-cat-naval-tint: #e3f2f4;
+  --color-cat-space: #7c3aed;
+  --color-cat-space-tint: #ece9f3;
+  --color-cat-uav: #d97706;
+  --color-cat-uav-tint: #f5ecdf;
+  --color-cat-industry: #6b7280;
+  --color-cat-industry-tint: #eeece5;
+
+  // "War in Ukraine" live-coverage hub
+  --color-ukraine-panel: #eef3fb;
+  --color-ukraine-blue: #0057b7;
+  --color-ukraine-yellow: #ffd700;
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #101012;
+  --color-surface: #18181b;
+  --color-surface-2: #1f1f23;
+
+  --color-ink: #f5f5f4;
+  --color-ink-rgb: 245, 245, 244;
+  --color-text-muted: #9a9ca3;
+  --color-text-faint: #6b6d74;
+
+  --color-border: #2a2a2e;
+
+  --color-accent: #ff5a1f;
+  --color-accent-rgb: 255, 90, 31;
+  --color-accent-hover: #ff744a;
+
+  --color-button-bg: #f5f5f4;
+  --color-button-text: #101012;
+
+  --color-cat-air-tint: #1b2740;
+  --color-cat-land-tint: #16281c;
+  --color-cat-cyber-tint: #2c1620;
+  --color-cat-naval-tint: #12262b;
+  --color-cat-space-tint: #241c33;
+  --color-cat-uav-tint: #2c2013;
+  --color-cat-industry-tint: #202023;
+
+  --color-ukraine-panel: #16202e;
+}
+
+// ─────────────────────────────────────────────────────────
+// Minimal global reset, wired to the tokens above
+// ─────────────────────────────────────────────────────────
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: $font-display;
+  font-size: $fs-base;
+  line-height: $lh-normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+// ─────────────────────────────────────────────────────────
+// Layout
+// ─────────────────────────────────────────────────────────
+
+// Centers content and caps its width at $container-max.
+// Padding counts inside max-width (border-box), so the gutters are
+// added on top: the content itself stays exactly $container-max wide.
+// For full-bleed bands (e.g. the header), put the background on an
+// outer element and .container inside it. Don't nest containers.
+.container {
+  width: 100%;
+  max-width: $container-max + 2 * $gutter;
+  margin-inline: auto;
+  padding-inline: $gutter;
+}
