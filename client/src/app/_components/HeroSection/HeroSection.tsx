@@ -1,33 +1,43 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './HeroSection.module.scss';
-import type { ArticleListItem } from '@/features/article/article.types';
+import {
+  ArticleListItem,
+} from '@/features/article/article.types';
+import { getSectionTagAndLink } from '@/features/article/article.utils';
+import { ArticleByline } from '@/features/article/components/ArticleByline/ArticleByline';
 
 type Props = {
   articles: ArticleListItem[];
 };
 
-// Головна новина (isFeatured) на всю ширину. Її заголовок — єдиний h1 головної сторінки
 export const HeroSection: React.FC<Props> = ({ articles }) => {
   const [featured] = articles;
 
   if (!featured) return null;
 
+  const { label, href, section } = getSectionTagAndLink(featured);
+
   return (
     <section className={styles.hero} aria-labelledby='hero-title'>
       <div className='container'>
         <article className={styles.hero__article}>
-          {/*
-            TODO: мітка — не завжди підкатегорія: у воєнної новини це "War in Ukraine".
-            Та сама функція "мітка і колір для статті", що й у картках
-          */}
-          {featured.subcategory && (
-            <Link
-              href={`/news/${featured.subcategory.toLowerCase()}`}
-              className={styles.hero__subcategoryLink}
-            >
-              {featured.subcategory}
-            </Link>
-          )}
+          <Image
+            src={featured.mainPicture}
+            alt=''
+            fill
+            preload
+            sizes='(min-width: 1528px) 1400px, calc(100vw - 128px)'
+            className={styles.hero__image}
+          />
+          {/* data-section — за ним стилі беруть колір плашки мітки */}
+          <Link
+            href={href}
+            className={styles.hero__subcategoryLink}
+            data-section={section}
+          >
+            {label}
+          </Link>
 
           <h1 id='hero-title' className={styles.hero__title}>
             <Link href={`/${featured.slug}`} className={styles.hero__titleLink}>
@@ -37,19 +47,11 @@ export const HeroSection: React.FC<Props> = ({ articles }) => {
 
           <p className={styles.hero__description}>{featured.description}</p>
 
-          <div className={styles.hero__meta}>
-            {/** пара автор + чам з горизонтальної картки, мона потім перевикристсати */}
-            <Link
-              href={`/authors/${featured.author.login}`}
-              className={styles.hero__authorLink}
-            >
-              {featured.author.fullName}
-            </Link>
-            <time dateTime={featured.createdAt} className={styles.hero__time}>
-              {/* TODO: видимий час — з тієї самої функції форматування в lib/, що й у картках */}
-              2h ago
-            </time>
-          </div>
+          <ArticleByline
+            author={featured.author}
+            createdAt={featured.createdAt}
+            className={styles.hero__byline}
+          />
         </article>
       </div>
     </section>

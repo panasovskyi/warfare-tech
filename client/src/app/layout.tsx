@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
 import { Manrope, JetBrains_Mono } from 'next/font/google';
 import './globals.scss';
+import { Header } from '@/components/layout/Header/Header';
+import { Footer } from '@/components/layout/Footer/Footer';
 
 // TODO:
 // - metadata: замінити "Create Next App" на назву й опис сайту
 // - public/: видалити невикористані svg зі стартового шаблону (next, vercel, globe, file, window)
 // - favicon: замінити стандартний src/app/favicon.ico на свій
-// - .env.local з адресою API — на кроці шару API
 // - перемикач теми (data-theme на <html>) — окремим кроком
+// - посилання "Skip to content" першим у body (видиме лише у фокусі) → main з id:
+//   з клавіатури зараз треба протабати всю навігацію хедера на кожній сторінці.
+//   Для нього й для прихованих заголовків потрібна утиліта .sr-only у globals.scss
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -27,7 +31,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang='en' className={`${manrope.variable} ${jetBrainsMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        <Header />
+        <main>
+          {children}
+        </main>
+        <Footer />
+      </body>
     </html>
   );
 }

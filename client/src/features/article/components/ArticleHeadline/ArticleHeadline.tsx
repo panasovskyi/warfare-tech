@@ -1,6 +1,7 @@
 import type { ArticleListItem } from '@/features/article/article.types';
 import styles from './ArticleHeadline.module.scss';
 import Link from 'next/link';
+import { RelativeTime } from '@/components/ui/RelativeTime/RelativeTime';
 
 type Props = {
   article: ArticleListItem;
@@ -14,10 +15,10 @@ export const ArticleHeadline: React.FC<Props> = ({
   return (
     <div className={styles.headline}>
       {isShowTime && (
-        <time dateTime={article.createdAt} className={styles.headline__time}>
-          {/* TODO: видимий час — з тієї самої функції форматування в lib/, що й у картках */}
-          2h ago
-        </time>
+        <RelativeTime
+          dateTime={article.createdAt}
+          className={styles.headline__time}
+        />
       )}
 
       {/* TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug */}

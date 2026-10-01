@@ -2,17 +2,27 @@ import Link from 'next/link';
 import type { ArticleListItem } from '@/features/article/article.types';
 import styles from './ArticleCardVertical.module.scss';
 import Image from 'next/image';
+import { RelativeTime } from '@/components/ui/RelativeTime/RelativeTime';
 
 type Props = {
   article: ArticleListItem;
   // Рівень заголовка залежить від місця: під h2 блоку картка — h3
   headingLevel?: 2 | 3 | 4;
+  // Ширина фото на сторінці — підказка для next/image, яку версію фото вантажити.
+  // Залежить від сітки, в якій стоїть картка: секція з іншою сіткою передає своє значення
+  sizes?: string;
 };
+
+// За замовчуванням — головна новина War in Ukraine: 7/12 панелі без її полів (2 × 48px)
+// і проміжку між колонками (40px). 1528px = контейнер 1400 + поля сторінки 2 × 64
+const DEFAULT_SIZES =
+  '(min-width: 1528px) 737px, calc((100vw - 264px) * 7 / 12)';
 
 // Фото зверху, заголовок, опис і час. Головна новина у WarInUkraineSection
 export const ArticleCardVertical: React.FC<Props> = ({
   article,
   headingLevel = 3,
+  sizes = DEFAULT_SIZES,
 }) => {
   const Heading = `h${headingLevel}` as const;
 
@@ -20,13 +30,16 @@ export const ArticleCardVertical: React.FC<Props> = ({
     <article className={styles.card}>
       <div className={styles.card__imageWrapper}>
         {/*
-          TODO: fill уже є; ще потрібні sizes (без нього Next підставляє 100vw і вантажить
-          фото на всю ширину екрана) і стилі обгортки: position: relative, aspect-ratio,
-          overflow: hidden; на Image — object-fit: cover.
           TODO: remotePatterns зараз лише для тестового placehold.co. Краще, щоб ingestion
           завантажував фото в Cloudinary: тоді в конфігу один хост, і фото не зникнуть разом із джерелом
         */}
-        <Image src={article.mainPicture} alt='' fill />
+        <Image
+          src={article.mainPicture}
+          alt=''
+          fill
+          sizes={sizes}
+          className={styles.card__image}
+        />
       </div>
 
       <Heading className={styles.card__title}>
@@ -43,19 +56,10 @@ export const ArticleCardVertical: React.FC<Props> = ({
 
       <p className={styles.card__description}>{article.description}</p>
 
-      <time dateTime={article.createdAt} className={styles.card__time}>
-        2h ago
-        {/*
-          тут додамо логіку
-          типу буде now, 59 sec ago, min ago, 23h ago, yesterday, Sep 27th
-          у мене вже є готова функція з минулого проекту
-          вона приймає created at порівнює з поточним часов і повертає формат
-
-          TODO: функцію покласти в lib/ — вона загальна, не про статті.
-          Якщо рахувати на сервері, а сторінка кешується (revalidate), "2h ago"
-          буде застарілим на час кешу. Для новин прийнятно; інакше — клієнтський компонент
-        */}
-      </time>
+      <RelativeTime
+        dateTime={article.createdAt}
+        className={styles.card__time}
+      />
     </article>
   );
 };

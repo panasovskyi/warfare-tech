@@ -2,8 +2,8 @@ import Link from 'next/link';
 import styles from './Footer.module.scss';
 import { Logo } from '@/components/layout/Logo/Logo';
 
-// TODO: список розділів той самий, що в Header — брати з мапи розділів (article.constants),
-// коли вона повернеться
+// TODO: розділи брати з NEWS_SECTIONS (article.constants) — мапа вже є, той самий
+// список, що в Header
 const FOOTER_NAV = [
   {
     section: 'Sections',
@@ -17,19 +17,19 @@ const FOOTER_NAV = [
     ],
   },
 
+  // TODO: сторінок About, Advertise, Contact, Careers ще немає — посилання ведуть на головну
   {
     section: 'Company',
     items: [
-      { id: 1, label: 'about', link: '/', external: false },
-      { id: 2, label: 'advertise', link: '/', external: false },
-      { id: 3, label: 'contact', link: '/', external: false },
-      { id: 4, label: 'careers', link: '/', external: false },
+      { id: 1, label: 'About', link: '/', external: false },
+      { id: 2, label: 'Advertise', link: '/', external: false },
+      { id: 3, label: 'Contact', link: '/', external: false },
+      { id: 4, label: 'Careers', link: '/', external: false },
     ],
   },
 
-  // TODO: соцмережі — не навігація сайту, їх варто винести з nav в окремий список.
-  // Для target="_blank" — rel="noopener noreferrer". У зовнішніх <a> немає класу nav__link,
-  // тож їхні стилі розійдуться з внутрішніми посиланнями
+  // TODO: соцмережі — не навігація сайту, їх варто винести з nav в окремий список
+  // (тоді поміняється сітка футера). Для target="_blank" — rel="noopener noreferrer"
   {
     section: 'Socials',
     items: [
@@ -63,7 +63,9 @@ export const Footer = () => {
                   <li key={item.id} className={styles.nav__item}>
                     {/** потім буде  a target blank */}
                     {item.external ? (
-                      <a href={item.link}>{item.label}</a>
+                      <a href={item.link} className={styles.nav__link}>
+                        {item.label}
+                      </a>
                     ) : (
                       <Link href={item.link} className={styles.nav__link}>
                         {item.label}

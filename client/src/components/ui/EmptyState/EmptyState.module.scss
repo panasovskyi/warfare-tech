@@ -1,0 +1,23 @@
+@use 'variables' as *;
+
+// Спокійна панель на тлі поверхні, текст по центру
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-12 $space-6;
+  border-radius: $radius-lg;
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.empty__title {
+  font-size: $fs-md;
+  font-weight: $fw-semibold;
+}
+
+.empty__description {
+  font-size: $fs-sm;
+  color: var(--color-text-muted);
+}

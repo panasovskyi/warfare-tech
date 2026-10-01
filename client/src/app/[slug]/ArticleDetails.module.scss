@@ -1,0 +1,233 @@
+@use 'variables' as *;
+
+.page {
+  padding-block: $space-12 $space-24;
+}
+
+// Шапка, фото, текст з aside і футер — одна колонка з однаковими відступами
+.page__inner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+}
+
+// ── Шапка ───────────────────────────────────────────────
+
+.page__header {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+}
+
+// max-width у ch — довжина рядка в символах (≈ 1000px, як у макеті)
+.page__title {
+  max-width: 34ch;
+  font-size: $fs-display-lg;
+  font-weight: $fw-extrabold;
+  line-height: $lh-tight;
+  text-wrap: balance;
+}
+
+.page__description {
+  max-width: 65ch;
+  font-size: $fs-xl;
+  line-height: $lh-normal;
+  color: var(--color-text-muted);
+}
+
+// Аватар ліворуч на два рядки, праворуч ім'я над датою
+.author {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: $space-3;
+  align-items: center;
+}
+
+.author__avatar {
+  grid-row: span 2;
+}
+
+.author__link {
+  justify-self: start;
+  font-weight: $fw-bold;
+}
+
+.author__link:hover {
+  text-decoration: underline;
+}
+
+.author__time {
+  font-size: $fs-sm;
+  color: var(--color-text-muted);
+}
+
+// ── Головне фото ────────────────────────────────────────
+
+// Обгортка задає фото з fill розмір: position: relative — точка відліку,
+// aspect-ratio — висота від ширини, overflow: hidden — обрізає по заокругленню
+.page__mainPicWrapper {
+  position: relative;
+  aspect-ratio: $ratio-article;
+  overflow: hidden;
+  border-radius: $radius-xl;
+  background: var(--color-surface-2);
+}
+
+.page__mainPic {
+  object-fit: cover;
+}
+
+// ── Текст і aside ───────────────────────────────────────
+
+// Колонка тексту обмежена для зручної довжини рядка, aside праворуч.
+// Без aside лишається лише колонка тексту
+.page__content {
+  display: grid;
+  grid-template-columns: minmax(0, $article-text-width) $article-aside-width;
+  justify-content: space-between;
+  align-items: start;
+  column-gap: $space-20;
+}
+
+// pre-line зберігає переноси рядків з тексту: без цього HTML склеїв би
+// абзаци в один. Тимчасово — доки не вирішено формат body (абзаци чи Markdown)
+.body {
+  font-size: $fs-lg;
+  line-height: $lh-loose;
+  white-space: pre-line;
+}
+
+// Липне під час прокрутки, поки видно колонку тексту
+.aside {
+  position: sticky;
+  top: $space-6;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+// Колір розділу — --section-color з globals за data-section на aside
+.aside__title {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $fs-md;
+  font-weight: $fw-extrabold;
+  color: var(--section-color, var(--color-text));
+}
+
+.aside__icon {
+  flex-shrink: 0;
+  font-size: $fs-xl;
+}
+
+.aside__item {
+  padding-block: $space-4;
+  border-top: 1px solid var(--color-border);
+}
+
+.aside__item:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.aside__link {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: $space-1;
+  font-size: $fs-sm;
+  font-weight: $fw-semibold;
+  color: var(--color-text);
+}
+
+.aside__link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+}
+
+// ── Футер статті ────────────────────────────────────────
+
+// Під колонкою тексту, тієї ж ширини
+.page__footer {
+  display: flex;
+  flex-direction: column;
+  gap: $space-8;
+  max-width: $article-text-width;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.tags__item {
+  padding: $space-1 $space-4;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-pill;
+  font-size: $fs-sm;
+  font-weight: $fw-semibold;
+}
+
+.source {
+  padding-top: $space-6;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+// inline-flex + gap — відстань до іконки: у розмітці вони на різних рядках
+.source__link {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  font-weight: $fw-semibold;
+  color: var(--color-text);
+}
+
+.source__link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+}
+
+// Картка автора на тлі поверхні
+.writer {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  padding: $space-6;
+  border-radius: $radius-lg;
+  background: var(--color-surface);
+}
+
+// Аватар за замовчуванням того ж відтінку, що й картка, — тут біле тло
+.writer__avatar {
+  background: var(--color-bg);
+}
+
+// Два span у розмітці: підпис "Written by" і ім'я
+.writer__name {
+  display: flex;
+  flex-direction: column;
+  font-size: $fs-lg;
+  font-weight: $fw-extrabold;
+}
+
+.writer__name > span:first-child {
+  font-size: $fs-sm;
+  font-weight: $fw-regular;
+  color: var(--color-text-muted);
+}
+
+.writer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  margin-left: auto;
+  font-size: $fs-sm;
+  font-weight: $fw-semibold;
+}
+
+.writer__link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+}

@@ -36,18 +36,25 @@ $lh-tight: 1.14;
 $lh-snug: 1.3;
 $lh-normal: 1.5;
 $lh-relaxed: 1.6;
+$lh-loose: 1.75; // article body text
 
-// Spacing scale (px)
+// Spacing scale (px). The number is px / 4: $space-5 is 20px,
+// $space-12 is 48px. Gaps in the numbering are intentional —
+// a new value takes its own number (72px → $space-18) without
+// renaming the existing ones.
 $space-1: 4px;
 $space-2: 8px;
 $space-3: 12px;
 $space-4: 16px;
-$space-5: 24px;
-$space-6: 32px;
-$space-7: 40px;
-$space-8: 44px;
-$space-9: 56px;
-$space-10: 64px;
+$space-5: 20px;
+$space-6: 24px;
+$space-8: 32px;
+$space-10: 40px;
+$space-12: 48px;
+$space-14: 56px;
+$space-16: 64px;
+$space-20: 80px;
+$space-24: 96px;
 
 // Radius scale
 $radius-sm: 10px;
@@ -58,14 +65,31 @@ $radius-pill: 999px;
 
 // Layout
 $container-max: 1400px;
-$gutter: $space-10; // 64px page gutter, matches homepage mockup
+$gutter: $space-16; // 64px page gutter, matches homepage mockup
+
+// Article page columns: text keeps a comfortable line length, the aside
+// sits on the right
+$article-text-width: 720px;
+$article-aside-width: 340px;
+
+// Aspect ratios of photo boxes. calc() instead of a bare 5 / 2: Sass
+// would read the slash as the deprecated division operator and warn
+$ratio-hero: calc(5 / 2); // 1400 × 560 at full container width
+$ratio-card: calc(16 / 9); // photos of the Vertical and Compact cards
+$ratio-thumb: calc(3 / 2); // thumbnail of the Horizontal card
+$ratio-article: calc(2 / 1); // main photo of the article page
 
 // Shadows (structure only — color channel comes from the
-// --color-ink-rgb custom property so shadows still tint
-// correctly under a dark theme)
+// --color-ink-rgb custom property). Not used anywhere yet.
+// TODO: у темній темі --color-ink-rgb світлий, тож ці тіні стануть світлим
+// ореолом. Перед використанням — окремий колір тіні, однаковий в обох темах
 $shadow-sm: 0 1px 2px rgba(var(--color-ink-rgb), 0.06);
 $shadow-md: 0 4px 16px rgba(var(--color-ink-rgb), 0.08);
 $shadow-lg: 0 12px 32px rgba(var(--color-ink-rgb), 0.12);
 
 // Transitions
 $ease-standard: 150ms ease;
+
+// Focus ring (the color is --color-focus in globals.scss)
+$focus-ring-width: 2px;
+$focus-ring-offset: 3px;

@@ -35,6 +35,9 @@ export const createArticleSchema = z
       .max(10, 'Too many tags')
       .optional(),
     source: z.string().trim().min(1, 'Source cannot be empty').optional(),
+    // TODO: z.url() пропускає будь-яку схему, зокрема javascript: — обмежити до http(s)
+    // (опція protocol у z.url), і так само для mainPicture. Посилання прийдуть з ingestion,
+    // тобто зі сторонніх сторінок, а фронт ставить sourceLink прямо в href
     sourceLink: z
       .string()
       .trim()

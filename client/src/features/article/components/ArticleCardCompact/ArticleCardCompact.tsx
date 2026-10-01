@@ -7,12 +7,20 @@ type Props = {
   article: ArticleListItem;
   // Рівень заголовка залежить від місця: під h2 блоку картка — h3
   headingLevel?: 2 | 3 | 4;
+  // Ширина фото на сторінці — підказка для next/image, яку версію фото вантажити.
+  // Залежить від сітки, в якій стоїть картка: секція з іншою сіткою передає своє значення
+  sizes?: string;
 };
+
+// За замовчуванням — сітка підкатегорій: третина контейнера без двох проміжків по 48px.
+// 1528px = контейнер 1400 + поля 2 × 64
+const DEFAULT_SIZES = '(min-width: 1528px) 435px, calc((100vw - 224px) / 3)';
 
 // Фото і заголовок, без мітки й мети. Перша новина в SubcategorySection, картки SpecialReportSection
 export const ArticleCardCompact: React.FC<Props> = ({
   article,
   headingLevel = 3,
+  sizes = DEFAULT_SIZES,
 }) => {
   const Heading = `h${headingLevel}` as const;
 
@@ -20,13 +28,16 @@ export const ArticleCardCompact: React.FC<Props> = ({
     <article className={styles.card}>
       <div className={styles.card__imageWrapper}>
         {/*
-          TODO: fill уже є; ще потрібні sizes (без нього Next підставляє 100vw і вантажить
-          фото на всю ширину екрана) і стилі обгортки: position: relative, aspect-ratio,
-          overflow: hidden; на Image — object-fit: cover.
           TODO: remotePatterns зараз лише для тестового placehold.co. Краще, щоб ingestion
           завантажував фото в Cloudinary: тоді в конфігу один хост, і фото не зникнуть разом із джерелом
         */}
-        <Image src={article.mainPicture} alt='' fill />
+        <Image
+          src={article.mainPicture}
+          alt=''
+          fill
+          sizes={sizes}
+          className={styles.card__image}
+        />
       </div>
 
       <Heading className={styles.card__title}>

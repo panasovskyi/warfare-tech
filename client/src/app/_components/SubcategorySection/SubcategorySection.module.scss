@@ -1,0 +1,55 @@
+@use 'variables' as *;
+
+.subcategory {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+// Капс — рішення дизайну. Підпис з мапи в звичайному регістрі ("Air"),
+// тож скрінрідер читає його словом, а не по літерах.
+// Колір розділу — --section-color з globals за data-section на секції.
+// Його успадковують і посилання, і іконка (вона малює currentColor)
+.subcategory__title {
+  font-size: $fs-md;
+  font-weight: $fw-bold;
+  color: var(--section-color, var(--color-text));
+  text-transform: uppercase;
+}
+
+// Іконка й назва — всередині посилання, тож flex і gap тут, а не на h2
+.subcategory__link {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+// Підкреслення кольору самої назви: акцентне поруч із кольоровим текстом
+// виглядало б строкато
+.subcategory__link:hover {
+  text-decoration: underline;
+}
+
+// Розмір іконки — 1em, тож задається font-size: 24px — рівно сітка 24×24,
+// лінії лягають на пікселі
+.subcategory__icon {
+  flex-shrink: 0;
+  font-size: $fs-2xl;
+}
+
+// Картка з фото, під нею список заголовків
+.news {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+// Рядки розділені лініями, як у макеті
+.news__listItem {
+  padding-block: $space-3;
+  border-top: 1px solid var(--color-border);
+}
+
+.news__listItem:last-child {
+  border-bottom: 1px solid var(--color-border);
+}

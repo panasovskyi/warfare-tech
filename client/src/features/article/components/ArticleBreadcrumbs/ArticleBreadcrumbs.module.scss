@@ -1,0 +1,45 @@
+@use 'variables' as *;
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $fs-sm;
+}
+
+// Шеврон і посилання в одному рядку. inline-flex + gap: у розмітці вони
+// на різних рядках, і JSX прибрав би пробіл між ними
+.breadcrumbs__item {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+// Перша ланка (News) — приглушена. У ланки розділу data-section на li дає
+// --section-color: її текст і іконка — кольору розділу
+.breadcrumbs__link {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  font-weight: $fw-medium;
+  color: var(--section-color, var(--color-text-muted));
+}
+
+.breadcrumbs__link:hover {
+  text-decoration: underline;
+}
+
+// Остання ланка — розділ статті — жирніша
+.breadcrumbs__item:last-child .breadcrumbs__link {
+  font-weight: $fw-bold;
+}
+
+// Шеврон декоративний (IconBase ставить aria-hidden), тож світлий колір
+// без вимог до контрасту тексту
+.breadcrumbs__separator {
+  color: var(--color-text-faint);
+}
+
+.breadcrumbs__icon {
+  font-size: $fs-md;
+}

@@ -1,0 +1,26 @@
+@use 'variables' as *;
+
+// Панель на тлі поверхні
+.special {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+  padding: $space-12;
+  border-radius: $radius-xl;
+  background: var(--color-surface);
+}
+
+.special__title {
+  font-size: $fs-xl;
+  font-weight: $fw-extrabold;
+  line-height: $lh-snug;
+}
+
+// Три картки в ряд. Колонка тут трохи вужча, ніж у сітці підкатегорій
+// (панель має поля), тож sizes ArticleCardCompact за замовчуванням — із
+// невеликим запасом, це не страшно
+.special__content {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-8;
+}

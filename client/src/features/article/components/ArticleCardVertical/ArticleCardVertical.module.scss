@@ -1,0 +1,58 @@
+@use 'variables' as *;
+
+// Фото зверху, під ним заголовок, опис і час.
+// position: relative — межі для розтягнутого посилання заголовка
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+// Обгортка задає фото з fill розмір: position: relative — точка відліку,
+// aspect-ratio — висота від ширини, overflow: hidden — обрізає по заокругленню.
+// Фон видно, поки фото вантажиться
+.card__imageWrapper {
+  position: relative;
+  aspect-ratio: $ratio-card;
+  margin-bottom: $space-2;
+  overflow: hidden;
+  border-radius: $radius-lg;
+  background: var(--color-surface-2);
+}
+
+.card__image {
+  object-fit: cover;
+}
+
+.card__title {
+  font-size: $fs-xl;
+  font-weight: $fw-bold;
+  line-height: $lh-snug;
+}
+
+// Розтягує клік на всю картку: заголовок і посилання не позиціоновані,
+// тож inset рахується від .card
+.card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+// Підкреслення акцентом, а не акцентний колір тексту: #ff5a1f на білому
+// як дрібний текст не проходить за контрастом
+.card:hover .card__link {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+}
+
+.card__description {
+  color: var(--color-text-muted);
+}
+
+// Час окремо від автора — моноширинним, як у макеті
+.card__time {
+  font-family: $font-mono;
+  font-size: $fs-xs;
+  color: var(--color-text-muted);
+}

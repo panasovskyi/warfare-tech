@@ -1,0 +1,34 @@
+@use 'variables' as *;
+
+// Коло з ініціалами по центру. Тло за замовчуванням — surface-2; на панелі
+// того ж відтінку батько передає className з іншим тлом
+.avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-pill;
+  background: var(--color-surface-2);
+  font-weight: $fw-bold;
+  color: var(--color-text);
+}
+
+// Розміри: коло й шрифт ініціалів разом. s — для майбутніх списків,
+// m — під статтею біля імені, l — картка автора внизу статті
+.avatar--s {
+  width: $space-8;
+  height: $space-8;
+  font-size: $fs-xs;
+}
+
+.avatar--m {
+  width: $space-10;
+  height: $space-10;
+  font-size: $fs-sm;
+}
+
+.avatar--l {
+  width: $space-14;
+  height: $space-14;
+  font-size: $fs-md;
+}

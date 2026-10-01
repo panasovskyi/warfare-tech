@@ -7,10 +7,9 @@
 // CSS output and can be reassigned per-theme just by swapping
 // the [data-theme] attribute on <html>, no rebuild needed.
 //
-// Later, in Next.js: import this once (e.g. in app/layout.tsx
-// or pages/_app.tsx) so the tokens are available globally, and
-// toggle themes with something like
-// document.documentElement.dataset.theme = 'dark'.
+// Imported once in app/layout.tsx, before the components, so
+// module styles come after it. A theme toggle (not built yet)
+// would set document.documentElement.dataset.theme = 'dark'.
 // ─────────────────────────────────────────────────────────
 
 @use 'variables' as *;
@@ -30,15 +29,36 @@
 
   // Borders
   --color-border: #eeeeec;
+  // For tinted panels (War in Ukraine), where --color-border blends into
+  // the background. Built from ink, so it follows the theme on its own
+  --color-border-translucent: rgba(var(--color-ink-rgb), 0.08);
 
   // Accent (links, tags, buttons on hover, CTAs)
   --color-accent: #ff5a1f;
   --color-accent-rgb: 255, 90, 31;
   --color-accent-hover: #e14512;
 
+  // Keyboard focus ring. Darker than the accent on purpose: #ff5a1f
+  // falls under 3:1 on the tinted panels, this keeps 3.7:1+ on every
+  // light surface. Same value as accent-hover but a separate token,
+  // so retuning the hover doesn't touch the ring
+  --color-focus: #e14512;
+
   // Buttons
   --color-button-bg: var(--color-ink);
   --color-button-text: #ffffff;
+
+  // Text and overlay on photos (hero). The same in both themes: the photo
+  // always sits under a dark gradient, so text on it is always light.
+  // Not built from --color-ink-rgb — under the dark theme ink is light
+  --color-on-image: #ffffff;
+  --color-on-image-muted: rgba(255, 255, 255, 0.82);
+  --gradient-image-overlay: linear-gradient(
+    to top,
+    rgba(6, 6, 7, 0.88) 0%,
+    rgba(6, 6, 7, 0.5) 45%,
+    rgba(6, 6, 7, 0) 75%
+  );
 
   // Category tags (kept constant across themes — only tints change)
   --color-cat-air: #2f6fed;
@@ -53,8 +73,19 @@
   --color-cat-space-tint: #ece9f3;
   --color-cat-uav: #d97706;
   --color-cat-uav-tint: #f5ecdf;
+  // TODO: розділу Industry немає — --color-cat-industry* прибрати (і в темному блоці)
   --color-cat-industry: #6b7280;
   --color-cat-industry-tint: #eeece5;
+
+  // Category colors as text (section titles, labels). Land, Naval and UAV
+  // base colors fall under 4.5:1 on white, so darker shades (≈5:1);
+  // Air, Cyber and Space pass as they are
+  --color-cat-air-text: var(--color-cat-air);
+  --color-cat-land-text: #15803d;
+  --color-cat-naval-text: #0e7490;
+  --color-cat-space-text: var(--color-cat-space);
+  --color-cat-cyber-text: var(--color-cat-cyber);
+  --color-cat-uav-text: #b45309;
 
   // "War in Ukraine" live-coverage hub
   --color-ukraine-panel: #eef3fb;
@@ -78,6 +109,8 @@
   --color-accent-rgb: 255, 90, 31;
   --color-accent-hover: #ff744a;
 
+  --color-focus: #ff744a;
+
   --color-button-bg: #f5f5f4;
   --color-button-text: #101012;
 
@@ -88,6 +121,10 @@
   --color-cat-space-tint: #241c33;
   --color-cat-uav-tint: #2c2013;
   --color-cat-industry-tint: #202023;
+
+  // TODO: --color-cat-*-text для темної теми — світліші відтінки: темні
+  // з :root на темному тлі не проходять за контрастом. Підібрати разом
+  // із перемикачем теми
 
   --color-ukraine-panel: #16202e;
 }
@@ -117,24 +154,108 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+// Browsers give these elements their own margins (lists also get a 40px
+// indent and markers, figure 40px on the sides). Components have no
+// outer spacing — the parent sets the gaps — so everything starts at 0.
+// Headings also drop the browser size and weight: the level is document
+// structure, the size is design (a footer h2 is small, a card h3 is
+// bigger), so each component sets its own.
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+// Lists here are structure (nav, card lists, tags). Markers in the
+// article text come back with the article body styles
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 a {
   color: inherit;
   text-decoration: none;
 }
 
+// height: auto keeps the aspect ratio when max-width shrinks an image
+// with width/height attributes. Images with fill aren't affected:
+// next/image sets their size inline
 img {
   max-width: 100%;
+  height: auto;
   display: block;
 }
 
+// Form controls don't inherit fonts. font (not just font-family) brings
+// the size too — otherwise Chrome renders them at 13.33px
 button,
 input {
-  font-family: inherit;
+  font: inherit;
+}
+
+// Keyboard focus ring. :focus-visible matches only when the browser
+// decides focus should be shown (Tab, text fields), not on mouse clicks.
+// outline, not border or box-shadow: it doesn't shift the layout,
+// follows border-radius and stays in Windows high contrast mode
+:focus-visible {
+  outline: $focus-ring-width solid var(--color-focus);
+  outline-offset: $focus-ring-offset;
 }
 
 // ─────────────────────────────────────────────────────────
 // Layout
 // ─────────────────────────────────────────────────────────
+
+// Sticky footer: body is a column at least one screen tall, and <main>
+// (the only one, in app/layout.tsx) takes all the free space. On short
+// pages (not-found, error) the footer stays at the bottom instead of
+// floating mid-screen; long pages get their height from the content.
+// Next's own nodes in body (route announcer, dev overlay) are
+// position: absolute and stay out of the column.
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex-grow: 1;
+}
+
+// Section color. Any element with data-section="<key>" gets --section-color:
+// the section's color as text (--color-cat-*-text, War in Ukraine — the flag
+// blue). Components use it as text color (card label, subcategory title) or
+// background (hero label pill). Keys match NEWS_SECTIONS. Longread and the
+// News fallback have no color: `initial` makes var() use the component's own
+// fallback instead of inheriting the color of a parent section
+@each $name in air, land, naval, space, cyber, uav {
+  [data-section='#{$name}'] {
+    --section-color: var(--color-cat-#{$name}-text);
+  }
+}
+
+[data-section='ukraine'] {
+  --section-color: var(--color-ukraine-blue);
+}
+
+[data-section='longread'],
+[data-section='news'] {
+  --section-color: initial;
+}
 
 // Centers content and caps its width at $container-max.
 // Padding counts inside max-width (border-box), so the gutters are

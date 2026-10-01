@@ -1,0 +1,38 @@
+@use 'variables' as *;
+
+// Смуга на всю ширину з лінією знизу; вміст — у .container усередині
+.header {
+  padding-block: $space-6;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header__container {
+  display: flex;
+  align-items: center;
+  gap: $space-10;
+}
+
+// Розмір логотипа задає font-size посилання: Logo рахує знак від нього (1.35em)
+.logotype {
+  display: inline-flex;
+  font-size: $fs-xl;
+}
+
+.nav__list {
+  display: flex;
+  gap: $space-6;
+}
+
+// Приглушені пункти, при наведенні — колір основного тексту.
+// padding-block трохи збільшує площу кліку
+.nav__link {
+  display: block;
+  padding-block: $space-1;
+  font-weight: $fw-medium;
+  color: var(--color-text-muted);
+  transition: color $ease-standard;
+}
+
+.nav__link:hover {
+  color: var(--color-text);
+}

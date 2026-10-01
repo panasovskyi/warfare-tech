@@ -1,0 +1,115 @@
+@use 'variables' as *;
+
+// Тонована панель із прапорною смужкою зверху.
+// position: relative — для смужки; overflow: clip — обрізає її по заокругленню
+.ukraine {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+  padding: $space-10 $space-12;
+  border-radius: $radius-xl;
+  overflow: clip;
+  background: var(--color-ukraine-panel);
+}
+
+// Смужка декоративна, тож не елемент у розмітці, а ::before:
+// ліва половина синя, права жовта, як у макеті
+.ukraine::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: $space-1;
+  background: linear-gradient(
+    to right,
+    var(--color-ukraine-blue) 50%,
+    var(--color-ukraine-yellow) 50%
+  );
+}
+
+// Заголовок із підписом ліворуч, посилання праворуч.
+// center, а не baseline: базова лінія h2 — це його перший елемент, прапор-svg,
+// а в svg немає текстової базової лінії, тож браузер бере низ іконки —
+// і підпис та посилання сідали нижче за текст заголовка
+.ukraine__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $space-4;
+}
+
+.ukraine__heading {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+}
+
+// inline-flex + gap — відстань між прапором і текстом: JSX прибирає пробіл
+// між тегом і текстом на різних рядках
+.ukraine__title {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $fs-2xl;
+  font-weight: $fw-extrabold;
+  line-height: $lh-snug;
+}
+
+// Іконка має розмір 1.5em × 1em, тож менший font-size — менший прапор
+.ukraine__flag {
+  font-size: $fs-lg;
+}
+
+.ukraine__subtitle {
+  font-size: $fs-sm;
+  color: var(--color-text-muted);
+}
+
+// Як "View all" у Latest: текст кольору основного, акцентні лише стрілка
+// й підкреслення
+.ukraine__sectionLink {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  font-size: $fs-sm;
+  font-weight: $fw-semibold;
+}
+
+.ukraine__sectionLink:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+}
+
+.ukraine__sectionLinkArrow {
+  color: var(--color-accent);
+}
+
+// Головна новина і список, 7 : 5. Під цю сітку розраховані sizes
+// ArticleCardVertical за замовчуванням
+.ukraine__content {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: start;
+  gap: $space-10;
+}
+
+.ukraine__latest {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.ukraine__latestTitle {
+  font-size: $fs-sm;
+  font-weight: $fw-bold;
+}
+
+// На тонованій панелі звичайну межу не видно — напівпрозора
+.ukraine__newsItem {
+  padding-block: $space-3;
+  border-top: 1px solid var(--color-border-translucent);
+}
+
+.ukraine__newsItem:last-child {
+  border-bottom: 1px solid var(--color-border-translucent);
+}

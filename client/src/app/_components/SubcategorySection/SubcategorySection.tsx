@@ -3,10 +3,14 @@ import styles from './SubcategorySection.module.scss';
 import { ArticleListItem } from '@/features/article/article.types';
 import { ArticleCardCompact } from '@/features/article/components/ArticleCardCompact/ArticleCardCompact';
 import { ArticleHeadline } from '@/features/article/components/ArticleHeadline/ArticleHeadline';
+import {
+  NEWS_SECTIONS,
+  SECTION_ICONS,
+  SubcategoryKey,
+} from '@/features/article/article.constants';
 
 type Props = {
-  // TODO: зараз сюди пройде будь-який рядок — замінити на тип ключа розділу з мапи розділів
-  subcategory: string;
+  subcategory: SubcategoryKey;
   articles: ArticleListItem[];
 };
 
@@ -14,26 +18,25 @@ export const SubcategorySection: React.FC<Props> = ({
   subcategory,
   articles,
 }) => {
-  // Блок стоїть на сторінці шість разів, тож id заголовка будується з підкатегорії
   const titleId = `${subcategory}-news-title`;
+  const SectionIcon = SECTION_ICONS[subcategory];
   const [featured, ...rest] = articles;
 
   if (!featured) return null;
 
   return (
-    <section className={styles.subcategory} aria-labelledby={titleId}>
+    <section
+      className={styles.subcategory}
+      aria-labelledby={titleId}
+      data-section={subcategory}
+    >
       <h2 id={titleId} className={styles.subcategory__title}>
-        {/*
-          Залупмо тут іконку типу літак, ракета тощо
-          в залежності від підкатегоріх щось підходяще
-          TODO: іконка декоративна — svg з aria-hidden, скрінрідер читає лише назву
-        */}
         <Link
           href={`/news/${subcategory}`}
           className={styles.subcategory__link}
         >
-          {/* TODO: видимий підпис ("Air") брати з мапи розділів, а не сирий subcategory */}
-          {subcategory}
+          <SectionIcon className={styles.subcategory__icon} />
+          {NEWS_SECTIONS[subcategory].label}
         </Link>
       </h2>
 
@@ -53,3 +56,4 @@ export const SubcategorySection: React.FC<Props> = ({
     </section>
   );
 };
+
