@@ -1,0 +1,77 @@
+@use 'variables' as *;
+
+// Нижній відступ перед футером, як у макеті (96px). Зверху відступу немає:
+// обкладинка йде впритул до хедера
+.page {
+  padding-bottom: $space-24;
+}
+
+// Обкладинка на всю ширину: фон на самому елементі, .container всередині (див. globals).
+// Колір розділу — --section-color з globals за data-section, текст світлий, як на фото.
+// Білий на -text відтінках проходить за контрастом.
+// TODO: без фото висота від вмісту (відступи нижче), у макеті з фото — 520px
+.page__cover {
+  padding-block: $space-24 $space-14;
+  background: var(--section-color, var(--color-text));
+  color: var(--color-on-image);
+}
+
+.page__coverInner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+// Іконка розділу й заголовок в одному рядку. Розмір задає font-size обгортки: заголовок
+// наслідує його (reset у globals), а іконка малює 1em — тож вони завжди однакові.
+// 48px, як заголовок сторінки /news. Колір іконки — currentColor, тобто світлий
+.page__titleWrapper {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+  font-size: $fs-display-lg;
+  font-weight: $fw-extrabold;
+  line-height: $lh-tight;
+}
+
+.page__icon {
+  flex-shrink: 0;
+}
+
+// Капс — рішення дизайну, як у назв розділів на головній: підпис у даних звичайним
+// регістром ("Air"), тож скрінрідер читає його словом.
+// TODO: трекінг заголовків ≈ −0.02em, як у макеті — токена ще немає
+.page__title {
+  text-transform: uppercase;
+}
+
+// Чипи, список і пагінація в одному .container з однаковим проміжком. gap, а не margin:
+// блок, що не відрендерився (список чи заглушка), не лишає після себе порожнього місця
+.page__content {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+  padding-top: $space-12;
+}
+
+// Список, під ним пагінація
+.news {
+  display: flex;
+  flex-direction: column;
+  gap: $space-16;
+}
+
+// Три колонки з проміжками 48 і 56px — під цю сітку розраховані sizes у ArticleCardGrid.
+// minmax(0, 1fr), а не 1fr: звичайна колонка не стискається вужче за вміст,
+// і довге слово в заголовку розширило б свою колонку
+.news__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-14 $space-12;
+}
+
+// Пагінація по центру, як у макеті сторінки розділу
+.news__pagination {
+  display: flex;
+  justify-content: center;
+}

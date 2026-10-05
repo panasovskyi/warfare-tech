@@ -1,0 +1,51 @@
+@use 'variables' as *;
+
+// Чипи розділів у рядок, на вузькому екрані переносяться
+.section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+}
+
+// Чип: таблетка з рамкою. Іконка й підпис в одному рядку через inline-flex і gap:
+// у розмітці вони на різних рядках, і JSX прибрав би пробіл між ними.
+// TODO: у макеті висота 44px, шрифт 14px, рамка #e4e4e0, відступи 10px між чипами
+// і 18px всередині — токенів немає, взяті найближчі ($space-10, $fs-sm, --color-border,
+// $space-3, $space-4)
+.section__link {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  height: $space-10;
+  padding-inline: $space-4;
+  border: 1px solid var(--color-border);
+  border-radius: $radius-pill;
+  font-size: $fs-sm;
+  font-weight: $fw-semibold;
+}
+
+.section__link:hover {
+  border-color: var(--color-text);
+}
+
+// Активний чип заповнений, як кнопка. Стиль від aria-current. Правило після :hover
+// навмисно: з тією ж специфічністю воно перемагає
+.section__link[aria-current='page'] {
+  border-color: var(--color-button-bg);
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+}
+
+// Колір розділу — --section-color з globals за data-section на посиланні; лише в іконки,
+// текст лишається кольору тексту. У «All» іконки немає, а прапор має власні кольори.
+// Розмір іконки — 1em, тож 16px задає font-size
+.section__icon {
+  flex-shrink: 0;
+  font-size: $fs-md;
+  color: var(--section-color, currentColor);
+}
+
+// На заповненому чипі іконка біла, як текст: колір розділу на чорному читається гірше
+.section__link[aria-current='page'] .section__icon {
+  color: inherit;
+}

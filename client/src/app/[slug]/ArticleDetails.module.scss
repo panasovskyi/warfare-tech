@@ -97,7 +97,11 @@
   white-space: pre-line;
 }
 
-// Липне під час прокрутки, поки видно колонку тексту
+// Липне під час прокрутки, поки видно колонку тексту.
+// TODO: без обмеження висоти: при limit: 10 aside вищий за екран ноутбука, і нижні рядки
+// та "View all" недосяжні, поки не скінчиться колонка тексту. Варіанти: max-height з
+// overflow-y: auto (кільце фокуса обріжеться — потрібен внутрішній відступ), менше рядків
+// або липнути лише коли вміщується
 .aside {
   position: sticky;
   top: $space-6;
@@ -130,19 +134,10 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+// Вигляд посилання — в ArrowLink, тут лише розташування: у flex-колонці без align-self
+// воно розтягнулось би на всю ширину
 .aside__link {
-  display: inline-flex;
   align-self: flex-start;
-  align-items: center;
-  gap: $space-1;
-  font-size: $fs-sm;
-  font-weight: $fw-semibold;
-  color: var(--color-text);
-}
-
-.aside__link:hover {
-  text-decoration: underline;
-  text-decoration-color: var(--color-accent);
 }
 
 // ── Футер статті ────────────────────────────────────────
@@ -218,16 +213,7 @@
   color: var(--color-text-muted);
 }
 
+// Вигляд посилання — в ArrowLink, тут лише розташування: праворуч у рядку картки
 .writer__link {
-  display: inline-flex;
-  align-items: center;
-  gap: $space-1;
   margin-left: auto;
-  font-size: $fs-sm;
-  font-weight: $fw-semibold;
-}
-
-.writer__link:hover {
-  text-decoration: underline;
-  text-decoration-color: var(--color-accent);
 }

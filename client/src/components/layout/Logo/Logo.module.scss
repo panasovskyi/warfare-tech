@@ -28,6 +28,8 @@
 
 .logo__name {
   font-weight: $fw-extrabold;
+  // TODO: -0.02em — той самий трекінг, що в заголовках сторінок (ArticleCardLead, NewsPage,
+  // NewsSectionPage): взяти токен, коли з'явиться
   letter-spacing: -0.02em;
   white-space: nowrap;
 }

@@ -1,8 +1,7 @@
-import Link from 'next/link';
 import styles from './LatestSection.module.scss';
 import { ArticleCardHorizontal } from '@/features/article/components/ArticleCardHorizontal/ArticleCardHorizontal';
 import { ArticleListItem } from '@/features/article/article.types';
-import { ArrowRightIcon } from '@/components/icons/ArrowRightIcon';
+import { ArrowLink } from '@/components/ui/ArrowLink/ArrowLink';
 import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
 
 type Props = {
@@ -18,16 +17,9 @@ export const LatestSection: React.FC<Props> = ({ articles }) => {
           Latest news
         </h2>
         {articles.length > 0 && (
-          <Link
-            href='/news'
-            className={styles.latest__link}
-            aria-label='View all latest news'
-          >
-            View all{' '}
-            <span aria-hidden='true' className={styles.latest__linkArrow}>
-              <ArrowRightIcon />
-            </span>
-          </Link>
+          <ArrowLink href='/news' aria-label='View all latest news'>
+            View all
+          </ArrowLink>
         )}
       </div>
 

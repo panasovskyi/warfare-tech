@@ -10,8 +10,15 @@ type Props = {
 // Рахується на сервері, тож застаріває разом із кешем сторінки (revalidate).
 // Для новин прийнятно; якщо стане ні — робити клієнтський компонент тут,
 // решта коду не зміниться
-export const RelativeTime: React.FC<Props> = ({ dateTime, className }) => (
-  <time dateTime={dateTime} className={className}>
-    {formatRelativeTime(dateTime)}
-  </time>
-);
+export const RelativeTime: React.FC<Props> = ({ dateTime, className }) => {
+  const text = formatRelativeTime(dateTime);
+
+  // Невалідна дата дає порожній рядок: порожній <time> не рендеримо
+  if (!text) return null;
+
+  return (
+    <time dateTime={dateTime} className={className}>
+      {text}
+    </time>
+  );
+};

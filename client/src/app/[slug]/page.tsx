@@ -8,10 +8,10 @@ import { notFound } from 'next/navigation';
 import styles from './ArticleDetails.module.scss';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRightIcon } from '@/components/icons/ArrowRightIcon';
+import { ArrowLink } from '@/components/ui/ArrowLink/ArrowLink';
 import { ExternalLinkIcon } from '@/components/icons/ExternalLinkIcon';
 import { RelativeTime } from '@/components/ui/RelativeTime/RelativeTime';
-import { ArticleBreadcrumbs } from '@/features/article/components/ArticleBreadcrumbs/ArticleBreadcrumbs';
+import { SectionBreadcrumbs } from '@/features/article/components/SectionBreadcrumbs/SectionBreadcrumbs';
 import { Avatar } from '@/components/ui/Avatar/Avatar';
 import {
   NEWS_SECTIONS,
@@ -43,7 +43,9 @@ const getArticleOrNotFound = async (slug: string): Promise<ArticleDetails> => {
 export default async function ArticleDetailsPage({ params }: Props) {
   const { slug } = await params;
   const article = await getArticleOrNotFound(slug);
-  const { href, label, section } = getSectionTagAndLink(article);
+  // TODO: лонгріди — окремий роут (/longreads/[slug]) чи цей? Якщо окремий: звіряти
+  // article.category і permanentRedirect на правильну адресу (див. TODO про getArticlePath у картках)
+  const { href, sectionLabel, section } = getSectionTagAndLink(article);
   const sectionArticlesFilter =
     section === 'longread'
       ? { category: ArticleCategory.LONGREAD }
@@ -58,18 +60,20 @@ export default async function ArticleDetailsPage({ params }: Props) {
   //    список догружається, помилку компонент обробляє сам
   const latestNewsResponse = await articleApi.getArticles({ ...sectionArticlesFilter, limit: 10 });
   const latestNews = latestNewsResponse.items.filter(item => item.id !== article.id);
+  // TODO: <SectionIcon section={section} /> замість SECTION_ICONS: дублює вибір іконки, а
+  // ukraine зараз без прапора в aside (те саме в SectionBreadcrumbs) — чи потрібен там прапор?
   const SectionIcon =
       section in SECTION_ICONS ? SECTION_ICONS[section as SubcategoryKey] : null;
-  // Мітка лонгріда — "Longread" (одна стаття), а тут потрібна назва розділу
-  const sectionLabel = section === 'longread' ? 'Longreads' : label;
 
   return (
     <article className={styles.page}>
       <div className={`container ${styles.page__inner}`}>
         <header className={styles.page__header}>
-          <ArticleBreadcrumbs article={article} />
+          <SectionBreadcrumbs section={section} />
           <h1 className={styles.page__title}>{article.title}</h1>
           <p className={styles.page__description}>{article.description}</p>
+          {/* TODO: сторінки /authors/[login] ще немає — обидва посилання на автора (тут і в картці
+              внизу) ведуть на 404, як і в ArticleByline на всіх картках */}
           <div className={styles.author}>
             <Avatar
               name={article.author.fullName}
@@ -111,10 +115,6 @@ export default async function ArticleDetailsPage({ params }: Props) {
             зберігає white-space: pre-line у стилях, але це один блок, а не абзаци
           */}
           <div className={styles.body}>{article.body}</div>
-          {/*
-            Свіжі статті того ж розділу. aside зв'язаний зі своїм h2, data-section дає
-            колір розділу (--section-color) заголовку й іконці. Без інших статей — не рендеримо
-          */}
           {latestNews.length > 0 && (
             <aside
               className={styles.aside}
@@ -134,13 +134,13 @@ export default async function ArticleDetailsPage({ params }: Props) {
                 ))}
               </ul>
 
-              <Link
+              <ArrowLink
                 href={href}
                 className={styles.aside__link}
                 aria-label={`View all in ${sectionLabel}`}
               >
-                View all <ArrowRightIcon />
-              </Link>
+                View all
+              </ArrowLink>
             </aside>
           )}
         </div>
@@ -155,11 +155,6 @@ export default async function ArticleDetailsPage({ params }: Props) {
               ))}
             </ul>
           )}
-          {/*
-            Джерело — лише коли є і назва, і адреса. Нова вкладка: rel забирає в тієї
-            сторінки доступ до нашої (window.opener) і не передає їй, звідки прийшли.
-            aria-label каже скрінрідеру про нову вкладку: іконка aria-hidden
-          */}
           {article.source && article.sourceLink && (
             <p className={styles.source}>
               Originally posted by{' '}
@@ -176,7 +171,6 @@ export default async function ArticleDetailsPage({ params }: Props) {
             </p>
           )}
           <div className={styles.writer}>
-            {/* writer__avatar — біле тло: картка автора сама на --color-surface */}
             <Avatar
               name={article.author.fullName}
               size='l'
@@ -186,15 +180,15 @@ export default async function ArticleDetailsPage({ params }: Props) {
               <span>Written by</span>
               <span>{article.author.fullName}</span>
             </div>
-            <Link
+            <ArrowLink
               href={`/authors/${article.author.login}`}
               className={styles.writer__link}
             >
-              More from this author <ArrowRightIcon />
-            </Link>
+              More from this author
+            </ArrowLink>
           </div>
         </footer>
-        {/** додамо форму підписки на новини */}
+        {/* TODO: під статтею, найімовірніше, перехід до наступної новини (не форма підписки) — вирішити */}
       </div>
     </article>
   );

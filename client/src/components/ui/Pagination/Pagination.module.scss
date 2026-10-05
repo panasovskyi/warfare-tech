@@ -1,0 +1,64 @@
+@use 'variables' as *;
+
+// Номери й стрілки — кружечки в один рядок. Відступи навколо і вирівнювання
+// (ліворуч чи по центру) задає батько
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+}
+
+// Спільний вигляд кружечка: квадрат $space-10, а номер із трьома цифрами росте
+// по ширині завдяки min-width і padding-inline.
+// TODO: у макеті 44px і шрифт 14px — токенів немає, взяті найближчі ($space-10, $fs-sm)
+.pagination__link,
+.pagination__arrowLink,
+.pagination__arrowPlaceholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $space-10;
+  height: $space-10;
+  padding-inline: $space-2;
+  border-radius: $radius-pill;
+  font-size: $fs-sm;
+  font-weight: $fw-semibold;
+}
+
+// Hover лише у посилань: заглушка не клікається
+.pagination__link:hover,
+.pagination__arrowLink:hover {
+  background: var(--color-surface);
+}
+
+// Поточна сторінка заповнена. Стиль від aria-current, а не від окремого класу: стан
+// у розмітці один і для скрінрідера, і для CSS. Правило після :hover навмисно —
+// з тією ж специфічністю воно перемагає, і hover не світлить поточну сторінку
+.pagination__link[aria-current='page'] {
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+}
+
+// Стрілки з рамкою. Розмір іконки — 1em, тож 18px задає font-size
+.pagination__arrowLink,
+.pagination__arrowPlaceholder {
+  border: 1px solid var(--color-border);
+  font-size: $fs-lg;
+}
+
+// Стрілка на краю: місце лишається, але вона згасла
+.pagination__arrowPlaceholder {
+  color: var(--color-text-faint);
+}
+
+// Ліва стрілка — те саме зображення, відзеркалене по горизонталі
+.pagination__iconPrev {
+  transform: scaleX(-1);
+}
+
+// Крапки між номерами, не клікабельні
+.pagination__ellipsis {
+  min-width: $space-6;
+  text-align: center;
+  color: var(--color-text-muted);
+}

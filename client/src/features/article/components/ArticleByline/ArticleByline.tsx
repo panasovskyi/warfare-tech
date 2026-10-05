@@ -18,6 +18,10 @@ export const ArticleByline: React.FC<Props> = ({
     <div
       className={className ? `${styles.byline} ${className}` : styles.byline}
     >
+      {/*
+        TODO: сторінки /authors/[login] ще немає — посилання веде на 404. login на сервері —
+        будь-які символи (3–20), тож у href потрібен encodeURIComponent, як для slug в api
+      */}
       <Link
         href={`/authors/${author.login}`}
         className={styles.byline__authorLink}

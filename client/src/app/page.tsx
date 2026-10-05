@@ -79,17 +79,19 @@ export default async function Home() {
     logIfRejected(subcategory, subcategoryResults[index]),
   );
 
+  const featuredArticles = getItemsOrEmpty(featuredNews);
+
   // TODO: коли API недоступний, на сторінці лишаються лише дві однакові заглушки
   // (War in Ukraine і Latest). Можливо, краще одне повідомлення на рівні сторінки,
   // якщо впали всі запити
   return (
     <div className={styles.page}>
       {/*
-        TODO: h1 сторінки — у HeroSection. Якщо featured-новини немає (запит упав), Hero
-        повертає null, і на головній не лишається жодного h1. Запасний — візуально
-        прихований h1 "Warfare Tech" (.sr-only, див. TODO в layout.tsx)
+        h1 сторінки — у HeroSection. Якщо featured-новини немає (запит упав), Hero повертає
+        null, і на головній не було б жодного h1: тоді запасний, візуально прихований
       */}
-      <HeroSection articles={getItemsOrEmpty(featuredNews)} />
+      {featuredArticles.length === 0 && <h1 className='sr-only'>Warfare Tech</h1>}
+      <HeroSection articles={featuredArticles} />
 
       <div className={`container ${styles.page__content}`}>
         <WarInUkraineSection articles={getItemsOrEmpty(ukraineNews)} />
@@ -108,9 +110,7 @@ export default async function Home() {
 
         <LatestSection articles={getItemsOrEmpty(latestNews)} />
 
-        {/**
-         * Додамо потім форму підписки
-         */}
+        {/* TODO: форма підписки (розсилка) під Latest — вирішити сервіс, текст і куди веде форма */}
       </div>
     </div>
   );

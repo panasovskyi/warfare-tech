@@ -125,6 +125,9 @@
   // TODO: --color-cat-*-text для темної теми — світліші відтінки: темні
   // з :root на темному тлі не проходять за контрастом. Підібрати разом
   // із перемикачем теми
+  // TODO: --color-ukraine-blue (#0057b7) як текст на темному тлі ≈ 2.8:1 — світліший
+  // відтінок для темної теми. Той самий токен — фон обкладинки /news/ukraine з білим
+  // текстом, тож для тексту й для фону можуть знадобитися два токени
 
   --color-ukraine-panel: #16202e;
 }
@@ -262,9 +265,56 @@ main {
 // added on top: the content itself stays exactly $container-max wide.
 // For full-bleed bands (e.g. the header), put the background on an
 // outer element and .container inside it. Don't nest containers.
+// TODO: адаптив — зараз лише десктоп: $gutter 64px, сітки 3/2 колонки й 7:5 без @media, а
+// bp-up з breakpoints.scss ніде не використовується. Додати брейкпоінти для .container,
+// головної, сторінки новини, /news і розділів, Header і Footer
 .container {
   width: 100%;
   max-width: $container-max + 2 * $gutter;
   margin-inline: auto;
   padding-inline: $gutter;
+}
+
+// ─────────────────────────────────────────────────────────
+// Accessibility utilities
+// ─────────────────────────────────────────────────────────
+
+// Visually hidden, but still read by screen readers. Used for text that has no
+// place in the design (fallback h1 on the homepage)
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+// "Skip to content": the first element in <body> (app/layout.tsx). Parked above the
+// viewport, not display: none, so it stays in the tab order; a keyboard focus slides
+// it into the top left corner. Colors follow the button tokens, so it works in both themes
+.skip-link {
+  position: absolute;
+  top: $space-4;
+  left: $gutter;
+  z-index: 100;
+  padding: $space-3 $space-5;
+  border-radius: $radius-pill;
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+  font-weight: $fw-semibold;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+// <main> is only the programmatic focus target of the skip link (tabIndex -1), not an
+// interactive element, so it gets no focus ring
+main:focus {
+  outline: none;
 }

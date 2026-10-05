@@ -43,3 +43,21 @@
 .breadcrumbs__icon {
   font-size: $fs-md;
 }
+
+// На кольоровому тлі обкладинки колір розділу злився б із тлом, тож усі ланки білі, як
+// текст на фото. Приглушений --color-on-image-muted (0.82) на суцільному кольорі не
+// проходить за контрастом (≈3.5:1 для 13px), тож News від розділу відрізняє вага
+// шрифту, а не прозорість. Шеврон декоративний — лишається приглушеним
+.breadcrumbs--onImage .breadcrumbs__link {
+  color: var(--color-on-image);
+}
+
+// Кільце фокуса того ж кольору, що й текст: глобальний --color-focus на кольоровому тлі
+// має контраст 1.1–1.7:1 при потрібних 3:1
+.breadcrumbs--onImage .breadcrumbs__link:focus-visible {
+  outline-color: var(--color-on-image);
+}
+
+.breadcrumbs--onImage .breadcrumbs__separator {
+  color: var(--color-on-image-muted);
+}

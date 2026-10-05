@@ -1,0 +1,22 @@
+@use 'variables' as *;
+
+// Текст — кольору основного тексту, акцентні лише стрілка й підкреслення при наведенні:
+// акцент як дрібний текст не проходить за контрастом.
+// inline-flex + gap — відстань до стрілки: JSX прибирає пробіл між текстом і тегом
+// на різних рядках
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  font-size: $fs-sm;
+  font-weight: $fw-semibold;
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+}
+
+.link__arrow {
+  color: var(--color-accent);
+}

@@ -1,0 +1,104 @@
+@use 'variables' as *;
+
+// Відступи зверху й знизу сторінки, як у макеті (56 і 96px)
+.page {
+  padding-block: $space-14 $space-24;
+}
+
+// Блоки сторінки один під одним з однаковим проміжком. gap, а не margin: блок, який
+// не відрендерився (топ, список, пагінація), не лишає після себе порожнього місця.
+// TODO: у макеті проміжки різні (32, 48, 72px) — тут один, $space-12
+.page__inner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+}
+
+.page__header {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+// 48px, як заголовок сторінки статті; у макеті 52px — токена немає.
+// TODO: трекінг заголовків ≈ −0.02em, як у макеті — токена ще немає (так само в ArticleCardLead)
+.page__title {
+  font-size: $fs-display-lg;
+  font-weight: $fw-extrabold;
+  line-height: $lh-tight;
+}
+
+.page__description {
+  max-width: $article-text-width;
+  font-size: $fs-lg;
+  line-height: $lh-relaxed;
+  color: var(--color-text-muted);
+}
+
+// Панель, що виділяє топ: світла тепла поверхня з ледь помітним акцентним відсвітом до
+// правого нижнього кута. Відсвіт слабкий навмисно: підписи розділів — кольоровий дрібний
+// текст, і чим темніший фон, тим гірший його контраст. Межа translucent: на тонованій
+// панелі --color-border не видно. Відсвіт лежить шаром над --color-surface, тож в обох
+// темах основа своя.
+// Усередині велика картка ліворуч, дві середні праворуч. Колонки 1.55fr і 1fr з проміжком
+// 40px і полями панелі 40px — під ці значення розраховані sizes у ArticleCardLead і
+// ArticleCardSide. minmax(0, …), а не fr: звичайна колонка не стискається вужче за вміст.
+// TODO: підписи розділів (11px) на цій панелі: Air 4.20:1 і Cyber 4.34:1 (у куті з
+// відсвітом 3.95 і 4.08), Land і UAV у куті ≈4.35 — нижче 4.5. Потрібні темніші
+// --color-cat-air-text, -cyber-text (і land, uav) або інша панель — вирішуєш ти
+.topStories {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: $space-10;
+  padding: $space-10;
+  border: 1px solid var(--color-border-translucent);
+  border-radius: $radius-xl;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(var(--color-accent-rgb), 0) 0%,
+      rgba(var(--color-accent-rgb), 0.06) 100%
+    ),
+    var(--color-surface);
+}
+
+// Без середніх карток велика займає всю ширину
+.topStories__left:only-child {
+  grid-column: 1 / -1;
+}
+
+.topStories__right {
+  display: flex;
+  flex-direction: column;
+  gap: $space-10;
+}
+
+// Список і пагінація під ним. Коли з'явиться aside, тут буде сітка з двох колонок
+.page__content {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+}
+
+.latest {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.latest__title {
+  font-size: $fs-xl;
+  font-weight: $fw-extrabold;
+  line-height: $lh-snug;
+}
+
+// Рядки розділені лініями, як у макеті і в SubcategorySection.
+// TODO: відступ рядка в макеті 28px — взято найближчий токен $space-6
+.latest__item {
+  padding-block: $space-6;
+  border-top: 1px solid var(--color-border);
+}
+
+.latest__item:last-child {
+  border-bottom: 1px solid var(--color-border);
+}

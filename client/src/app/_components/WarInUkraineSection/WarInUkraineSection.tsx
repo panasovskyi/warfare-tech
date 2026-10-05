@@ -1,9 +1,8 @@
-import Link from 'next/link';
 import styles from './WarInUkraineSection.module.scss';
 import { ArticleListItem } from '@/features/article/article.types';
 import { ArticleCardVertical } from '@/features/article/components/ArticleCardVertical/ArticleCardVertical';
 import { ArticleHeadline } from '@/features/article/components/ArticleHeadline/ArticleHeadline';
-import { ArrowRightIcon } from '@/components/icons/ArrowRightIcon';
+import { ArrowLink } from '@/components/ui/ArrowLink/ArrowLink';
 import { UkraineFlagIcon } from '@/components/icons/UkraineFlagIcon';
 import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
 
@@ -26,10 +25,12 @@ export const WarInUkraineSection: React.FC<Props> = ({ articles }) => {
         </div>
 
         {articles.length > 0 && (
-          <Link href={'/news/ukraine'} className={styles.ukraine__sectionLink}>
+          <ArrowLink
+            href='/news/ukraine'
+            aria-label='View full coverage of the war in Ukraine'
+          >
             View full coverage
-            <ArrowRightIcon className={styles.ukraine__sectionLinkArrow} />
-          </Link>
+          </ArrowLink>
         )}
       </div>
 
@@ -39,11 +40,7 @@ export const WarInUkraineSection: React.FC<Props> = ({ articles }) => {
 
           {rest.length > 0 && (
             <div className={styles.ukraine__latest}>
-              {/*
-                TODO: "Latest news" збігається із заголовком секції Latest — у списку
-                заголовків скрінрідера їх два. У макеті тут "Latest updates"
-              */}
-              <h3 className={styles.ukraine__latestTitle}>Latest news</h3>
+              <h3 className={styles.ukraine__latestTitle}>Latest updates</h3>
               <ul className={styles.ukraine__news}>
                 {rest.map((article) => (
                   <li key={article.id} className={styles.ukraine__newsItem}>

@@ -20,26 +20,6 @@
   line-height: $lh-snug;
 }
 
-// Текст — кольору основного тексту, акцентні лише стрілка й підкреслення:
-// акцент як дрібний текст не проходить за контрастом
-.latest__link {
-  display: inline-flex;
-  align-items: center;
-  gap: $space-1;
-  font-size: $fs-sm;
-  font-weight: $fw-semibold;
-}
-
-.latest__link:hover {
-  text-decoration: underline;
-  text-decoration-color: var(--color-accent);
-}
-
-.latest__linkArrow {
-  display: inline-flex;
-  color: var(--color-accent);
-}
-
 // Дві колонки через $space-12 — під цю сітку розраховані sizes
 // ArticleCardHorizontal за замовчуванням
 .news {

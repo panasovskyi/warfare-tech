@@ -27,6 +27,9 @@ export const NEWS_SECTIONS = {
 
 export type NewsSectionKey = keyof typeof NEWS_SECTIONS;
 
+export const isNewsSectionKey = (value: string): value is NewsSectionKey =>
+  Object.hasOwn(NEWS_SECTIONS, value);
+
 export type SubcategoryKey = Exclude<NewsSectionKey, 'ukraine'>;
 
 export const SECTION_ICONS = {

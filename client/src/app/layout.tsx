@@ -9,9 +9,6 @@ import { Footer } from '@/components/layout/Footer/Footer';
 // - public/: видалити невикористані svg зі стартового шаблону (next, vercel, globe, file, window)
 // - favicon: замінити стандартний src/app/favicon.ico на свій
 // - перемикач теми (data-theme на <html>) — окремим кроком
-// - посилання "Skip to content" першим у body (видиме лише у фокусі) → main з id:
-//   з клавіатури зараз треба протабати всю навігацію хедера на кожній сторінці.
-//   Для нього й для прихованих заголовків потрібна утиліта .sr-only у globals.scss
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -32,8 +29,12 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang='en' className={`${manrope.variable} ${jetBrainsMono.variable}`}>
       <body>
+        {/* Першим у body: з клавіатури одразу до вмісту, повз усю навігацію хедера */}
+        <a href='#main-content' className='skip-link'>
+          Skip to content
+        </a>
         <Header />
-        <main>
+        <main id='main-content' tabIndex={-1}>
           {children}
         </main>
         <Footer />

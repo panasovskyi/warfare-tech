@@ -1,14 +1,9 @@
 import Link from 'next/link';
-import styles from './ArticleCardHorizontal.module.scss';
+import styles from './ArticleCardRow.module.scss';
 import Image from 'next/image';
 import type { ArticleListItem } from '@/features/article/article.types';
 import { ArticleByline } from '@/features/article/components/ArticleByline/ArticleByline';
 import { getSectionTagAndLink } from '@/features/article/article.utils';
-
-// TODO: поки що сім окремих карток — Horizontal (ця: фото зліва, мітка, заголовок, автор і час),
-// Compact, Vertical, Lead, Side, Row і Grid з однаковими пропсами article, headingLevel і sizes
-// (у Lead ще preload). Після порівняння — або одна ArticleCard з variant, або тонкі картки зі
-// спільних частин (фото, мітка, заголовок-посилання, мета).
 
 type Props = {
   article: ArticleListItem;
@@ -19,11 +14,12 @@ type Props = {
   sizes?: string;
 };
 
-// За замовчуванням — Latest: дві колонки через 48px, мініатюра — третина картки
-// без проміжку 20px. 1528px = контейнер 1400 + поля 2 × 64
-const DEFAULT_SIZES = '(min-width: 1528px) 220px, calc((100vw - 216px) / 6)';
+// Мініатюра має фіксовану ширину, тож і sizes фіксований
+const DEFAULT_SIZES = '240px';
 
-export const ArticleCardHorizontal: React.FC<Props> = ({
+// Рядок списку: мініатюра зліва, справа мітка, заголовок, опис, автор і час.
+// Список Latest на /news. Межі й відступи між рядками задає список
+export const ArticleCardRow: React.FC<Props> = ({
   article,
   headingLevel = 3,
   sizes = DEFAULT_SIZES,
@@ -35,10 +31,6 @@ export const ArticleCardHorizontal: React.FC<Props> = ({
   return (
     <article className={styles.card}>
       <div className={styles.card__imageWrapper}>
-        {/*
-          TODO: remotePatterns зараз лише для тестового placehold.co. Краще, щоб ingestion
-          завантажував фото в Cloudinary: тоді в конфігу один хост, і фото не зникнуть разом із джерелом
-        */}
         <Image
           src={article.mainPicture}
           alt=''
@@ -63,6 +55,8 @@ export const ArticleCardHorizontal: React.FC<Props> = ({
             {article.title}
           </Link>
         </Heading>
+
+        <p className={styles.card__description}>{article.description}</p>
 
         <ArticleByline
           author={article.author}
