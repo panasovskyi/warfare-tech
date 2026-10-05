@@ -1,0 +1,28 @@
+{
+  "name": "ingestion",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "publish-draft": "tsx src/publish.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
+    "axios": "^1.20.0",
+    "cloudinary": "^2.11.0",
+    "dotenv": "^18.0.5",
+    "slugify": "^1.6.9",
+    "yaml": "^2.9.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
