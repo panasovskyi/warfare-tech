@@ -5,6 +5,12 @@ import {
 } from 'generated/prisma/enums';
 import z from 'zod';
 
+// Хости, з яких фронт показує фото: next/image кидає помилку на невідомому хості, і вся
+// сторінка списку віддає 500. Тримати в синхроні з images.remotePatterns у
+// client/next.config.ts (там і https як протокол).
+// TODO: коли ingestion завантажуватиме фото у своє сховище (Cloudinary) — замінити на його хост
+const IMAGE_HOSTNAME = /^placehold\.co$/;
+
 export const createArticleSchema = z
   .object({
     category: z.enum(ArticleCategory, 'Invalid category'),
@@ -15,7 +21,13 @@ export const createArticleSchema = z
     mainPicture: z
       .string()
       .trim()
-      .pipe(z.url('Main picture must be a valid URL')),
+      .pipe(
+        z.url({
+          protocol: /^https$/,
+          hostname: IMAGE_HOSTNAME,
+          error: 'Main picture must be an https URL on an allowed image host',
+        }),
+      ),
     title: z
       .string()
       .trim()
@@ -35,13 +47,17 @@ export const createArticleSchema = z
       .max(10, 'Too many tags')
       .optional(),
     source: z.string().trim().min(1, 'Source cannot be empty').optional(),
-    // TODO: z.url() пропускає будь-яку схему, зокрема javascript: — обмежити до http(s)
-    // (опція protocol у z.url), і так само для mainPicture. Посилання прийдуть з ingestion,
-    // тобто зі сторонніх сторінок, а фронт ставить sourceLink прямо в href
+    // Лише http(s): z.url() без protocol пропускає будь-яку схему, зокрема javascript:, а
+    // фронт ставить sourceLink прямо в href. Посилання прийдуть з ingestion, зі сторонніх сторінок
     sourceLink: z
       .string()
       .trim()
-      .pipe(z.url('Source link must be a valid URL'))
+      .pipe(
+        z.url({
+          protocol: /^https?$/,
+          error: 'Source link must be a valid http(s) URL',
+        }),
+      )
       .optional(),
   })
 
