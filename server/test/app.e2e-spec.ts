@@ -4,6 +4,8 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
+// TODO: це стартовий шаблон Nest: тест '/ (GET)' не відповідає API (такого роута немає).
+// Замінити e2e-тестами auth: реєстрація, логін, захищені роути
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 

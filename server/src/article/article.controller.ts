@@ -34,6 +34,9 @@ import { PaginatedResponse } from 'src/types/pagination';
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
+  // TODO: ендпоінтів редагування (PATCH) і видалення (DELETE) статті немає: опублікований
+  // текст міняється лише через Prisma Studio
+
   @UseGuards(JwtGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
   @Post()

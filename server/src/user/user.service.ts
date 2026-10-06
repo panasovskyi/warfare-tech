@@ -33,7 +33,7 @@ export class UserService {
       throw ApiError.fieldErrors({ field: 'login', message: 'Login is taken' });
     }
 
-    // два await можна переписати на promise all
+    // TODO: перевірки email і login незалежні — два await вище переписати на Promise.all
 
     const hashedPassword = await bcrypt.hash(payload.password, SALT_ROUNDS);
 
