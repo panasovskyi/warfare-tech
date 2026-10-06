@@ -98,6 +98,24 @@ export const checkDraft = ({
     );
   }
 
+  // The body is Markdown: lines with no blank line between them are joined into one paragraph
+  const brokenParagraph = body
+    .split(/\n\s*\n/)
+    .find(
+      (paragraph) =>
+        paragraph.trim().includes('\n') &&
+        !paragraph
+          .trim()
+          .split('\n')
+          .every((line) => /^\s*[-*]\s/.test(line)),
+    );
+
+  if (brokenParagraph) {
+    warnings.push(
+      `A paragraph is split into several lines ("${brokenParagraph.trim().slice(0, 40)}…"): Markdown joins such lines into one, put a blank line between paragraphs`,
+    );
+  }
+
   const lastLine = body.trim().split(/\r?\n/).at(-1) ?? '';
 
   if (SOURCE_LINE.test(lastLine)) {

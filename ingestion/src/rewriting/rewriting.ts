@@ -1,11 +1,13 @@
 import { generateJson, type GenerateResult } from '../llm/llm.client';
+import { isMostlyCyrillic } from '../translation/cyrillic';
+import { translateArticle } from '../translation/translate';
 import { checkDraft } from './checks';
 import {
   modelArticleSchema,
   type ModelArticle,
 } from './model-article.schema';
 import { measureOverlap, type OverlapReport } from './overlap';
-import { REWRITE_SYSTEM_PROMPT, SOURCE_TAG } from './rules';
+import { getRewritePrompt, SOURCE_TAG, type OutputLanguage } from './rules';
 
 export type RewriteInput = {
   sourceText: string;
@@ -15,7 +17,11 @@ export type RewriteInput = {
 };
 
 export type RewriteResult = {
+  // The English article, ready for the site
   article: ModelArticle;
+  // Only for a Ukrainian source: the Ukrainian rewrite the English text was translated from.
+  // The overlap with the source is measured on it, in the language of the source.
+  intermediate?: { title: string; description: string; body: string };
   model: string;
   usage: GenerateResult['usage'];
   overlap: OverlapReport;
@@ -80,47 +86,96 @@ const cleanSourceText = (sourceText: string): string => {
   return text;
 };
 
+const sumUsage = (
+  first: GenerateResult['usage'],
+  second: GenerateResult['usage'],
+): GenerateResult['usage'] => ({
+  inputTokens: first.inputTokens + second.inputTokens,
+  outputTokens: first.outputTokens + second.outputTokens,
+});
+
 export const rewrite = async ({
   sourceText,
   sourceName,
   publishedAt,
 }: RewriteInput): Promise<RewriteResult> => {
   const text = cleanSourceText(sourceText);
+  const language: OutputLanguage = isMostlyCyrillic(text) ? 'uk' : 'en';
 
   const result = await generateJson({
-    system: REWRITE_SYSTEM_PROMPT,
+    system: getRewritePrompt(language),
     prompt: buildPrompt(text, sourceName, publishedAt),
     schema: modelArticleSchema,
   });
 
-  const article = result.data;
+  const rewritten = result.data;
 
-  if (!article.usable) {
+  if (!rewritten.usable) {
     throw new UnusableSourceError(
-      `The source is not a usable article: ${article.reason || 'no reason given'}`,
+      `The source is not a usable article: ${rewritten.reason || 'no reason given'}`,
     );
   }
 
-  const overlap = measureOverlap(article.body, text);
-  const warnings = [
-    ...(overlap.warning ? [overlap.warning] : []),
-    ...(measureOverlap(article.description, text).ranges.length > 0
-      ? ['The description repeats wording from the source: rephrase it']
-      : []),
-    ...checkDraft({
-      title: article.title,
-      description: article.description,
-      body: article.body,
-      sourceName,
-      sourceText: text,
-    }),
-  ];
+  // Measured in the language of the source, which is what the rewrite is compared with
+  const overlap = measureOverlap(rewritten.body, text);
+  const descriptionRepeats =
+    measureOverlap(rewritten.description, text).ranges.length > 0;
+
+  if (language === 'en') {
+    return {
+      article: rewritten,
+      model: result.model,
+      usage: result.usage,
+      overlap,
+      warnings: [
+        ...(overlap.warning ? [overlap.warning] : []),
+        ...(descriptionRepeats
+          ? ['The description repeats wording from the source: rephrase it']
+          : []),
+        ...checkDraft({
+          title: rewritten.title,
+          description: rewritten.description,
+          body: rewritten.body,
+          sourceName,
+          sourceText: text,
+        }),
+      ],
+    };
+  }
+
+  const translated = await translateArticle(rewritten);
+  const article: ModelArticle = {
+    ...rewritten,
+    title: translated.title,
+    description: translated.description,
+    body: translated.body,
+  };
 
   return {
     article,
-    model: result.model,
-    usage: result.usage,
+    intermediate: {
+      title: rewritten.title,
+      description: rewritten.description,
+      body: rewritten.body,
+    },
+    model: translated.model,
+    usage: sumUsage(result.usage, translated.usage),
     overlap,
-    warnings,
+    warnings: [
+      ...(overlap.warning
+        ? [`The Ukrainian rewrite (see the .uk.md file): ${overlap.warning}`]
+        : []),
+      ...(descriptionRepeats
+        ? ['The Ukrainian description repeats wording from the source']
+        : []),
+      ...translated.warnings.map((warning) => `Translation: ${warning}`),
+      ...checkDraft({
+        title: article.title,
+        description: article.description,
+        body: article.body,
+        sourceName,
+        sourceText: text,
+      }),
+    ],
   };
 };

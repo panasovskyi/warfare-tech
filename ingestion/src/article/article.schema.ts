@@ -1,7 +1,14 @@
 import { z } from 'zod';
+import {
+  checkBodyMarkdown,
+  findImagePlaceholders,
+  IMAGE_HOSTNAME,
+} from './body-rules';
 
 // Mirror of server/src/article/schemas/create-article.schema.ts: keep the two in
 // sync, because the server is the one that finally accepts or rejects an article.
+// TODO: автотест, що це дзеркало дає ті самі результати, що серверна схема (зараз це
+// перевіряв одноразовий скрипт)
 
 export const ArticleCategory = {
   NEWS: 'NEWS',
@@ -22,9 +29,6 @@ export const ArticleStatus = {
   PUBLISHED: 'PUBLISHED',
 } as const;
 
-// TODO: коли фото підуть у Cloudinary — замінити хост тут, у create-article.schema.ts на сервері та в images.remotePatterns у client/next.config.ts
-const IMAGE_HOSTNAME = /^placehold\.co$/;
-
 export const articleSchema = z
   .object({
     category: z.enum(ArticleCategory, 'Invalid category'),
@@ -42,6 +46,12 @@ export const articleSchema = z
           error: 'Main picture must be an https URL on an allowed image host',
         }),
       ),
+    photoCredit: z
+      .string()
+      .trim()
+      .min(1, 'Photo credit cannot be empty')
+      .max(200, 'Photo credit too long: maximum 200 characters')
+      .optional(),
     title: z
       .string()
       .trim()
@@ -128,6 +138,12 @@ export const articleSchema = z
         message: 'Source is required when source link is provided',
       });
     }
+  })
+
+  .superRefine((data, ctx) => {
+    for (const message of checkBodyMarkdown(data.body)) {
+      ctx.addIssue({ code: 'custom', path: ['body'], message });
+    }
   });
 
 // What a draft file holds. A draft has no status (publishing sets it), and a missing
@@ -138,6 +154,8 @@ export type ArticleDraft = {
   isFeatured: boolean;
   isWarInUkraine: boolean;
   mainPicture: string;
+  // Empty when the picture needs no credit (our own placeholder)
+  photoCredit?: string;
   title: string;
   description: string;
   body: string;
@@ -153,11 +171,19 @@ export const validateArticle = (article: ArticleDraft): string[] => {
     subcategory: article.subcategory ?? undefined,
   });
 
+  // Not a server rule: words that `upload-image` leaves for the owner to replace
+  const placeholders = findImagePlaceholders(article.body).map(
+    (message) => `body: ${message}`,
+  );
+
   if (result.success) {
-    return [];
+    return placeholders;
   }
 
-  return result.error.issues.map(
-    (issue) => `${issue.path.join('.') || 'article'}: ${issue.message}`,
-  );
+  return [
+    ...result.error.issues.map(
+      (issue) => `${issue.path.join('.') || 'article'}: ${issue.message}`,
+    ),
+    ...placeholders,
+  ];
 };

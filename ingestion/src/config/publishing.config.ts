@@ -28,7 +28,6 @@ export type PublishingConfig = {
   password: string;
 };
 
-// Read on demand, not at import: writing a draft does not need the server's credentials
 export const getPublishingConfig = (): PublishingConfig => {
   const parsed = envSchema.safeParse(process.env);
 

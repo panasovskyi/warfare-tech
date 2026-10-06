@@ -1,15 +1,15 @@
-import "./config.js";
-import { downloadImage } from "./image-download.js";
-import { uploadBufferToCloudinary } from "./image-upload.js";
+import { downloadImage, readLocalImage } from './image-download';
+import { uploadBufferToCloudinary } from './image-upload';
 
-const FALLBACK_IMAGE_URL =
-  "https://res.cloudinary.com/tjpyazwe/image/upload/v1790068741/fallback.svg";
+// Takes a picture from an https address or a file on this computer, stores it in our
+// Cloudinary and returns the new address. When there is no picture, the caller keeps
+// the placeholder from article.ts.
+export const uploadImage = async (source: string): Promise<string> => {
+  const buffer = /^https?:\/\//i.test(source)
+    ? await downloadImage(source)
+    : await readLocalImage(source);
 
-export async function getMainPicture(imageUrl: string | null): Promise<string> {
-  if (!imageUrl) {
-    return FALLBACK_IMAGE_URL;
-  }
-
-  const buffer = await downloadImage(imageUrl);
   return uploadBufferToCloudinary(buffer);
-}
+};
+
+export const getMainPicture = uploadImage;

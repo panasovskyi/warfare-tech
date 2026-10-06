@@ -19,6 +19,7 @@ export const toPayload = (article: ArticleDraft) => ({
   isFeatured: article.isFeatured,
   isWarInUkraine: article.isWarInUkraine,
   mainPicture: article.mainPicture,
+  photoCredit: article.photoCredit,
   title: article.title,
   description: article.description,
   body: article.body,

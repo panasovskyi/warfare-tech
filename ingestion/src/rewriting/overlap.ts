@@ -111,8 +111,8 @@ const findMaximalRuns = (tokens: Token[], source: Token[]): Token[][] => {
   return runs;
 };
 
-// Wraps the ranges in ** ** so they show up bold in a Markdown preview. A range is
-// cut at line breaks: bold does not carry across paragraphs
+// Wraps the ranges in ** (bold): the owner deletes them while editing, and publishing
+// removes what is left. A range is cut at line breaks: a marker does not carry across paragraphs
 export const highlightMatches = (
   text: string,
   ranges: OverlapRange[],
@@ -124,7 +124,9 @@ export const highlightMatches = (
     const marked = result
       .slice(start, end)
       .split(/(\n+)/)
-      .map((piece) => (piece.trim() && !piece.includes('\n') ? `**${piece}**` : piece))
+      .map((piece) =>
+        piece.trim() && !piece.includes('\n') ? `**${piece}**` : piece,
+      )
       .join('');
 
     result = result.slice(0, start) + marked + result.slice(end);

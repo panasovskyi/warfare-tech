@@ -4,6 +4,14 @@ export const ALLOWED_SOURCES: Record<string, string> = {
   "war.gov": "US Department of War",
   "airandspaceforces.com": "Air & Space Forces Magazine",
   "rheinmetall.com": "Rheinmetall",
+  "twz.com": "The War Zone",
+  "breakingdefense.com": "Breaking Defense",
+  "airbus.com": "Airbus",
+  "rtx.com": "Raytheon",
+  "news.northropgrumman.com": "Northrop Grumman",
+  "thalesgroup.com": "Thales",
+  "boeing.mediaroom.com": "Boeing",
+  "militarnyi.com": "Militarnyi",
 };
 
 export const resolveSource = (url: string) => {

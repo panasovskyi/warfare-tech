@@ -5,6 +5,7 @@ import {
   addPublishedMarks,
   splitDraft,
   toArticleDraft,
+  usesBoldHighlights,
 } from './draft-file.schema';
 
 export const readDraft = async (
@@ -23,7 +24,9 @@ export const readDraft = async (
     throw new Error(`Cannot read the front matter: ${reason}`);
   }
 
-  return toArticleDraft(data, body);
+  return toArticleDraft(data, body, {
+    boldHighlights: usesBoldHighlights(front),
+  });
 };
 
 export const markPublished = async (
