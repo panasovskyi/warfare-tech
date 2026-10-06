@@ -20,6 +20,7 @@ import {
 } from '@/features/article/article.constants';
 import { getSectionTagAndLink } from '@/features/article/article.utils';
 import { ArticleHeadline } from '@/features/article/components/ArticleHeadline/ArticleHeadline';
+import { ArticleBody } from '@/features/article/components/ArticleBody/ArticleBody';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -97,8 +98,7 @@ export default async function ArticleDetailsPage({ params }: Props) {
             fill: обгортці потрібні position: relative і aspect-ratio (або висота),
             інакше фото розтягнеться на весь екран. preload — це найбільший елемент першого екрана.
             alt порожній, бо опису фото в даних немає.
-            TODO: поля на сервері для опису фото (alt) і підпису з автором/джерелом фото
-            (figcaption) — для новинного сайту підпис потрібен ще й через права на фото
+            TODO: поле на сервері для опису фото (alt)
           */}
           <Image
             src={article.mainPicture}
@@ -108,13 +108,20 @@ export default async function ArticleDetailsPage({ params }: Props) {
             sizes='(min-width: 1528px) 1400px, calc(100vw - 128px)'
             className={styles.page__mainPic}
           />
+          {article.photoCredit && (
+            <figcaption className={styles.page__mainPicCredit}>
+              Photo: {article.photoCredit}
+            </figcaption>
+          )}
         </figure>
         <div className={styles.page__content}>
           {/*
-            TODO: формат body — абзаци (<p> за порожніми рядками) чи Markdown. Поки переноси
-            зберігає white-space: pre-line у стилях, але це один блок, а не абзаци
+            TODO: ArticleBody поки малює лише абзаци й посилання (react-markdown без `components`).
+            Не зроблено: зовнішні посилання з target/rel, картинки (figure + figcaption; img
+            лягає в <p>), відео YouTube, зсув рівнів заголовків. Доки не зроблено — картинок і
+            відео в тексті статей не вставляти
           */}
-          <div className={styles.body}>{article.body}</div>
+          <ArticleBody body={article.body} />
           {latestNews.length > 0 && (
             <aside
               className={styles.aside}

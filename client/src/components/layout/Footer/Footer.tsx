@@ -80,9 +80,14 @@ export const Footer = () => {
           ))}
         </nav>
 
-        <p className={styles.footer__rights}>
-          © {new Date().getFullYear()} Warfare Tech. All rights reserved.
-        </p>
+        <div className={styles.footer__legal}>
+          <p>© {new Date().getFullYear()} Warfare Tech. All rights reserved.</p>
+          {/* Вимога DVIDS до фото військових США: dvidshub.net/about/copyright. Один раз на сайті, не під кожним фото */}
+          <p>
+            The appearance of U.S. Department of War (DoW) visual information
+            does not imply or constitute DoW endorsement.
+          </p>
+        </div>
       </div>
     </footer>
   );

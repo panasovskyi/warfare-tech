@@ -77,6 +77,22 @@
   object-fit: cover;
 }
 
+// Автор фото на самому фото, у лівому нижньому куті. Пізніше за фото в розмітці й теж
+// positioned, тому лежить поверх нього без z-index. max-width — щоб довгий підпис
+// переносився, а не виходив за фото
+.page__mainPicCredit {
+  position: absolute;
+  left: $space-4;
+  bottom: $space-4;
+  max-width: calc(100% - #{$space-8});
+  padding: $space-1 $space-3;
+  border-radius: $radius-sm;
+  background: var(--color-image-scrim);
+  font-size: $fs-sm;
+  line-height: $lh-snug;
+  color: var(--color-on-image);
+}
+
 // ── Текст і aside ───────────────────────────────────────
 
 // Колонка тексту обмежена для зручної довжини рядка, aside праворуч.
@@ -87,14 +103,6 @@
   justify-content: space-between;
   align-items: start;
   column-gap: $space-20;
-}
-
-// pre-line зберігає переноси рядків з тексту: без цього HTML склеїв би
-// абзаци в один. Тимчасово — доки не вирішено формат body (абзаци чи Markdown)
-.body {
-  font-size: $fs-lg;
-  line-height: $lh-loose;
-  white-space: pre-line;
 }
 
 // Липне під час прокрутки, поки видно колонку тексту.

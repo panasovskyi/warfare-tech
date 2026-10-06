@@ -3,7 +3,10 @@ import path from 'node:path';
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [{ protocol: 'https', hostname: 'placehold.co' }],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'placehold.co' },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+    ],
   },
   sassOptions: {
     // Lets any .scss file write `@use 'variables'` without relative paths.

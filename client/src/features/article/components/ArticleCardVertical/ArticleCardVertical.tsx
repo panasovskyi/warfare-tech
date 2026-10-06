@@ -29,10 +29,6 @@ export const ArticleCardVertical: React.FC<Props> = ({
   return (
     <article className={styles.card}>
       <div className={styles.card__imageWrapper}>
-        {/*
-          TODO: remotePatterns зараз лише для тестового placehold.co. Краще, щоб ingestion
-          завантажував фото в Cloudinary: тоді в конфігу один хост, і фото не зникнуть разом із джерелом
-        */}
         <Image
           src={article.mainPicture}
           alt=''

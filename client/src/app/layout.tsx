@@ -9,6 +9,9 @@ import { Footer } from '@/components/layout/Footer/Footer';
 // - public/: видалити невикористані svg зі стартового шаблону (next, vercel, globe, file, window)
 // - favicon: замінити стандартний src/app/favicon.ico на свій
 // - перемикач теми (data-theme на <html>) — окремим кроком
+// - кореневі app/not-found.tsx і app/error.tsx: невідомий розділ (/news/foo) і сторінка розділу
+//   за межами діапазону зараз дають стандартну 404 Next, а /longreads потрапляє в [slug] і
+//   дає наш not-found лише після запиту до API
 
 const manrope = Manrope({
   variable: '--font-manrope',

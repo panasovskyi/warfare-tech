@@ -53,6 +53,10 @@
   // Not built from --color-ink-rgb — under the dark theme ink is light
   --color-on-image: #ffffff;
   --color-on-image-muted: rgba(255, 255, 255, 0.82);
+  // Підкладка під дрібним текстом прямо на фото (автор фото): під текстом може
+  // опинитись будь-яка частина знімка, і на білому небі біле без підкладки не читається.
+  // 0.65 тримає білий текст вище 6:1 навіть на чисто білому фоні
+  --color-image-scrim: rgba(6, 6, 7, 0.65);
   --gradient-image-overlay: linear-gradient(
     to top,
     rgba(6, 6, 7, 0.88) 0%,

@@ -45,6 +45,7 @@ export type Article = {
   isFeatured: boolean;
   isWarInUkraine: boolean;
   mainPicture: string;
+  photoCredit: string | null;
   slug: string;
   title: string;
   description: string;

@@ -1,0 +1,26 @@
+@use 'variables' as *;
+
+// Текст статті. react-markdown кладе абзаци прямо в цей блок, а reset не лишає відступів
+// браузера, тож відстань між абзацами — gap
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-6;
+  font-size: $fs-lg;
+  line-height: $lh-loose;
+  // Довга адреса в тексті не має розпирати колонку
+  overflow-wrap: break-word;
+}
+
+// Колір тексту, а підкреслення акцентом: акцентний колір як дрібний текст не проходить за
+// контрастом, а саме підкреслення відрізняє посилання не лише кольором
+.body a {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+.body a:hover {
+  text-decoration-thickness: 3px;
+}
