@@ -79,7 +79,6 @@ const checkBodyMarkdown = (body: string): string[] => {
     }
   }
 
-  // Фронт ставить посилання в href: javascript: і подібне не можна
   for (const [, address] of body.matchAll(LINK_IN_BODY)) {
     if (!address || !/^https?:\/\//i.test(address)) {
       problems.push(
@@ -108,8 +107,6 @@ export const createArticleSchema = z
           error: 'Main picture must be an https URL on an allowed image host',
         }),
       ),
-    // Автор або джерело головного фото ("Airbus", "Staff Sgt. … / U.S. Air Force"): фронт малює
-    // "Photo: <photoCredit>" на самому фото, тож префікс "Photo:" тут не пишеться
     photoCredit: z
       .string()
       .trim()
@@ -135,8 +132,6 @@ export const createArticleSchema = z
       .max(10, 'Too many tags')
       .optional(),
     source: z.string().trim().min(1, 'Source cannot be empty').optional(),
-    // Лише http(s): z.url() без protocol пропускає будь-яку схему, зокрема javascript:, а
-    // фронт ставить sourceLink прямо в href. Посилання прийдуть з ingestion, зі сторонніх сторінок
     sourceLink: z
       .string()
       .trim()

@@ -21,7 +21,6 @@ export class AuthService {
     return user;
   }
 
-  // тут ще треба додати refresh і відповідно змінити типізацію
   async login({
     identifier,
     password,
@@ -33,9 +32,7 @@ export class AuthService {
     );
 
     if (!isPasswordMatch || !user) {
-      // TODO: вирішити 400 чи 401 — для невірних облікових даних зазвичай 401 Unauthorized,
-      // зараз 400 заради formErrors для react-hook-form
-      throw ApiError.formErrors('Login and/or password is wrong');
+      throw ApiError.unauthorized('Login and/or password is wrong');
     }
 
     const tokenPayload: TokenPayload = {

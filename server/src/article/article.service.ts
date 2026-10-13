@@ -19,6 +19,12 @@ const generateSlug = (title: string): string => {
   return `${base}-${suffix}`;
 };
 
+const getReadingTime = (body: string): number => {
+  const wordsCount = body.split(/\s+/).length;
+
+  return Math.ceil(wordsCount / 250);
+};
+
 @Injectable()
 export class ArticleService {
   constructor(private readonly prisma: PrismaService) {}
@@ -28,9 +34,10 @@ export class ArticleService {
     authorId: string,
   ): Promise<Article> {
     const slug = generateSlug(payload.title);
+    const readingTime = getReadingTime(payload.body);
 
     const article = await this.prisma.article.create({
-      data: { ...payload, slug, authorId },
+      data: { ...payload, slug, readingTime, authorId },
     });
 
     return article;

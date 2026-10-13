@@ -1,6 +1,17 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { UserRole } from 'generated/prisma/enums';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginResponse } from 'src/auth/auth.types';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { type LoginPayload, loginSchema } from 'src/auth/schemas/login.schema';
 import {
   registrationSchema,
@@ -13,6 +24,8 @@ import { SafeUser, toSafeUser } from 'src/user/safe-user';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles([UserRole.ADMIN])
   @Post('register')
   async register(
     @Body(new ZodValidationPipe(registrationSchema))

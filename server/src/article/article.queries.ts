@@ -1,14 +1,14 @@
 import { Prisma } from 'generated/prisma/client';
 
-// include можна буде винести в константу
+const INCLUDE_PARAMS = {
+  author: { select: { fullName: true, login: true } },
+} satisfies Prisma.ArticleInclude;
 
-// TODO: поле readingTime у стрічці: body сюди не приходить, тож порахувати на фронті не
-// вийде. Рахувати при створенні статті й зберігати в базі
 export const articleListItemArgs = {
-  include: { author: { select: { fullName: true, login: true } } },
+  include: { ...INCLUDE_PARAMS },
   omit: { body: true },
 } satisfies Prisma.ArticleDefaultArgs;
 
 export const articleDetailsArgs = {
-  include: { author: { select: { fullName: true, login: true } } },
+  include: { ...INCLUDE_PARAMS },
 } satisfies Prisma.ArticleDefaultArgs;

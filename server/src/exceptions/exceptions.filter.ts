@@ -2,9 +2,9 @@ import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
+  HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiError } from 'src/exceptions/api-error.exception';
 import { handlePrismaError } from 'src/exceptions/prisma-error.exception';
 import { Request, Response } from 'express';
 
@@ -15,10 +15,10 @@ export class ExceptionsFilter implements ExceptionFilter {
     const req = ctx.getRequest<Request>();
     const res = ctx.getResponse<Response>();
 
-    // TODO: вбудовані HttpException Nest (напр. 404 для неіснуючого роута) зараз падають у 500 —
-    // перевіряти instanceof HttpException замість ApiError (ApiError — його підклас)
     const error =
-      exception instanceof ApiError ? exception : handlePrismaError(exception);
+      exception instanceof HttpException
+        ? exception
+        : handlePrismaError(exception);
 
     if (error) {
       return res.status(error.getStatus()).json(error.getResponse());

@@ -9,7 +9,8 @@ import { UserModule } from 'src/user/user.module';
     UserModule,
     JwtModule.register({
       secret: process.env.JWT_ACCESS_SECRET,
-      // TODO: 30d лише для тестів через Postman — скоротити до ~15m, коли з'явиться refresh-токен
+      // TODO: 30d лише для тестів через Postman — скоротити до ~15m
+      // коли з'явиться refresh-токен
       signOptions: { expiresIn: '30d' },
     }),
   ],

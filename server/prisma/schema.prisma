@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -63,15 +58,12 @@ model Article {
 
   category ArticleCategory
   subcategory Subcategory?
-  // TODO: за замовчуванням PUBLISHED, бо чернетки в базі не використовуємо (власник перевіряє
-  // чернетку у файлі ingestion). Якщо чернетки з'являться в базі — змінити default
   status ArticleStatus @default(PUBLISHED)
 
   isFeatured Boolean @default(false) @map("is_featured")
   isWarInUkraine Boolean @default(false) @map("is_war_in_ukraine")
 
   mainPicture String @map("main_picture")
-  // Хто автор головного фото: сайт малює "Photo: …" на самому фото
   photoCredit String? @map("photo_credit")
   // TODO: alt головного фото — поле опису (photoAlt): міграція, правило в create-article.schema,
   // дзеркало в ingestion, alt на фронті (зараз alt=''). Відкладено до проходу по доступності
@@ -80,13 +72,10 @@ model Article {
   title String
   description String @db.Text()
   body String @db.Text()
+  readingTime Int @map("reading_time")
 
-  // TODO: немає поняття "добірка" для Special Report: фільтр за тегом або окрема модель
-  // Collection (див. SpecialReportSection на фронті)
   tags String[]
 
-  // TODO: sourceLink не унікальний: дублі перевіряє лише ingestion (читає 400 останніх статей).
-  // Унікальний індекс по непорожніх або пошук за посиланням на сервері
   source     String?
   sourceLink String? @map("source_link")
 
