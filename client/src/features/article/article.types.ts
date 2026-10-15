@@ -1,10 +1,9 @@
-export const ArticleCategory = {
+export const ArticleType = {
   NEWS: 'NEWS',
   LONGREAD: 'LONGREAD',
 } as const;
 
-export type ArticleCategory =
-  (typeof ArticleCategory)[keyof typeof ArticleCategory];
+export type ArticleType = (typeof ArticleType)[keyof typeof ArticleType];
 
 export const ArticleSubcategory = {
   AIR: 'AIR',
@@ -33,13 +32,14 @@ export type ArticleAuthor = {
 export type Article = {
   id: string;
   authorId: string;
-  category: ArticleCategory;
+  type: ArticleType;
   subcategory: ArticleSubcategory | null;
   status: ArticleStatus;
   isFeatured: boolean;
   isWarInUkraine: boolean;
   mainPicture: string;
   photoCredit: string | null;
+  photoAlt: string | null;
   slug: string;
   title: string;
   description: string;
@@ -63,7 +63,7 @@ export type ArticleDetails = Article & {
 export type GetArticlesParams = {
   page?: number;
   limit?: number;
-  category?: ArticleCategory;
+  type?: ArticleType;
   subcategory?: ArticleSubcategory;
   isWarInUkraine?: boolean;
   isFeatured?: boolean;

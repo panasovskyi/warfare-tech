@@ -4,7 +4,7 @@ import { WarInUkraineSection } from '@/app/_components/WarInUkraineSection/WarIn
 import { SubcategorySection } from '@/app/_components/SubcategorySection/SubcategorySection';
 import { LatestSection } from '@/app/_components/LatestSection/LatestSection';
 import { articleApi } from '@/features/article/article.api';
-import { ArticleCategory } from '@/features/article/article.types';
+import { ArticleType } from '@/features/article/article.types';
 import {
   NEWS_SECTIONS,
   type SubcategoryKey,
@@ -30,12 +30,8 @@ function logIfRejected(
 }
 
 export default async function Home() {
-  // TODO: кешування. У Next 16 fetch за замовчуванням не кешується, тож кожен
-  // перегляд головної — 9 запитів до API. Вирішити, як часто оновлювати
-  // (use cache / revalidate); тоді й "3 hours ago" застаріватиме на час кешу
-
   const featuredRequest = articleApi.getArticles({
-    category: ArticleCategory.NEWS,
+    type: ArticleType.NEWS,
     isFeatured: true,
     limit: 1,
   });
@@ -45,13 +41,13 @@ export default async function Home() {
     limit: 9,
   });
   const latestRequest = articleApi.getArticles({
-    category: ArticleCategory.NEWS,
+    type: ArticleType.NEWS,
     isFeatured: false,
     limit: 6,
   });
   const subcategoryRequests = HOMEPAGE_SUBCATEGORIES.map((subcategory) =>
     articleApi.getArticles({
-      category: ArticleCategory.NEWS,
+      type: ArticleType.NEWS,
       ...NEWS_SECTIONS[subcategory].filter,
       isFeatured: false,
       limit: 4,
@@ -97,8 +93,6 @@ export default async function Home() {
           ))}
         </div>
         <LatestSection articles={getItemsOrEmpty(latestNews)} />
-
-        {/* TODO: форма підписки (розсилка) під Latest — вирішити сервіс, текст і куди веде форма */}
       </div>
     </div>
   );

@@ -52,19 +52,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: article.updatedAt,
       section: sectionLabel,
       tags: article.tags,
-      // alt поки заголовок статті: опису фото в даних немає (TODO про photoAlt у schema.prisma)
-      images: [{ url: article.mainPicture, alt: article.title }],
+      // alt — опис фото, а без нього заголовок статті
+      images: [{ url: article.mainPicture, alt: article.photoAlt ?? article.title }],
     },
   };
 }
 
-// TODO: кешування сторінки статті. Зараз її не кешуємо взагалі: динамічний маршрут без
-// generateStaticParams рендериться на кожен запит. Потрібні export const revalidate = N
-// (5–15 хв: статті не змінюються, оновлюються лише aside і "3 hours ago") і
-// generateStaticParams, що повертає [] (інакше ISR у рантаймі не працює). Перевірити, що
-// generateMetadata і сторінка кешуються разом. loading.tsx тут не додавати: [slug] ловить
-// невідомі адреси, і з ним їхній статус 404 став би 200. Решта — як на головній (TODO в
-// app/page.tsx)
+export async function generateStaticParams() {
+  return [];
+}
+
 export default async function ArticleDetailsPage({ params }: Props) {
   const { slug } = await params;
   const article = await getArticleOrNotFound(slug);
@@ -96,12 +93,9 @@ export default async function ArticleDetailsPage({ params }: Props) {
           </div>
         </header>
         <figure className={styles.page__mainPicWrapper}>
-          {/*
-            TODO: поле на сервері для опису фото (alt)
-          */}
           <Image
             src={article.mainPicture}
-            alt=''
+            alt={article.photoAlt ?? ''}
             fill
             preload
             sizes='(min-width: 1528px) 1400px, (min-width: 1024px) calc(100vw - 128px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 40px)'
@@ -120,7 +114,6 @@ export default async function ArticleDetailsPage({ params }: Props) {
           </Suspense>
         </div>
         <footer className={styles.page__footer}>
-          {/* TODO: теги — посилання на сторінку тегу, коли вона з'явиться (у макеті це посилання) */}
           {article.tags.length > 0 && (
             <ul className={styles.tags} aria-label='Tags'>
               {article.tags.map((tag) => (
@@ -163,7 +156,6 @@ export default async function ArticleDetailsPage({ params }: Props) {
             </ArrowLink>
           </div>
         </footer>
-        {/* TODO: під статтею, найімовірніше, перехід до наступної новини (не форма підписки) — вирішити */}
       </div>
     </article>
   );

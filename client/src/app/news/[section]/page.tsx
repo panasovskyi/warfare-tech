@@ -11,7 +11,7 @@ import { SectionIcon } from '@/features/article/components/SectionIcon/SectionIc
 import styles from './NewsSectionPage.module.scss';
 import { SectionsList } from '@/app/news/_components/SectionsList/SectionsList';
 import { articleApi } from '@/features/article/article.api';
-import { ArticleCategory } from '@/features/article/article.types';
+import { ArticleType } from '@/features/article/article.types';
 import { Pagination } from '@/components/ui/Pagination/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
 import { ArticleCardGrid } from '@/features/article/components/ArticleCardGrid/ArticleCardGrid';
@@ -23,7 +23,6 @@ type Props = {
 };
 
 // Опис розділу береться з NEWS_SECTIONS: той самий текст стоїть під заголовком обкладинки.
-// TODO: canonical — після домену, див. TODO у news/page.tsx
 export async function generateMetadata({
   params,
   searchParams,
@@ -56,10 +55,8 @@ export default async function NewsSectionPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // TODO: кешування — як у news/page.tsx: сторінка динамічна через searchParams, рішення
-  // одне на всі списки (TODO в app/page.tsx)
   const news = await articleApi.getArticles({
-    category: ArticleCategory.NEWS,
+    type: ArticleType.NEWS,
     ...NEWS_SECTIONS[section].filter,
     limit: 12,
     page: normalizedPage,

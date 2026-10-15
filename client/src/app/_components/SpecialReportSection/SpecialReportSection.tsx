@@ -1,8 +1,6 @@
 import styles from './SpecialReportSection.module.scss';
 
-// TODO: дані. В API немає поняття "добірка", тож статті звіту зараз не отримати одним запитом.
-// Поки: або приховати блок, або вручну вказати три slug (і назву звіту) в конфігу фронта.
-// Згодом, якщо блок лишиться: фільтр стрічки за тегом на сервері або окрема модель Collection.
+// Заглушка: секція в page.tsx не підключена, дані й картки ще не зроблені (див. BACKLOG.md)
 export const SpecialReportSection = () => {
   return (
     <section className={styles.special} aria-labelledby='special-report-title'>
@@ -10,10 +8,6 @@ export const SpecialReportSection = () => {
         Special Report: The Year Drone Warfare Changed
       </h2>
 
-      {/*
-        TODO: вміст кожного li замінити на ArticleCardCompact (фото + заголовок), як перша новина
-        в SubcategorySection. li лишається, класи article__* тоді зникнуть
-      */}
       <ul className={styles.special__content}>
         <li className={styles.special__item}>
           <div className={styles.article__imageWrapper}>

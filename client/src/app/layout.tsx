@@ -5,10 +5,6 @@ import { Header } from '@/components/layout/Header/Header';
 import { Footer } from '@/components/layout/Footer/Footer';
 import { THEME_INIT_SCRIPT } from '@/lib/theme';
 
-// TODO:
-// - metadata: коли буде домен — metadataBase і картинка для соцмереж (opengraph-image);
-//   сторінки новини й розділів — свої title (шаблон '%s | Warfare Tech' уже тут) і description
-
 const manrope = Manrope({
   variable: '--font-manrope',
   subsets: ['latin'],

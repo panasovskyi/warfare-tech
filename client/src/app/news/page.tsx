@@ -3,7 +3,7 @@ import styles from './NewsPage.module.scss';
 import { PageCover } from '@/components/ui/PageCover/PageCover';
 import { NEWS_PAGE_COVER } from '@/features/article/article.constants';
 import { articleApi } from '@/features/article/article.api';
-import { ArticleCategory } from '@/features/article/article.types';
+import { ArticleType } from '@/features/article/article.types';
 import { ArticleCardLead } from '@/features/article/components/ArticleCardLead/ArticleCardLead';
 import { ArticleCardSide } from '@/features/article/components/ArticleCardSide/ArticleCardSide';
 import { ArticleCardRow } from '@/features/article/components/ArticleCardRow/ArticleCardRow';
@@ -32,22 +32,13 @@ export async function generateMetadata({
   };
 }
 
-// TODO: canonical для /news і ?page=N (alternates.canonical). Потрібен metadataBase у кореневому
-// layout, а домену ще нема: відносна адреса без нього дала б неправильний canonical
 export default async function NewsPage({ searchParams }: Props) {
   const { page } = await searchParams;
 
   const normalizedPage = getPageNumber(page);
 
-  // TODO (після деплою): loading.tsx є (news/ і news/[section]/), але перевірити, чи він
-  // показується, коли міняється лише ?page=N. Локально API відповідає надто швидко, щоб це
-  // побачити (для перевірки можна тимчасово додати await-затримку ~2 с перед запитом). За
-  // відомою поведінкою Next ні, старий екран лишається; тоді обгорнути список у
-  // <Suspense key={normalizedPage}> з тими самими заглушками
-  // TODO: кешування — сторінка динамічна через searchParams. Рішення одне на головну,
-  // статтю і списки (TODO в app/page.tsx)
   const articlesResponse = await articleApi.getArticles({
-    category: ArticleCategory.NEWS,
+    type: ArticleType.NEWS,
     limit: 9,
     page: normalizedPage,
   });

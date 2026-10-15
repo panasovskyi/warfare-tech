@@ -7,15 +7,12 @@ import {
   type ArticleLabelSection,
 } from '@/features/article/article.utils';
 import {
-  ArticleCategory,
+  ArticleType,
   type ArticleListItem,
 } from '@/features/article/article.types';
 import { NEWS_SECTIONS } from '@/features/article/article.constants';
 import { articleApi } from '@/features/article/article.api';
 
-// Скільки статей показуємо. Aside липкий, тож мусить вміщуватися в екран, інакше нижні рядки
-// недосяжні, поки колонка тексту не скінчиться. Рядок ≈ 78px: 5 рядків із заголовком і
-// "View all" ≈ 500px, вміщується й у ноутбук з вікном ≈ 650px (10 рядків давали ≈ 900px)
 const ASIDE_ARTICLES = 5;
 
 type Props = {
@@ -28,9 +25,9 @@ export const AsideSection: React.FC<Props> = async ({ section, articleId }) => {
 
   const sectionArticlesFilter =
     section === 'longread'
-      ? { category: ArticleCategory.LONGREAD }
+      ? { type: ArticleType.LONGREAD }
       : section === 'news'
-        ? { category: ArticleCategory.NEWS }
+        ? { type: ArticleType.NEWS }
         : NEWS_SECTIONS[section].filter;
 
   let latestNews: ArticleListItem[] = [];
@@ -38,8 +35,6 @@ export const AsideSection: React.FC<Props> = async ({ section, articleId }) => {
   try {
     const latestNewsResponse = await articleApi.getArticles({
       ...sectionArticlesFilter,
-      // На одну більше, ніж показуємо: поточна стаття часто серед найновіших, і її
-      // відкидаємо нижче
       limit: ASIDE_ARTICLES + 1,
     });
 

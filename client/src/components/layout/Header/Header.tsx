@@ -29,10 +29,6 @@ export const Header = () => {
           <Logo />
         </Link>
 
-        {/*
-          TODO: Longreads у меню — коли з'явиться сторінка /longreads (є в макеті).
-          Кнопки Search і Subscribe — пізніше
-        */}
         <nav className={styles.nav} aria-label='Main'>
           <ul className={styles.nav__list}>
             {HEADER_NAV.map((item) => (
