@@ -15,8 +15,8 @@ import { resolveSource } from './rewriting/sources';
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 const USAGE = `Usage:
-  npm start -- <article url> [publication date YYYY-MM-DD] [--image=<picture url>|page] [--credit="Photo author"] [--force]
-  npm start -- <article url> <path to a text file> [publication date YYYY-MM-DD] [--image=<picture url>] [--credit="Photo author"] [--force]`;
+  npm start -- <article url> [publication date YYYY-MM-DD] [--image=<picture url>|page] [--credit="Photo author"] [--alt="Picture description"] [--force]
+  npm start -- <article url> <path to a text file> [publication date YYYY-MM-DD] [--image=<picture url>] [--credit="Photo author"] [--alt="Picture description"] [--force]`;
 
 const reasonOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -34,6 +34,11 @@ const main = async () => {
     args
       .find((arg) => arg.startsWith('--credit='))
       ?.slice('--credit='.length)
+      .trim() || undefined;
+  const altOption =
+    args
+      .find((arg) => arg.startsWith('--alt='))
+      ?.slice('--alt='.length)
       .trim() || undefined;
   const isForced = args.includes('--force');
   const [rawLink, second, third] = args.filter((arg) => !arg.startsWith('--'));
@@ -152,12 +157,20 @@ const main = async () => {
     );
   }
 
+  // The same for the description: it belongs to a real picture
+  if (altOption && !mainPicture) {
+    warnings.push(
+      '--alt is ignored: no picture was attached (the placeholder stays decorative)',
+    );
+  }
+
   const result = await rewrite({ sourceText, sourceName: source, publishedAt });
   const article = buildArticle(result.article, {
     source,
     sourceLink,
     mainPicture,
     photoCredit: mainPicture ? creditOption : undefined,
+    photoAlt: mainPicture ? altOption : undefined,
   });
   const problems = validateArticle(article);
 
@@ -204,6 +217,10 @@ const main = async () => {
         ? `Photo credit: ${article.photoCredit}`
         : 'Photo credit: none yet, fill the photoCredit line in the draft',
     );
+
+    if (article.photoAlt) {
+      console.log(`Photo alt: ${article.photoAlt}`);
+    }
   }
   console.log(
     `Overlap${ukrainianPath ? ' (Ukrainian rewrite vs the source)' : ''}: ${result.overlap.summary}`,

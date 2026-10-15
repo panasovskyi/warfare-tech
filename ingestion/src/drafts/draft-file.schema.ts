@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { toSubcategory } from '../article/article';
-import { ArticleCategory, type ArticleDraft } from '../article/article.schema';
+import { ArticleType, type ArticleDraft } from "../article/article.schema";
 
 const DRAFT_PATTERN = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
 const CLOSING_DELIMITER = /\r?\n---\r?\n/;
@@ -28,23 +28,28 @@ const tagsSchema = z
 
 // Only the article fields; the review notes (model, tokens, overlap, ...) are ignored
 export const frontMatterSchema = z.object({
-  title: z.string('title is required'),
-  description: z.string('description is required'),
-  category: z.enum(ArticleCategory, 'category must be NEWS or LONGREAD'),
+  title: z.string("title is required"),
+  description: z.string("description is required"),
+  type: z.enum(ArticleType, "type must be NEWS or LONGREAD"),
   subcategory: z.string().nullable().default(null).transform(toSubcategory),
   isWarInUkraine: z
-    .boolean('isWarInUkraine must be true or false')
+    .boolean("isWarInUkraine must be true or false")
     .default(false),
-  isFeatured: z.boolean('isFeatured must be true or false').default(false),
+  isFeatured: z.boolean("isFeatured must be true or false").default(false),
   tags: tagsSchema,
-  mainPicture: z.string('mainPicture is required'),
+  mainPicture: z.string("mainPicture is required"),
   // Absent, null and "" all mean "no credit": the line is only a place to fill in
   photoCredit: z
     .string()
     .nullish()
     .transform((value) => value?.trim() || undefined),
-  source: z.string('source is required'),
-  sourceLink: z.string('sourceLink is required'),
+  // The same way: absent, null and "" all mean "no description" (a decorative picture)
+  photoAlt: z
+    .string()
+    .nullish()
+    .transform((value) => value?.trim() || undefined),
+  source: z.string("source is required"),
+  sourceLink: z.string("sourceLink is required"),
   publishedAs: z.string().optional(),
 });
 
@@ -92,6 +97,7 @@ export const findCyrillicFields = (article: ArticleDraft): string[] => {
     description: article.description,
     body: article.body,
     tags: article.tags.join(' '),
+    photoAlt: article.photoAlt ?? '',
   };
 
   return Object.entries(fields)
@@ -139,6 +145,28 @@ export const setPhotoCredit = (text: string, credit: string): string =>
     const eol = front.includes('\r\n') ? '\r\n' : '\n';
 
     return front.replace(/^mainPicture:.*$/m, (mainPicture) => `${mainPicture}${eol}${line}`);
+  });
+
+// Fills the photoAlt line, or adds it under photoCredit (or mainPicture) when an older draft has none
+export const setPhotoAlt = (text: string, alt: string): string =>
+  editFrontMatter(text, (front) => {
+    const line = `photoAlt: ${JSON.stringify(alt)}`;
+
+    if (/^photoAlt:.*$/m.test(front)) {
+      return front.replace(/^photoAlt:.*$/m, () => line);
+    }
+
+    const anchor = /^photoCredit:.*$/m.test(front)
+      ? /^photoCredit:.*$/m
+      : /^mainPicture:.*$/m;
+
+    if (!anchor.test(front)) {
+      throw new Error('The front matter has no mainPicture line');
+    }
+
+    const eol = front.includes('\r\n') ? '\r\n' : '\n';
+
+    return front.replace(anchor, (found) => `${found}${eol}${line}`);
   });
 
 // Warnings that were true until a picture was attached and are only noise afterwards

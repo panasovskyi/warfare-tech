@@ -13,13 +13,14 @@ export type PublishedArticle = {
 // Only the fields the server's create schema knows. A missing subcategory is left
 // out, not sent as null; the status is decided here: the manual review already happened.
 export const toPayload = (article: ArticleDraft) => ({
-  category: article.category,
+  type: article.type,
   subcategory: article.subcategory ?? undefined,
   status: ArticleStatus.PUBLISHED,
   isFeatured: article.isFeatured,
   isWarInUkraine: article.isWarInUkraine,
   mainPicture: article.mainPicture,
   photoCredit: article.photoCredit,
+  photoAlt: article.photoAlt,
   title: article.title,
   description: article.description,
   body: article.body,

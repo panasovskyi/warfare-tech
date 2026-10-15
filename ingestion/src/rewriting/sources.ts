@@ -9,9 +9,11 @@ export const ALLOWED_SOURCES: Record<string, string> = {
   "airbus.com": "Airbus",
   "rtx.com": "Raytheon",
   "news.northropgrumman.com": "Northrop Grumman",
+  "news.lockheedmartin.com": "Lockheed Martin",
   "thalesgroup.com": "Thales",
   "boeing.mediaroom.com": "Boeing",
   "militarnyi.com": "Militarnyi",
+  "state.gov": "US Department of State",
 };
 
 export const resolveSource = (url: string) => {

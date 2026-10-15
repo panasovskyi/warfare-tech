@@ -2,10 +2,10 @@ import { getFallbackPictureUrl } from '../cloudinary/fallback';
 import { getCloudinaryConfig } from '../config/cloudinary.config';
 import type { ModelArticle } from '../rewriting/model-article.schema';
 import {
-  ArticleCategory,
+  ArticleType,
   ArticleSubcategory,
   type ArticleDraft,
-} from './article.schema';
+} from "./article.schema";
 
 // .png on purpose: placehold.co serves SVG by default, which next/image refuses
 const GRAY_PLACEHOLDER = 'https://placehold.co/1200x675.png';
@@ -49,19 +49,22 @@ export const buildArticle = (
     sourceLink,
     mainPicture = getPlaceholderPicture(),
     photoCredit,
+    photoAlt,
   }: {
     source: string;
     sourceLink: string;
     mainPicture?: string;
     photoCredit?: string;
+    photoAlt?: string;
   },
 ): ArticleDraft => ({
-  category: ArticleCategory.NEWS,
+  type: ArticleType.NEWS,
   subcategory: toSubcategory(article.subcategory),
   isFeatured: false,
   isWarInUkraine: article.isWarInUkraine,
   mainPicture,
   photoCredit,
+  photoAlt,
   title: article.title.trim(),
   description: article.description.trim(),
   body: article.body.trim(),

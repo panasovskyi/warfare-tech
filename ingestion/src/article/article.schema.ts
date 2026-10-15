@@ -10,9 +10,9 @@ import {
 // TODO: автотест, що це дзеркало дає ті самі результати, що серверна схема (зараз це
 // перевіряв одноразовий скрипт)
 
-export const ArticleCategory = {
-  NEWS: 'NEWS',
-  LONGREAD: 'LONGREAD',
+export const ArticleType = {
+  NEWS: "NEWS",
+  LONGREAD: "LONGREAD",
 } as const;
 
 export const ArticleSubcategory = {
@@ -31,11 +31,11 @@ export const ArticleStatus = {
 
 export const articleSchema = z
   .object({
-    category: z.enum(ArticleCategory, 'Invalid category'),
-    subcategory: z.enum(ArticleSubcategory, 'Invalid subcategory').optional(),
-    status: z.enum(ArticleStatus, 'Invalid status').optional(),
-    isFeatured: z.boolean('Featured must be a boolean').optional(),
-    isWarInUkraine: z.boolean('War in Ukraine must be a boolean').optional(),
+    type: z.enum(ArticleType, "Invalid type"),
+    subcategory: z.enum(ArticleSubcategory, "Invalid subcategory").optional(),
+    status: z.enum(ArticleStatus, "Invalid status").optional(),
+    isFeatured: z.boolean("Featured must be a boolean").optional(),
+    isWarInUkraine: z.boolean("War in Ukraine must be a boolean").optional(),
     mainPicture: z
       .string()
       .trim()
@@ -43,80 +43,86 @@ export const articleSchema = z
         z.url({
           protocol: /^https$/,
           hostname: IMAGE_HOSTNAME,
-          error: 'Main picture must be an https URL on an allowed image host',
+          error: "Main picture must be an https URL on an allowed image host",
         }),
       ),
     photoCredit: z
       .string()
       .trim()
-      .min(1, 'Photo credit cannot be empty')
-      .max(200, 'Photo credit too long: maximum 200 characters')
+      .min(1, "Photo credit cannot be empty")
+      .max(200, "Photo credit too long: maximum 200 characters")
+      .optional(),
+    photoAlt: z
+      .string()
+      .trim()
+      .min(1, "Photo alt cannot be empty")
+      .max(200, "Photo alt too long: maximum 200 characters")
       .optional(),
     title: z
       .string()
       .trim()
-      .min(5, 'Title too short: minimum 5 characters')
-      .max(200, 'Title too long: maximum 200 characters'),
+      .min(5, "Title too short: minimum 5 characters")
+      .max(200, "Title too long: maximum 200 characters"),
     description: z
       .string()
       .trim()
-      .min(50, 'Description too short: minimum 50 characters')
-      .max(500, 'Description too long: maximum 500 characters'),
+      .min(50, "Description too short: minimum 50 characters")
+      .max(500, "Description too long: maximum 500 characters"),
     body: z
       .string()
       .trim()
-      .min(1000, 'Body too short: minimum 1000 characters'),
+      .min(1000, "Body too short: minimum 1000 characters"),
     tags: z
-      .array(z.string().trim().min(1, 'Tag cannot be empty'))
-      .max(10, 'Too many tags')
+      .array(z.string().trim().min(1, "Tag cannot be empty"))
+      .max(10, "Too many tags")
       .optional(),
-    source: z.string().trim().min(1, 'Source cannot be empty').optional(),
+    source: z.string().trim().min(1, "Source cannot be empty").optional(),
     sourceLink: z
       .string()
       .trim()
       .pipe(
         z.url({
           protocol: /^https?$/,
-          error: 'Source link must be a valid http(s) URL',
+          error: "Source link must be a valid http(s) URL",
         }),
       )
       .optional(),
   })
 
   .superRefine((data, ctx) => {
-    if (data.category === ArticleCategory.NEWS) {
+    if (data.type === ArticleType.NEWS) {
       if (data.isWarInUkraine && data.subcategory) {
         ctx.addIssue({
-          code: 'custom',
-          path: ['subcategory'],
-          message: 'Subcategory is not allowed for War in Ukraine news',
+          code: "custom",
+          path: ["subcategory"],
+          message: "Subcategory is not allowed for War in Ukraine news",
         });
       }
 
       if (!data.isWarInUkraine && !data.subcategory) {
         ctx.addIssue({
-          code: 'custom',
-          path: ['subcategory'],
+          code: "custom",
+          path: ["subcategory"],
           message:
-            'Subcategory is required for News category if it is not related to war in Ukraine',
+            "Subcategory is required for News articles if it is not related to war in Ukraine",
         });
       }
     }
 
-    if (data.category === ArticleCategory.LONGREAD) {
+    if (data.type === ArticleType.LONGREAD) {
       if (data.subcategory) {
         ctx.addIssue({
-          code: 'custom',
-          path: ['subcategory'],
-          message: 'Subcategory is not allowed for Longread category',
+          code: "custom",
+          path: ["subcategory"],
+          message: "Subcategory is not allowed for Longreads",
         });
       }
 
       if (data.isWarInUkraine) {
         ctx.addIssue({
-          code: 'custom',
-          path: ['isWarInUkraine'],
-          message: 'War in Ukraine is not allowed for Longread category',
+          code: "custom",
+          path: ["isWarInUkraine"],
+          message: "War in Ukraine is not allowed for Longreads",
         });
       }
     }
@@ -125,37 +131,41 @@ export const articleSchema = z
   .superRefine((data, ctx) => {
     if (data.source && !data.sourceLink) {
       ctx.addIssue({
-        code: 'custom',
-        path: ['sourceLink'],
-        message: 'Source link is required when source is provided',
+        code: "custom",
+        path: ["sourceLink"],
+        message: "Source link is required when source is provided",
       });
     }
 
     if (!data.source && data.sourceLink) {
       ctx.addIssue({
-        code: 'custom',
-        path: ['source'],
-        message: 'Source is required when source link is provided',
+        code: "custom",
+        path: ["source"],
+        message: "Source is required when source link is provided",
       });
     }
   })
 
   .superRefine((data, ctx) => {
     for (const message of checkBodyMarkdown(data.body)) {
-      ctx.addIssue({ code: 'custom', path: ['body'], message });
+      ctx.addIssue({ code: "custom", path: ["body"], message });
     }
   });
 
 // What a draft file holds. A draft has no status (publishing sets it), and a missing
 // subcategory is written as null, which the server schema would reject.
 export type ArticleDraft = {
-  category: (typeof ArticleCategory)[keyof typeof ArticleCategory];
-  subcategory: (typeof ArticleSubcategory)[keyof typeof ArticleSubcategory] | null;
+  type: (typeof ArticleType)[keyof typeof ArticleType];
+  subcategory:
+    | (typeof ArticleSubcategory)[keyof typeof ArticleSubcategory]
+    | null;
   isFeatured: boolean;
   isWarInUkraine: boolean;
   mainPicture: string;
   // Empty when the picture needs no credit (our own placeholder)
   photoCredit?: string;
+  // Description of the main picture for screen readers; empty means a decorative picture
+  photoAlt?: string;
   title: string;
   description: string;
   body: string;

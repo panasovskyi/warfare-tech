@@ -5,9 +5,9 @@ import { toPublishingError } from './errors';
 
 const TIMEOUT_MS = 15_000;
 const PAGE_SIZE = 40;
-// 400 newest articles: enough for a young site, and a cap on the number of requests
-// TODO: коли статей стане понад 400, дублі серед старіших не знайдуться: шукати за
-// sourceLink на сервері (фільтр у GET /articles або унікальний індекс у базі)
+// 400 newest articles, and a cap on the number of requests. Older duplicates are not looked
+// for on purpose: the same story from another outlet is allowed anyway, so this check is a
+// convenience, not a guarantee
 const MAX_PAGES = 10;
 
 export type PublishedMatch = {

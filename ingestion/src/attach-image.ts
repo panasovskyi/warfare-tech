@@ -9,6 +9,7 @@ import { readDraft } from './drafts/draft-file';
 import {
   dropPictureWarnings,
   setMainPicture,
+  setPhotoAlt,
   setPhotoCredit,
 } from './drafts/draft-file.schema';
 import { DRAFTS_DIR } from './drafts/drafts';
@@ -21,7 +22,8 @@ const USAGE = `Usage:
   npm run attach-image -- <picture file | url | page>   (the newest draft)
   npm run attach-image -- <path to a draft .md>         (the newest photo in the folder)
   npm run attach-image -- <path to a draft .md> <picture file | url | page>
-Add --credit="Airbus" to any of them to fill photoCredit (the author shown under the photo).`;
+Add --credit="Airbus" to any of them to fill photoCredit (the author shown under the photo)
+and --alt="A jet on the runway" to fill photoAlt (the description for screen readers; empty means a decorative picture).`;
 
 // Puts a picture into a draft that is already written and edited: no model call,
 // nothing else in the file changes
@@ -31,6 +33,11 @@ const main = async () => {
     args
       .find((arg) => arg.startsWith('--credit='))
       ?.slice('--credit='.length)
+      .trim() || undefined;
+  const alt =
+    args
+      .find((arg) => arg.startsWith('--alt='))
+      ?.slice('--alt='.length)
       .trim() || undefined;
   const [first, second, extra] = args.filter((arg) => !arg.startsWith('--'));
 
@@ -99,16 +106,20 @@ const main = async () => {
   const original = await readFile(draftPath, 'utf-8');
 
   const withPicture = dropPictureWarnings(setMainPicture(original, picture));
+  const withCredit = credit
+    ? setPhotoCredit(withPicture, credit)
+    : withPicture;
 
-  await writeFile(
-    draftPath,
-    credit ? setPhotoCredit(withPicture, credit) : withPicture,
-  );
+  await writeFile(draftPath, alt ? setPhotoAlt(withCredit, alt) : withCredit);
 
   console.log(`Picture attached: ${picture}`);
 
   if (credit) {
     console.log(`Photo credit: ${credit}`);
+  }
+
+  if (alt) {
+    console.log(`Photo alt: ${alt}`);
   }
 
   // The picture is already attached, so a failed move is only worth a warning

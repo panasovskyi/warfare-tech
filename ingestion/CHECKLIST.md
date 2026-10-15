@@ -7,7 +7,7 @@
 1. `npm start -- <адреса> [YYYY-MM-DD]`
 2. Фото в `photos/`
 3. `npm run attach-image -- --credit="Автор"`
-4. Відкрити `drafts/….md`: прибрати `**`, виправити `problems` і `warnings`, перевірити `photoCredit`
+4. Відкрити `drafts/….md`: прибрати `**`, виправити `problems` і `warnings`, перевірити `photoCredit` і `photoAlt` (необов'язковий)
 5. `npm run publish-draft -- drafts/….md --dry-run`
 6. `npm run publish-draft -- drafts/….md`
 
@@ -18,7 +18,7 @@
 3. `npm run attach-image -- --credit="Автор"`
 4. Відкрити `drafts/….uk.md`: переписати виділене, прибрати `**`
 5. `npm run translate -- drafts/….uk.md`
-6. Відкрити `drafts/….md`: виправити `problems` і `warnings`, перевірити `photoCredit`, заголовок і видання (одна згадка)
+6. Відкрити `drafts/….md`: виправити `problems` і `warnings`, перевірити `photoCredit`, `photoAlt` (необов'язковий), заголовок і видання (одна згадка)
 7. `npm run publish-draft -- drafts/….md --dry-run`
 8. `npm run publish-draft -- drafts/….md`
 
