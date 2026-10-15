@@ -12,7 +12,7 @@ enum UserRole {
   USER
 }
 
-enum ArticleCategory {
+enum ArticleType {
   NEWS
   LONGREAD
 }
@@ -21,9 +21,7 @@ enum ArticleStatus {
   DRAFT
   PUBLISHED
 }
-// TODO: перейменувати на ArticleSubcategory (міграція і імпорти generated/prisma/enums у
-// схемах і сервісах)
-enum Subcategory {
+enum ArticleSubcategory {
   AIR
   LAND
   CYBER
@@ -56,8 +54,8 @@ model Article {
   authorId  String @map("author_id")
   author User @relation(fields: [authorId], references: [id])
 
-  category ArticleCategory
-  subcategory Subcategory?
+  type ArticleType
+  subcategory ArticleSubcategory?
   status ArticleStatus @default(PUBLISHED)
 
   isFeatured Boolean @default(false) @map("is_featured")
@@ -65,8 +63,7 @@ model Article {
 
   mainPicture String @map("main_picture")
   photoCredit String? @map("photo_credit")
-  // TODO: alt головного фото — поле опису (photoAlt): міграція, правило в create-article.schema,
-  // дзеркало в ingestion, alt на фронті (зараз alt=''). Відкладено до проходу по доступності
+  photoAlt String? @map("photo_alt")
 
   slug  String  @unique
   title String

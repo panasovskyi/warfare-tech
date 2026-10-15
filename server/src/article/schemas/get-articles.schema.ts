@@ -1,4 +1,4 @@
-import { ArticleCategory, Subcategory } from 'generated/prisma/enums';
+import { ArticleType, ArticleSubcategory } from 'generated/prisma/enums';
 import z from 'zod';
 
 export const getArticlesSchema = z.object({
@@ -14,8 +14,8 @@ export const getArticlesSchema = z.object({
     .positive('Limit must be greater than 0')
     .max(40, 'Limit cannot be greater than 40')
     .default(3),
-  category: z.enum(ArticleCategory, 'Invalid category').optional(),
-  subcategory: z.enum(Subcategory, 'Invalid subcategory').optional(),
+  type: z.enum(ArticleType, 'Invalid type').optional(),
+  subcategory: z.enum(ArticleSubcategory, 'Invalid subcategory').optional(),
   isWarInUkraine: z
     .stringbool({ error: 'War in Ukraine must be true or false' })
     .optional(),

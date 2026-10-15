@@ -327,7 +327,7 @@
 
 Усі query-параметри приходять **рядками**, тож схема їх ще й перетворює:
 - `page`, `limit` — `z.coerce.number()` + `int`, `positive`, `max` і `default` (`page: 1`, `limit: 3`);
-- `category`, `subcategory` — `z.enum(...)` з enum-ів Prisma, `.optional()`: без них — уся стрічка;
+- `type`, `subcategory` — `z.enum(...)` з enum-ів Prisma, `.optional()`: без них — уся стрічка;
 - `isWarInUkraine`, `isFeatured` — **`z.stringbool()`**, а не `z.coerce.boolean()`. `coerce.boolean` перетворює будь-який непорожній рядок на `true`, тож `"false"` став би `true`. `stringbool` правильно розуміє `true`/`false` (а також `1`/`0`, `yes`/`no`).
 
 ### Крок 2. Контролер — `@Query` замість `req.validatedQuery`

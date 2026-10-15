@@ -1,7 +1,7 @@
 import {
-  ArticleCategory,
+  ArticleType,
   ArticleStatus,
-  Subcategory,
+  ArticleSubcategory,
 } from 'generated/prisma/enums';
 import z from 'zod';
 
@@ -92,8 +92,8 @@ const checkBodyMarkdown = (body: string): string[] => {
 
 export const createArticleSchema = z
   .object({
-    category: z.enum(ArticleCategory, 'Invalid category'),
-    subcategory: z.enum(Subcategory, 'Invalid subcategory').optional(),
+    type: z.enum(ArticleType, 'Invalid type'),
+    subcategory: z.enum(ArticleSubcategory, 'Invalid subcategory').optional(),
     status: z.enum(ArticleStatus, 'Invalid status').optional(),
     isFeatured: z.boolean('Featured must be a boolean').optional(),
     isWarInUkraine: z.boolean('War in Ukraine must be a boolean').optional(),
@@ -112,6 +112,13 @@ export const createArticleSchema = z
       .trim()
       .min(1, 'Photo credit cannot be empty')
       .max(200, 'Photo credit too long: maximum 200 characters')
+      .optional(),
+    // Опис головного фото для скрінрідерів і соцмереж; без нього фото декоративне
+    photoAlt: z
+      .string()
+      .trim()
+      .min(1, 'Photo alt cannot be empty')
+      .max(200, 'Photo alt too long: maximum 200 characters')
       .optional(),
     title: z
       .string()
@@ -145,9 +152,7 @@ export const createArticleSchema = z
   })
 
   .superRefine((data, ctx) => {
-    // TODO: для майбутнього PATCH цю перевірку запускати над статтею, злитою зі збереженою:
-    // правило живе лише тут, база його не гарантує
-    if (data.category === ArticleCategory.NEWS) {
+    if (data.type === ArticleType.NEWS) {
       if (data.isWarInUkraine && data.subcategory) {
         ctx.addIssue({
           code: 'custom',
@@ -161,17 +166,17 @@ export const createArticleSchema = z
           code: 'custom',
           path: ['subcategory'],
           message:
-            'Subcategory is required for News category if it is not related to war in Ukraine',
+            'Subcategory is required for News articles if it is not related to war in Ukraine',
         });
       }
     }
 
-    if (data.category === ArticleCategory.LONGREAD) {
+    if (data.type === ArticleType.LONGREAD) {
       if (data.subcategory) {
         ctx.addIssue({
           code: 'custom',
           path: ['subcategory'],
-          message: 'Subcategory is not allowed for Longread category',
+          message: 'Subcategory is not allowed for Longreads',
         });
       }
 
@@ -179,7 +184,7 @@ export const createArticleSchema = z
         ctx.addIssue({
           code: 'custom',
           path: ['isWarInUkraine'],
-          message: 'War in Ukraine is not allowed for Longread category',
+          message: 'War in Ukraine is not allowed for Longreads',
         });
       }
     }
