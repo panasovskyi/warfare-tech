@@ -9,7 +9,6 @@ import { SectionIcon } from '@/features/article/components/SectionIcon/SectionIc
 const SECTIONS = Object.entries(NEWS_SECTIONS);
 
 type Props = {
-  // Ключ відкритого розділу. На /news розділу немає — тоді активний чип "All"
   activeSection?: NewsSectionKey;
 };
 

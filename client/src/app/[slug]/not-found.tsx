@@ -1,8 +1,17 @@
-// TODO: англійською й у стилі сайту: h1 ("Page not found"), короткий абзац і посилання на
-// головну та /news. Потрібен ще кореневий app/not-found.tsx: невідомий розділ (/news/foo),
-// сторінка розділу за межами діапазону й адреси з трьох сегментів показують стандартну 404 Next
-export default function NotFound() {
+import type { Metadata } from 'next';
+import { PageMessage } from '@/components/ui/PageMessage/PageMessage';
+
+export const metadata: Metadata = {
+  title: 'Page not found',
+};
+
+export default function ArticleNotFound() {
   return (
-    <div>ПОКИ ТЕСТОВА СТОРІНКА НЕ ЗНАЙДЕНО</div>
-  )
+    <PageMessage
+      title='Page not found'
+      description='We could not find this page. If you followed a link to an article, it may have been moved or removed.'
+      primaryAction={{ label: 'Back to the homepage', href: '/' }}
+      secondaryAction={{ label: 'Browse all news', href: '/news' }}
+    />
+  );
 }

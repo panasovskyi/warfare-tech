@@ -1,0 +1,52 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+
+// Липне під час прокрутки, поки видно колонку тексту. Висоту обмежує кількість статей у
+// AsideSection (ASIDE_ARTICLES): aside має вміщуватися в екран ноутбука. Нижче $bp-lg він
+// стоїть під текстом, а не збоку, тож прилипати нема до чого
+.aside {
+  position: sticky;
+  top: $space-6;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+
+  @include bp-down($bp-lg) {
+    position: static;
+  }
+}
+
+// Колір розділу — --section-color з globals за data-section на aside
+.aside__title {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $fs-md;
+  font-weight: $fw-extrabold;
+  color: var(--section-color, var(--color-text));
+}
+
+.aside__icon {
+  flex-shrink: 0;
+  font-size: $fs-xl;
+}
+
+// Прапор ширший за решту іконок (1.5em × 1em): при 22px він був би 33px завширшки
+.aside[data-section='ukraine'] .aside__icon {
+  font-size: $fs-lg;
+}
+
+.aside__item {
+  padding-block: $space-4;
+  border-top: 1px solid var(--color-border);
+}
+
+.aside__item:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+
+// Вигляд посилання — в ArrowLink, тут лише розташування: у flex-колонці без align-self
+// воно розтягнулось би на всю ширину
+.aside__link {
+  align-self: flex-start;
+}

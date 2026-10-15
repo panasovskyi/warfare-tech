@@ -1,0 +1,24 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+
+// Ширина мініатюри, як у ArticleCardRow (там теж 240px: токена немає)
+$thumb-width: 240px;
+
+// На малому телефоні фото зверху, як у ArticleCardRow
+.row {
+  display: grid;
+  grid-template-columns: $thumb-width minmax(0, 1fr);
+  align-items: start;
+  gap: $space-6;
+
+  @include bp-down($bp-sm) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: $space-3;
+  }
+}
+
+.row__content {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}

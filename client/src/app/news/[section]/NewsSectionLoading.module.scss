@@ -1,0 +1,11 @@
+@use 'variables' as *;
+
+.breadcrumbs {
+  width: 160px;
+}
+
+// Місце під опис розділу, як у справжньої обкладинки
+.description {
+  width: 480px;
+  max-width: 100%;
+}

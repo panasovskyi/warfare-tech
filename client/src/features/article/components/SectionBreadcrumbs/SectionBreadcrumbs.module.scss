@@ -2,6 +2,7 @@
 
 .breadcrumbs {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: $space-2;
   font-size: $fs-sm;

@@ -1,10 +1,16 @@
 // ─────────────────────────────────────────────────────────
 // breakpoints.scss
-// Breakpoint values and the media-query mixin. These stay as
+// Breakpoint values and the media-query mixins. These stay as
 // SCSS $variables: CSS custom properties can't be used inside
 // @media conditions.
 //
-// Mobile-first: bp-up($bp) applies styles from $bp and wider.
+// The styles of the components are written for the desktop first, so the
+// narrower screens are handled by bp-down($bp): it applies the styles to
+// screens narrower than $bp. The desktop view never changes because of
+// the mobile rules. Typical layers: below $bp-lg (tablet), below $bp-md
+// (phone), below $bp-sm (small phone, one column everywhere).
+//
+// bp-up($bp) is the opposite: from $bp and wider.
 // ─────────────────────────────────────────────────────────
 
 $bp-sm: 640px;
@@ -15,6 +21,13 @@ $bp-2xl: 1440px;
 
 @mixin bp-up($bp) {
   @media (min-width: $bp) {
+    @content;
+  }
+}
+
+// max-width is one pixel less, so the same $bp never matches both mixins at once
+@mixin bp-down($bp) {
+  @media (max-width: #{$bp - 1px}) {
     @content;
   }
 }

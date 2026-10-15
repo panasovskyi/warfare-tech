@@ -1,0 +1,51 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+
+// Ті самі відступи, висота й вирівнювання донизу, що в PageCover з фото (на кожній ширині
+// екрана). Фон нейтральний: колір розділу заглушка не знає
+.cover {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: $cover-photo-height;
+  padding-block: $space-24 $space-14;
+  overflow: clip;
+  background: var(--color-surface);
+
+  @include bp-down($bp-lg) {
+    min-height: $cover-photo-height-md;
+  }
+
+  @include bp-down($bp-md) {
+    min-height: $cover-photo-height-sm;
+    padding-block: $space-16 $space-10;
+  }
+}
+
+// Місце фото: права частина обкладинки тієї самої ширини, лівий край так само згасає
+// (на телефоні — вся ширина без маски, як у PageCover)
+.cover__photo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  width: $cover-photo-width;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 25%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 25%);
+
+  @include bp-down($bp-md) {
+    width: $cover-photo-width-sm;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+// Вміст колонкою, як .cover__inner у PageCover
+.cover__inner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}

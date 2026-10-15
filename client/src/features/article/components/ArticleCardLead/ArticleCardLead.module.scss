@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Фото зверху, під ним мітка, заголовок, опис і автор із часом.
 // position: relative — межі для розтягнутого посилання заголовка
@@ -42,12 +43,16 @@
   text-decoration: underline;
 }
 
-// TODO: трекінг заголовків ≈ −0.02em, як у макеті — токена ще немає
 .card__title {
+  letter-spacing: $ls-heading;
   font-size: $fs-3xl;
   font-weight: $fw-extrabold;
   line-height: $lh-tight;
   text-wrap: balance;
+
+  @include bp-down($bp-md) {
+    font-size: $fs-2xl;
+  }
 }
 
 // Розтягує клік на всю картку: заголовок і посилання не позиціоновані,

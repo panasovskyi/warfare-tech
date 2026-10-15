@@ -3,6 +3,7 @@ import type { ArticleListItem } from '@/features/article/article.types';
 import styles from './ArticleCardVertical.module.scss';
 import Image from 'next/image';
 import { RelativeTime } from '@/components/ui/RelativeTime/RelativeTime';
+import { ReadingTime } from '@/components/ui/ReadingTime/ReadingTime';
 
 type Props = {
   article: ArticleListItem;
@@ -14,9 +15,10 @@ type Props = {
 };
 
 // За замовчуванням — головна новина War in Ukraine: 7/12 панелі без її полів (2 × 48px)
-// і проміжку між колонками (40px). 1528px = контейнер 1400 + поля сторінки 2 × 64
+// і проміжку між колонками (40px). 1528px = контейнер 1400 + поля сторінки 2 × 64. Нижче
+// 1024px одна колонка на всю панель: від 768px поля сторінки 32 і панелі 32, нижче по 20
 const DEFAULT_SIZES =
-  '(min-width: 1528px) 737px, calc((100vw - 264px) * 7 / 12)';
+  '(min-width: 1528px) 737px, (min-width: 1024px) calc((100vw - 264px) * 7 / 12), (min-width: 768px) calc(100vw - 128px), calc(100vw - 80px)';
 
 // Фото зверху, заголовок, опис і час. Головна новина у WarInUkraineSection
 export const ArticleCardVertical: React.FC<Props> = ({
@@ -39,12 +41,6 @@ export const ArticleCardVertical: React.FC<Props> = ({
       </div>
 
       <Heading className={styles.card__title}>
-        {/*
-          Як у Horizontal: посилання лише на заголовку, його ::after розтягується
-          на всю картку (position: absolute; inset: 0), у .card — position: relative.
-          Інших посилань у цій картці немає, тож z-index не знадобиться.
-          TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug
-        */}
         <Link href={`/${article.slug}`} className={styles.card__link}>
           {article.title}
         </Link>
@@ -52,10 +48,17 @@ export const ArticleCardVertical: React.FC<Props> = ({
 
       <p className={styles.card__description}>{article.description}</p>
 
-      <RelativeTime
-        dateTime={article.createdAt}
-        className={styles.card__time}
-      />
+      {/* Обидва в одному рядку: окремо в колонці картки вони стали б двома рядками */}
+      <div className={styles.card__meta}>
+        <RelativeTime
+          dateTime={article.createdAt}
+          className={styles.card__time}
+        />
+        <ReadingTime
+          minutes={article.readingTime}
+          className={styles.card__readingTime}
+        />
+      </div>
     </article>
   );
 };

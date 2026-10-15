@@ -19,7 +19,7 @@ export const SubcategorySection: React.FC<Props> = ({
   articles,
 }) => {
   const titleId = `${subcategory}-news-title`;
-  const SectionIcon = SECTION_ICONS[subcategory];
+  const Icon = SECTION_ICONS[subcategory];
   const [featured, ...rest] = articles;
 
   if (!featured) return null;
@@ -35,7 +35,7 @@ export const SubcategorySection: React.FC<Props> = ({
           href={`/news/${subcategory}`}
           className={styles.subcategory__link}
         >
-          <SectionIcon className={styles.subcategory__icon} />
+          <Icon className={styles.subcategory__icon} />
           {NEWS_SECTIONS[subcategory].label}
         </Link>
       </h2>

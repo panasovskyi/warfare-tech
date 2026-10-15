@@ -8,10 +8,8 @@ import {
   type ArticleSubcategory,
 } from '@/features/article/article.types';
 
-// Ключ, за яким стилі беруть колір мітки (data-атрибут у розмітці)
 export type ArticleLabelSection = NewsSectionKey | 'longread' | 'news';
 
-// Стаття → ключ її розділу
 export function getArticleSection(
   article: ArticleListItem,
 ): ArticleLabelSection {
@@ -38,8 +36,6 @@ type SectionLabelAndLink = {
 export function getSectionLabelAndLink(
   section: ArticleLabelSection,
 ): SectionLabelAndLink {
-  // TODO: сторінки /longreads ще немає (зараз 404), а де житимуть самі лонгріди — /[slug]
-  // чи /longreads/[slug] — не вирішено. Від цього залежить href мітки й крихт лонгріда
   if (section === 'longread') {
     return { label: 'Longread', sectionLabel: 'Longreads', href: '/longreads' };
   }
@@ -51,6 +47,12 @@ export function getSectionLabelAndLink(
   const { label } = NEWS_SECTIONS[section];
 
   return { label, sectionLabel: label, href: `/news/${section}` };
+}
+
+// Адреса сторінки автора. login на сервері — будь-які символи (3–20), тож його кодуємо, як
+// slug в api: "/", "?" чи "#" у логіні інакше зламали б адресу. Єдине місце, де вона будується
+export function getAuthorPath(login: string): string {
+  return `/authors/${encodeURIComponent(login)}`;
 }
 
 export function getSectionTagAndLink(article: ArticleListItem): {

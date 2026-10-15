@@ -1,15 +1,45 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Смуга на всю ширину з лінією знизу; вміст — у .container усередині
 .header {
   padding-block: $space-6;
   border-bottom: 1px solid var(--color-border);
+
+  @include bp-down($bp-md) {
+    position: relative;
+    padding-block: $space-4;
+  }
 }
 
+// На телефоні логотип і меню стають у два рядки: меню на всю ширину під логотипом
 .header__container {
   display: flex;
   align-items: center;
   gap: $space-10;
+
+  @include bp-down($bp-lg) {
+    gap: $space-6;
+  }
+
+  @include bp-down($bp-md) {
+    flex-wrap: wrap;
+    gap: $space-3 $space-6;
+  }
+}
+
+// Перемикач теми: праворуч у рядку. На телефоні логотип і меню стоять у два рядки, а кнопка
+// лишається в правому верхньому куті поруч із логотипом (абсолютно, щоб не мінятись місцями в
+// розмітці: вона й там стоїть після меню). top підібраний під висоту рядка логотипа
+.themeToggle {
+  margin-left: auto;
+
+  @include bp-down($bp-md) {
+    position: absolute;
+    top: $space-3;
+    right: var(--gutter);
+    margin-left: 0;
+  }
 }
 
 // Розмір логотипа задає font-size посилання: Logo рахує знак від нього (1.35em)
@@ -18,21 +48,62 @@
   font-size: $fs-xl;
 }
 
+// Пунктів вісім, і на вужчому екрані вони не вміщаються: меню прокручується вбік, а не
+// розпирає сторінку. min-width: 0 — flex-елемент інакше не стиснеться вужче за вміст.
+// Смуги прокрутки не видно (пункти і так видно навпіл на краю, і палець їх гортає).
+// Кільце фокуса лежить за межами посилання, а overflow обрізає все поза блоком, тому зверху
+// й знизу запас, який від'ємний margin повертає назад: висота меню не змінюється
+.nav {
+  @include bp-down($bp-lg) {
+    min-width: 0;
+    padding-block: $space-2;
+    margin-block: -$space-2;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  @include bp-down($bp-md) {
+    width: 100%;
+  }
+}
+
 .nav__list {
   display: flex;
   gap: $space-6;
+
+  @include bp-down($bp-lg) {
+    gap: $space-5;
+  }
+}
+
+// Пункт не стискається: у прокручуваному меню він має лишатися цілим
+.nav__item {
+  flex-shrink: 0;
 }
 
 // Приглушені пункти, при наведенні — колір основного тексту.
-// padding-block трохи збільшує площу кліку
+// padding-block трохи збільшує площу кліку. nowrap — "War in Ukraine" не ламається
 .nav__link {
   display: block;
   padding-block: $space-1;
   font-weight: $fw-medium;
   color: var(--color-text-muted);
+  white-space: nowrap;
   transition: color $ease-standard;
 }
 
 .nav__link:hover {
   color: var(--color-text);
+}
+
+// Активний пункт (aria-current ставить NavLink): колір основного тексту й підкреслення
+// акцентом, як на заголовках карток при наведенні. Це text-decoration, а не рамка чи
+// вага шрифту: розмір пункту не змінюється, і меню не "стрибає". Колір теж змінюється,
+// тож пункт відрізняється не лише акцентом
+.nav__link[aria-current='page'] {
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
 }

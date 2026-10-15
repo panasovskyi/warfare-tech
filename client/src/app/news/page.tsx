@@ -1,4 +1,7 @@
+import type { Metadata } from 'next';
 import styles from './NewsPage.module.scss';
+import { PageCover } from '@/components/ui/PageCover/PageCover';
+import { NEWS_PAGE_COVER } from '@/features/article/article.constants';
 import { articleApi } from '@/features/article/article.api';
 import { ArticleCategory } from '@/features/article/article.types';
 import { ArticleCardLead } from '@/features/article/components/ArticleCardLead/ArticleCardLead';
@@ -7,29 +10,40 @@ import { ArticleCardRow } from '@/features/article/components/ArticleCardRow/Art
 import { Pagination } from '@/components/ui/Pagination/Pagination';
 import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
 import { SectionsList } from '@/app/news/_components/SectionsList/SectionsList';
+import { notFound } from 'next/navigation';
+import { getPageNumber } from '@/lib/api/pagination';
 
-const MAX_PAGE = 999;
 const TOP_STORIES_COUNT = 3;
 
 type Props = {
   searchParams: Promise<{ page?: string | string[] }>;
 };
 
-// TODO: generateMetadata — title "News — Warfare Tech" і опис; для ?page=N окремий title
-// і canonical (зараз "Create Next App", див. TODO про metadata в layout.tsx)
+export async function generateMetadata({
+  searchParams,
+}: Props): Promise<Metadata> {
+  const { page } = await searchParams;
+  const pageNumber = getPageNumber(page);
+
+  return {
+    title: pageNumber === 1 ? 'News' : `News — page ${pageNumber}`,
+    description:
+      'Every story across air, land, naval, space, cyber, UAV and the war in Ukraine, newest first.',
+  };
+}
+
+// TODO: canonical для /news і ?page=N (alternates.canonical). Потрібен metadataBase у кореневому
+// layout, а домену ще нема: відносна адреса без нього дала б неправильний canonical
 export default async function NewsPage({ searchParams }: Props) {
   const { page } = await searchParams;
 
-  const pageNumber = typeof page === 'string' ? Number(page) : NaN;
-  const normalizedPage =
-    Number.isInteger(pageNumber) && pageNumber >= 1 && pageNumber <= MAX_PAGE
-      ? pageNumber
-      : 1;
+  const normalizedPage = getPageNumber(page);
 
-  // TODO: page > totalPages при total > 0 (наприклад, ?page=50) зараз дає 200 і "No news…"
-  // без пагінації. Як у news/[section]: 404 (потрібен total із відповіді)
-  // TODO: loading.tsx для news/, news/[section]/ і [slug]/: сторінки динамічні, при кліку на
-  // чип чи сторінку пагінації нічого не видно, доки API не відповість
+  // TODO (після деплою): loading.tsx є (news/ і news/[section]/), але перевірити, чи він
+  // показується, коли міняється лише ?page=N. Локально API відповідає надто швидко, щоб це
+  // побачити (для перевірки можна тимчасово додати await-затримку ~2 с перед запитом). За
+  // відомою поведінкою Next ні, старий екран лишається; тоді обгорнути список у
+  // <Suspense key={normalizedPage}> з тими самими заглушками
   // TODO: кешування — сторінка динамічна через searchParams. Рішення одне на головну,
   // статтю і списки (TODO в app/page.tsx)
   const articlesResponse = await articleApi.getArticles({
@@ -38,7 +52,11 @@ export default async function NewsPage({ searchParams }: Props) {
     page: normalizedPage,
   });
 
-  const { items, totalPages } = articlesResponse;
+  const { items, totalPages, total } = articlesResponse;
+
+  if (total > 0 && totalPages < normalizedPage) {
+    return notFound();
+  }
 
   const topCount = normalizedPage === 1 ? TOP_STORIES_COUNT : 0;
   const [firstTop, secondTop, thirdTop] = items.slice(0, topCount);
@@ -47,14 +65,15 @@ export default async function NewsPage({ searchParams }: Props) {
  
   return (
     <div className={styles.page}>
+      <PageCover cover={NEWS_PAGE_COVER}>
+        <h1 className={styles.page__title}>News</h1>
+        <p className={styles.page__description}>
+          Every story across air, land, naval, space, cyber, UAV and the war in
+          Ukraine, newest first.
+        </p>
+      </PageCover>
+
       <div className={`container ${styles.page__inner}`}>
-        <header className={styles.page__header}>
-          <h1 className={styles.page__title}>News</h1>
-          <p className={styles.page__description}>
-            Every story across air, land, naval, space, cyber, UAV and the war
-            in Ukraine, newest first.
-          </p>
-        </header>
         <SectionsList />
 
         {items.length === 0 && (
@@ -97,7 +116,6 @@ export default async function NewsPage({ searchParams }: Props) {
                 ))}
               </ul>
             </section>
-            {/* TODO: коли з'явиться aside — пагінація має стояти під списком у лівій колонці */}
             <Pagination
               page={normalizedPage}
               totalPages={totalPages}

@@ -1,16 +1,23 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Номери й стрілки — кружечки в один рядок. Відступи навколо і вирівнювання
-// (ліворуч чи по центру) задає батько
+// (ліворуч чи по центру) задає батько. На телефоні кружечки й проміжки менші (дев'ять
+// елементів у вікні з семи місць і двох стрілок мають вміститись у ряд), а на зовсім вузькому
+// екрані ряд переноситься, а не розпирає сторінку
 .pagination {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: $space-2;
+
+  @include bp-down($bp-sm) {
+    gap: $space-1;
+  }
 }
 
 // Спільний вигляд кружечка: квадрат $space-10, а номер із трьома цифрами росте
-// по ширині завдяки min-width і padding-inline.
-// TODO: у макеті 44px і шрифт 14px — токенів немає, взяті найближчі ($space-10, $fs-sm)
+// по ширині завдяки min-width і padding-inline
 .pagination__link,
 .pagination__arrowLink,
 .pagination__arrowPlaceholder {
@@ -23,6 +30,12 @@
   border-radius: $radius-pill;
   font-size: $fs-sm;
   font-weight: $fw-semibold;
+
+  @include bp-down($bp-sm) {
+    min-width: $space-8 + $space-1;
+    height: $space-8 + $space-1;
+    padding-inline: $space-1;
+  }
 }
 
 // Hover лише у посилань: заглушка не клікається
@@ -61,4 +74,8 @@
   min-width: $space-6;
   text-align: center;
   color: var(--color-text-muted);
+
+  @include bp-down($bp-sm) {
+    min-width: $space-4;
+  }
 }

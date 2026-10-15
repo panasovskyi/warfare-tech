@@ -1,38 +1,53 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
-// Відступи зверху й знизу сторінки, як у макеті (56 і 96px)
+// Нижній відступ перед футером, як у макеті (96px). Зверху відступу нема: обкладинка
+// (components/ui/PageCover) йде впритул до хедера, як на сторінках розділів
 .page {
-  padding-block: $space-14 $space-24;
+  padding-bottom: $space-24;
+
+  @include bp-down($bp-md) {
+    padding-bottom: $space-14;
+  }
 }
 
 // Блоки сторінки один під одним з однаковим проміжком. gap, а не margin: блок, який
 // не відрендерився (топ, список, пагінація), не лишає після себе порожнього місця.
-// TODO: у макеті проміжки різні (32, 48, 72px) — тут один, $space-12
+// padding-top — відступ від обкладинки до чипів (48px, як на сторінках розділів)
 .page__inner {
   display: flex;
   flex-direction: column;
   gap: $space-12;
+  padding-top: $space-12;
+
+  @include bp-down($bp-md) {
+    gap: $space-8;
+    padding-top: $space-8;
+  }
 }
 
-.page__header {
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
-}
-
-// 48px, як заголовок сторінки статті; у макеті 52px — токена немає.
-// TODO: трекінг заголовків ≈ −0.02em, як у макеті — токена ще немає (так само в ArticleCardLead)
+// 48px, як заголовок сторінки статті. Колір від обкладинки (світлий)
 .page__title {
   font-size: $fs-display-lg;
   font-weight: $fw-extrabold;
   line-height: $lh-tight;
+  letter-spacing: $ls-heading;
+
+  @include bp-down($bp-lg) {
+    font-size: $fs-display-md;
+  }
+
+  @include bp-down($bp-md) {
+    font-size: $fs-display-xs;
+  }
 }
 
+// Опис на обкладинці: світлий приглушений текст, як на сторінках розділів
 .page__description {
-  max-width: $article-text-width;
+  max-width: 60ch;
   font-size: $fs-lg;
   line-height: $lh-relaxed;
-  color: var(--color-text-muted);
+  color: var(--color-on-image-muted);
 }
 
 // Панель, що виділяє топ: світла тепла поверхня з ледь помітним акцентним відсвітом до
@@ -43,9 +58,10 @@
 // Усередині велика картка ліворуч, дві середні праворуч. Колонки 1.55fr і 1fr з проміжком
 // 40px і полями панелі 40px — під ці значення розраховані sizes у ArticleCardLead і
 // ArticleCardSide. minmax(0, …), а не fr: звичайна колонка не стискається вужче за вміст.
-// TODO: підписи розділів (11px) на цій панелі: Air 4.20:1 і Cyber 4.34:1 (у куті з
-// відсвітом 3.95 і 4.08), Land і UAV у куті ≈4.35 — нижче 4.5. Потрібні темніші
-// --color-cat-air-text, -cyber-text (і land, uav) або інша панель — вирішуєш ти
+// Підписи розділів (11px) на цій панелі перевірено в найтемнішому місці, куті з відсвітом:
+// --color-cat-*-text у globals.scss дають там від 4.6:1.
+// Нижче $bp-lg одна колонка (велика картка, під нею середні), а поля панелі менші; від
+// них залежать sizes у ArticleCardLead і ArticleCardSide
 .topStories {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
@@ -60,6 +76,16 @@
       rgba(var(--color-accent-rgb), 0.06) 100%
     ),
     var(--color-surface);
+
+  @include bp-down($bp-lg) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: $space-8;
+    padding: $space-6;
+  }
+
+  @include bp-down($bp-md) {
+    padding: $space-5;
+  }
 }
 
 // Без середніх карток велика займає всю ширину
@@ -67,10 +93,22 @@
   grid-column: 1 / -1;
 }
 
+// Середні картки: колонка поруч з великою; на планшеті — дві поруч під нею, на телефоні знову
+// одна колонка
 .topStories__right {
   display: flex;
   flex-direction: column;
   gap: $space-10;
+
+  @include bp-down($bp-lg) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-6;
+  }
+
+  @include bp-down($bp-sm) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 // Список і пагінація під ним. Коли з'явиться aside, тут буде сітка з двох колонок
@@ -78,6 +116,10 @@
   display: flex;
   flex-direction: column;
   gap: $space-12;
+
+  @include bp-down($bp-md) {
+    gap: $space-8;
+  }
 }
 
 .latest {
@@ -92,11 +134,14 @@
   line-height: $lh-snug;
 }
 
-// Рядки розділені лініями, як у макеті і в SubcategorySection.
-// TODO: відступ рядка в макеті 28px — взято найближчий токен $space-6
+// Рядки розділені лініями, як у SubcategorySection
 .latest__item {
   padding-block: $space-6;
   border-top: 1px solid var(--color-border);
+
+  @include bp-down($bp-md) {
+    padding-block: $space-5;
+  }
 }
 
 .latest__item:last-child {

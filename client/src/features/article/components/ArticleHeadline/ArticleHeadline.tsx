@@ -20,8 +20,6 @@ export const ArticleHeadline: React.FC<Props> = ({
           className={styles.headline__time}
         />
       )}
-
-      {/* TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug */}
       <Link href={`/${article.slug}`} className={styles.headline__link}>
         {article.title}
       </Link>

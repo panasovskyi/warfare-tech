@@ -1,6 +1,5 @@
 import { IconBase, type IconProps } from '@/components/icons/IconBase';
 
-// Супутник із сонячними панелями й сигналом, нахилений на 45°
 export const SpaceIcon: React.FC<IconProps> = (props) => (
   <IconBase {...props}>
     <g transform='rotate(45 12 12)'>

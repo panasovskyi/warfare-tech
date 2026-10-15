@@ -4,10 +4,7 @@ import {
   getSectionLabelAndLink,
   type ArticleLabelSection,
 } from '@/features/article/article.utils';
-import {
-  SECTION_ICONS,
-  type SubcategoryKey,
-} from '@/features/article/article.constants';
+import { SectionIcon } from '@/features/article/components/SectionIcon/SectionIcon';
 import { ChevronRightIcon } from '@/components/icons/ChevronRightIcon';
 
 type Props = {
@@ -34,10 +31,6 @@ export const SectionBreadcrumbs: React.FC<Props> = ({
   const { sectionLabel, href } = getSectionLabelAndLink(section);
   // Лонгріди — не новини, тож без першої ланки "News"
   const isNews = section !== 'longread';
-  const SectionIcon =
-    isShowIcon && section in SECTION_ICONS
-      ? SECTION_ICONS[section as SubcategoryKey]
-      : null;
 
   return (
     <nav aria-label='Breadcrumb'>
@@ -66,8 +59,11 @@ export const SectionBreadcrumbs: React.FC<Props> = ({
               className={styles.breadcrumbs__link}
               aria-current={isCurrentPage ? 'page' : undefined}
             >
-              {SectionIcon && (
-                <SectionIcon className={styles.breadcrumbs__icon} />
+              {isShowIcon && (
+                <SectionIcon
+                  section={section}
+                  className={styles.breadcrumbs__icon}
+                />
               )}
               {sectionLabel}
             </Link>

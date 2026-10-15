@@ -1,7 +1,12 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 .page {
   padding-block: $space-12 $space-24;
+
+  @include bp-down($bp-md) {
+    padding-block: $space-6 $space-14;
+  }
 }
 
 // Шапка, фото, текст з aside і футер — одна колонка з однаковими відступами
@@ -9,6 +14,10 @@
   display: flex;
   flex-direction: column;
   gap: $space-12;
+
+  @include bp-down($bp-md) {
+    gap: $space-8;
+  }
 }
 
 // ── Шапка ───────────────────────────────────────────────
@@ -22,10 +31,19 @@
 // max-width у ch — довжина рядка в символах (≈ 1000px, як у макеті)
 .page__title {
   max-width: 34ch;
+  letter-spacing: $ls-heading;
   font-size: $fs-display-lg;
   font-weight: $fw-extrabold;
   line-height: $lh-tight;
   text-wrap: balance;
+
+  @include bp-down($bp-lg) {
+    font-size: $fs-display-md;
+  }
+
+  @include bp-down($bp-md) {
+    font-size: $fs-display-xs;
+  }
 }
 
 .page__description {
@@ -33,6 +51,10 @@
   font-size: $fs-xl;
   line-height: $lh-normal;
   color: var(--color-text-muted);
+
+  @include bp-down($bp-md) {
+    font-size: $fs-lg;
+  }
 }
 
 // Аватар ліворуч на два рядки, праворуч ім'я над датою
@@ -64,13 +86,19 @@
 // ── Головне фото ────────────────────────────────────────
 
 // Обгортка задає фото з fill розмір: position: relative — точка відліку,
-// aspect-ratio — висота від ширини, overflow: hidden — обрізає по заокругленню
+// aspect-ratio — висота від ширини, overflow: hidden — обрізає по заокругленню.
+// На телефоні пропорція 16:9 (як у карток): 2:1 дала б низьку смужку
 .page__mainPicWrapper {
   position: relative;
   aspect-ratio: $ratio-article;
   overflow: hidden;
   border-radius: $radius-xl;
   background: var(--color-surface-2);
+
+  @include bp-down($bp-md) {
+    aspect-ratio: $ratio-card;
+    border-radius: $radius-lg;
+  }
 }
 
 .page__mainPic {
@@ -96,57 +124,22 @@
 // ── Текст і aside ───────────────────────────────────────
 
 // Колонка тексту обмежена для зручної довжини рядка, aside праворуч.
-// Без aside лишається лише колонка тексту
+// Без aside лишається лише колонка тексту. Нижче $bp-lg одна колонка: текст, під ним aside
+// (без прилипання, див. AsideSection)
 .page__content {
   display: grid;
   grid-template-columns: minmax(0, $article-text-width) $article-aside-width;
   justify-content: space-between;
   align-items: start;
   column-gap: $space-20;
+
+  @include bp-down($bp-lg) {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: $space-12;
+  }
 }
 
-// Липне під час прокрутки, поки видно колонку тексту.
-// TODO: без обмеження висоти: при limit: 10 aside вищий за екран ноутбука, і нижні рядки
-// та "View all" недосяжні, поки не скінчиться колонка тексту. Варіанти: max-height з
-// overflow-y: auto (кільце фокуса обріжеться — потрібен внутрішній відступ), менше рядків
-// або липнути лише коли вміщується
-.aside {
-  position: sticky;
-  top: $space-6;
-  display: flex;
-  flex-direction: column;
-  gap: $space-3;
-}
-
-// Колір розділу — --section-color з globals за data-section на aside
-.aside__title {
-  display: inline-flex;
-  align-items: center;
-  gap: $space-2;
-  font-size: $fs-md;
-  font-weight: $fw-extrabold;
-  color: var(--section-color, var(--color-text));
-}
-
-.aside__icon {
-  flex-shrink: 0;
-  font-size: $fs-xl;
-}
-
-.aside__item {
-  padding-block: $space-4;
-  border-top: 1px solid var(--color-border);
-}
-
-.aside__item:last-child {
-  border-bottom: 1px solid var(--color-border);
-}
-
-// Вигляд посилання — в ArrowLink, тут лише розташування: у flex-колонці без align-self
-// воно розтягнулось би на всю ширину
-.aside__link {
-  align-self: flex-start;
-}
+// Стилі самого aside — у _components/AsideSection
 
 // ── Футер статті ────────────────────────────────────────
 
@@ -192,14 +185,19 @@
   text-decoration-color: var(--color-accent);
 }
 
-// Картка автора на тлі поверхні
+// Картка автора на тлі поверхні. wrap: на телефоні посилання переходить під ім'я
 .writer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: $space-4;
   padding: $space-6;
   border-radius: $radius-lg;
   background: var(--color-surface);
+
+  @include bp-down($bp-md) {
+    padding: $space-5;
+  }
 }
 
 // Аватар за замовчуванням того ж відтінку, що й картка, — тут біле тло
@@ -221,7 +219,13 @@
   color: var(--color-text-muted);
 }
 
-// Вигляд посилання — в ArrowLink, тут лише розташування: праворуч у рядку картки
+// Вигляд посилання — в ArrowLink, тут лише розташування: праворуч у рядку картки, а на
+// телефоні окремим рядком під іменем
 .writer__link {
   margin-left: auto;
+
+  @include bp-down($bp-sm) {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
 }

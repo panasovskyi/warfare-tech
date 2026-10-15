@@ -27,10 +27,9 @@ export const HeroSection: React.FC<Props> = ({ articles }) => {
             alt=''
             fill
             preload
-            sizes='(min-width: 1528px) 1400px, calc(100vw - 128px)'
+            sizes='(min-width: 1528px) 1400px, (min-width: 1024px) calc(100vw - 128px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 40px)'
             className={styles.hero__image}
           />
-          {/* data-section — за ним стилі беруть колір плашки мітки */}
           <Link
             href={href}
             className={styles.hero__subcategoryLink}
@@ -48,6 +47,7 @@ export const HeroSection: React.FC<Props> = ({ articles }) => {
           <p className={styles.hero__description}>{featured.description}</p>
 
           <ArticleByline
+            readingTime={featured.readingTime}
             author={featured.author}
             createdAt={featured.createdAt}
             className={styles.hero__byline}

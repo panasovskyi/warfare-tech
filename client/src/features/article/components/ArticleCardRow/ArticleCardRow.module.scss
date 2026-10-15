@@ -1,17 +1,25 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Ширина мініатюри з макета (240 × 160). Токена немає
 $thumb-width: 240px;
 
 // Мініатюра зліва фіксованої ширини, текст справа.
 // align-items: start — мініатюра тримає свою пропорцію, а не тягнеться
-// на висоту тексту. position: relative — межі для розтягнутого посилання
+// на висоту тексту. position: relative — межі для розтягнутого посилання.
+// На малому телефоні фото стає зверху на всю ширину: текст у вузькій колонці поруч з
+// мініатюрою (із заголовком 22px) розтягнувся б на пів екрана
 .card {
   position: relative;
   display: grid;
   grid-template-columns: $thumb-width minmax(0, 1fr);
   align-items: start;
   gap: $space-6;
+
+  @include bp-down($bp-sm) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: $space-3;
+  }
 }
 
 // Обгортка задає фото з fill розмір: position: relative — точка відліку,

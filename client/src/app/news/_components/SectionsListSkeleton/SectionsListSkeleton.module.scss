@@ -1,0 +1,8 @@
+@use 'variables' as *;
+
+// Як у SectionsList: чипи в рядок, на вузькому екрані переносяться
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+}

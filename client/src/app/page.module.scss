@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Порядок блоків головної і відступи між ними. У самих блоків зовнішніх
 // відступів немає. gap, а не margin: секція, що повернула null, не лишає
@@ -8,6 +9,11 @@
   flex-direction: column;
   gap: $space-14;
   padding-block: $space-10 $space-14;
+
+  @include bp-down($bp-md) {
+    gap: $space-10;
+    padding-block: $space-6 $space-10;
+  }
 }
 
 // Усе під hero — в одному .container
@@ -15,15 +21,28 @@
   display: flex;
   flex-direction: column;
   gap: $space-14;
+
+  @include bp-down($bp-md) {
+    gap: $space-10;
+  }
 }
 
-// Шість блоків підкатегорій: три колонки, два рядки.
-// minmax(0, 1fr), а не 1fr: звичайна 1fr не стискається вужче за вміст,
+// Шість блоків підкатегорій: три колонки, два рядки; на планшеті дві колонки, на телефоні
+// одна. minmax(0, 1fr), а не 1fr: звичайна 1fr не стискається вужче за вміст,
 // і довге слово в заголовку розширило б свою колонку
 .page__subcategories {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: $space-10 $space-12;
+
+  @include bp-down($bp-lg) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: $space-8;
+  }
+
+  @include bp-down($bp-sm) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 // Якщо всі шість запитів упали, сітка порожня — ховаємо її,

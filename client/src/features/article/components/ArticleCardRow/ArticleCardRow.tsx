@@ -14,8 +14,9 @@ type Props = {
   sizes?: string;
 };
 
-// Мініатюра має фіксовану ширину, тож і sizes фіксований
-const DEFAULT_SIZES = '240px';
+// Мініатюра має фіксовану ширину, тож і sizes фіксований; на малому телефоні фото зверху на
+// всю ширину (поля 20)
+const DEFAULT_SIZES = '(min-width: 640px) 240px, calc(100vw - 40px)';
 
 // Рядок списку: мініатюра зліва, справа мітка, заголовок, опис, автор і час.
 // Список Latest на /news. Межі й відступи між рядками задає список
@@ -50,15 +51,16 @@ export const ArticleCardRow: React.FC<Props> = ({
         </Link>
 
         <Heading className={styles.card__title}>
-          {/* TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug */}
-          <Link href={`/${article.slug}`} className={styles.card__link}>
+       <Link href={`/${article.slug}`} className={styles.card__link}>
             {article.title}
           </Link>
         </Heading>
 
         <p className={styles.card__description}>{article.description}</p>
 
+ 
         <ArticleByline
+          readingTime={article.readingTime}
           author={article.author}
           createdAt={article.createdAt}
           className={styles.card__byline}

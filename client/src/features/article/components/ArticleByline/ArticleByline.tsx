@@ -1,34 +1,40 @@
 import Link from 'next/link';
 import styles from './ArticleByline.module.scss';
 import { ArticleAuthor } from '@/features/article/article.types';
+import { getAuthorPath } from '@/features/article/article.utils';
 import { RelativeTime } from '@/components/ui/RelativeTime/RelativeTime';
+import { ReadingTime } from '@/components/ui/ReadingTime/ReadingTime';
 
 type Props = {
   author: ArticleAuthor;
   createdAt: string;
   className?: string;
+  readingTime: number;
 };
 
 export const ArticleByline: React.FC<Props> = ({
   author,
   createdAt,
   className,
+  readingTime,
 }) => {
   return (
     <div
       className={className ? `${styles.byline} ${className}` : styles.byline}
     >
-      {/*
-        TODO: сторінки /authors/[login] ще немає — посилання веде на 404. login на сервері —
-        будь-які символи (3–20), тож у href потрібен encodeURIComponent, як для slug в api
-      */}
       <Link
-        href={`/authors/${author.login}`}
+        href={getAuthorPath(author.login)}
         className={styles.byline__authorLink}
       >
         {author.fullName}
       </Link>
-      <RelativeTime dateTime={createdAt} />
+      <div className={styles.byline__meta}>
+        <RelativeTime dateTime={createdAt} className={styles.byline__time} />
+        <ReadingTime
+          minutes={readingTime}
+          className={styles.byline__readingTime}
+        />
+      </div>
     </div>
   );
 };

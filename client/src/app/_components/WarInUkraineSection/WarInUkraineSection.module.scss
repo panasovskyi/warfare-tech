@@ -1,7 +1,9 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Тонована панель із прапорною смужкою зверху.
-// position: relative — для смужки; overflow: clip — обрізає її по заокругленню
+// position: relative — для смужки; overflow: clip — обрізає її по заокругленню.
+// Поля панелі менші на вужчих екранах; від них залежать sizes ArticleCardVertical
 .ukraine {
   position: relative;
   display: flex;
@@ -11,6 +13,14 @@
   border-radius: $radius-xl;
   overflow: clip;
   background: var(--color-ukraine-panel);
+
+  @include bp-down($bp-lg) {
+    padding: $space-8;
+  }
+
+  @include bp-down($bp-md) {
+    padding: $space-5;
+  }
 }
 
 // Смужка декоративна, тож не елемент у розмітці, а ::before:
@@ -30,18 +40,21 @@
 // Заголовок із підписом ліворуч, посилання праворуч.
 // center, а не baseline: базова лінія h2 — це його перший елемент, прапор-svg,
 // а в svg немає текстової базової лінії, тож браузер бере низ іконки —
-// і підпис та посилання сідали нижче за текст заголовка
+// і підпис та посилання сідали нижче за текст заголовка.
+// wrap: на телефоні заголовок із підписом і посилання не вміщаються в один рядок
 .ukraine__top {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: $space-4;
+  gap: $space-2 $space-4;
 }
 
 .ukraine__heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: $space-3;
+  gap: $space-1 $space-3;
 }
 
 // inline-flex + gap — відстань між прапором і текстом: JSX прибирає пробіл
@@ -66,12 +79,17 @@
 }
 
 // Головна новина і список, 7 : 5. Під цю сітку розраховані sizes
-// ArticleCardVertical за замовчуванням
+// ArticleCardVertical за замовчуванням. Нижче $bp-lg одна колонка: новина, під нею список
 .ukraine__content {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
   align-items: start;
   gap: $space-10;
+
+  @include bp-down($bp-lg) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: $space-8;
+  }
 }
 
 .ukraine__latest {

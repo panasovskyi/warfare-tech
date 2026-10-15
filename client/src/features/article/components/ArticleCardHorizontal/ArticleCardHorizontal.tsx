@@ -5,11 +5,6 @@ import type { ArticleListItem } from '@/features/article/article.types';
 import { ArticleByline } from '@/features/article/components/ArticleByline/ArticleByline';
 import { getSectionTagAndLink } from '@/features/article/article.utils';
 
-// TODO: поки що сім окремих карток — Horizontal (ця: фото зліва, мітка, заголовок, автор і час),
-// Compact, Vertical, Lead, Side, Row і Grid з однаковими пропсами article, headingLevel і sizes
-// (у Lead ще preload). Після порівняння — або одна ArticleCard з variant, або тонкі картки зі
-// спільних частин (фото, мітка, заголовок-посилання, мета).
-
 type Props = {
   article: ArticleListItem;
   // Рівень заголовка залежить від місця: під h2 блоку картка — h3
@@ -20,8 +15,10 @@ type Props = {
 };
 
 // За замовчуванням — Latest: дві колонки через 48px, мініатюра — третина картки
-// без проміжку 20px. 1528px = контейнер 1400 + поля 2 × 64
-const DEFAULT_SIZES = '(min-width: 1528px) 220px, calc((100vw - 216px) / 6)';
+// без проміжку 20px. 1528px = контейнер 1400 + поля 2 × 64. Від 768px поля 32, нижче одна
+// колонка з полями 20
+const DEFAULT_SIZES =
+  '(min-width: 1528px) 220px, (min-width: 1024px) calc((100vw - 216px) / 6), (min-width: 768px) calc((100vw - 152px) / 6), calc((100vw - 60px) / 3)';
 
 export const ArticleCardHorizontal: React.FC<Props> = ({
   article,
@@ -54,13 +51,13 @@ export const ArticleCardHorizontal: React.FC<Props> = ({
         </Link>
 
         <Heading className={styles.card__title}>
-          {/* TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug */}
+        
           <Link href={`/${article.slug}`} className={styles.card__link}>
             {article.title}
           </Link>
         </Heading>
-
         <ArticleByline
+          readingTime={article.readingTime}
           author={article.author}
           createdAt={article.createdAt}
           className={styles.card__byline}

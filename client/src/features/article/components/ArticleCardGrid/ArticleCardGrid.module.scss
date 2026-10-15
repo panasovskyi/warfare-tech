@@ -25,7 +25,6 @@
   object-fit: cover;
 }
 
-// TODO: у макеті заголовок 20px — токена немає, взято найближчий $fs-xl
 .card__title {
   font-size: $fs-xl;
   font-weight: $fw-bold;

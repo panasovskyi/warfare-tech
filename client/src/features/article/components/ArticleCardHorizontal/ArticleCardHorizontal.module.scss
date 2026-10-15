@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Мініатюра зліва (третина картки), текст справа.
 // align-items: start — мініатюра тримає свою пропорцію, а не тягнеться
@@ -9,6 +10,10 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   align-items: start;
   gap: $space-5;
+
+  @include bp-down($bp-sm) {
+    gap: $space-4;
+  }
 }
 
 // Обгортка задає фото з fill розмір: position: relative — точка відліку,

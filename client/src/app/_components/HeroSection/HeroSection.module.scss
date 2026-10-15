@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 // Картка на всю ширину контейнера: фото, поверх нього градієнт, текст знизу.
 // Шари знизу вгору: фото й градієнт (z-index: -1) → текст → розтягнуте
@@ -7,7 +8,9 @@
 // від'ємним z-index пішли б під фон сторінки.
 // overflow: clip, а не hidden: так само обрізає фото по заокругленню, але
 // з hidden блок стає прокручуваним, і aspect-ratio вже не дає йому вирости
-// під довгий текст — текст обрізало б. З clip картка росте
+// під довгий текст — текст обрізало б. З clip картка росте.
+// Нижче $bp-lg пропорція 5:2 замінена мінімальною висотою: у вузькій картці текст не
+// вміщувався б у таку низьку смугу, а висота й так росла б від нього нерівномірно
 .hero__article {
   position: relative;
   isolation: isolate;
@@ -22,6 +25,18 @@
   // Фон, поки фото вантажиться
   background: var(--color-surface-2);
   color: var(--color-on-image);
+
+  @include bp-down($bp-lg) {
+    aspect-ratio: auto;
+    min-height: 440px;
+    padding: $space-8;
+  }
+
+  @include bp-down($bp-md) {
+    min-height: 400px;
+    gap: $space-3;
+    padding: $space-5;
+  }
 }
 
 .hero__image {
@@ -47,21 +62,18 @@
   align-self: flex-start;
   padding: $space-1 $space-3;
   border-radius: $radius-pill;
-  background: var(--section-color, transparent);
+  background: var(--section-solid, transparent);
   font-size: $fs-sm;
   font-weight: $fw-bold;
   color: var(--color-on-image);
   text-transform: uppercase;
 }
 
-// Плашка кольору розділу (--section-color з globals за data-section) з білим
+// Плашка кольору розділу (--section-solid з globals за data-section) з білим
 // текстом, а не кольоровий текст: кольори розділів на темному фото дають
 // ≈ 3:1, а білий на них — від 4.5:1. Для лонгріда й запасного News кольору
 // немає — лишається білий текст без плашки (у hero їх і не буває: там лише
 // новини)
-// TODO: без плашки поля лишаються, і текст мітки зсувається на $space-3 відносно
-// заголовка. Якщо лонгріди потраплять у hero — прибирати padding, коли кольору немає
-
 .hero__subcategoryLink:hover {
   text-decoration: underline;
 }
@@ -69,10 +81,15 @@
 // max-width у ch — довжина рядка в символах (≈ 920px, як у макеті)
 .hero__title {
   max-width: 35ch;
+  letter-spacing: $ls-heading;
   font-size: $fs-display-sm;
   font-weight: $fw-extrabold;
   line-height: $lh-tight;
   text-wrap: balance;
+
+  @include bp-down($bp-md) {
+    font-size: $fs-display-xs;
+  }
 }
 
 // Розтягує клік на всю картку: h1 і посилання не позиціоновані, тож inset
@@ -87,12 +104,21 @@
   text-decoration: underline;
 }
 
-// ≈ 680px, як у макеті
+// ≈ 680px, як у макеті. На телефоні дрібніший і не довший за чотири рядки: інакше опис
+// займав би півекрана
 .hero__description {
   max-width: 60ch;
   font-size: $fs-lg;
   line-height: $lh-relaxed;
   color: var(--color-on-image-muted);
+
+  @include bp-down($bp-md) {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    font-size: $fs-md;
+  }
 }
 
 // Колір і розмір для ArticleByline — він їх успадковує

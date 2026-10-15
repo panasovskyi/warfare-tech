@@ -50,9 +50,26 @@
   color: var(--color-text-muted);
 }
 
+// Час публікації й час читання в один рядок. Шрифт і колір — на рядку, діти їх успадковують.
 // Час окремо від автора — моноширинним, як у макеті
-.card__time {
+.card__meta {
+  display: flex;
+  gap: $space-3;
   font-family: $font-mono;
   font-size: $fs-xs;
   color: var(--color-text-muted);
+}
+
+// Час читання відділяється від часу публікації крапкою, а не лише проміжком. Селектор із
+// сусідом (.card__time + …): крапка є лише коли час публікації відрендерився. На зіпсованій
+// даті RelativeTime не малює нічого, і безумовна крапка стояла б у рядку першою. Крапка
+// декоративна: другий рядок у content ('') ховає її від скрінрідера. margin дорівнює gap
+// рядка, тож крапка посередині. nowrap — щоб "4 min read" не ламався на два рядки
+.card__readingTime {
+  white-space: nowrap;
+}
+
+.card__time + .card__readingTime::before {
+  content: '·' / '';
+  margin-inline-end: $space-3;
 }

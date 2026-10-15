@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local backup of the full-size cover photos (public/covers holds the 2400px versions)
+/covers-original/

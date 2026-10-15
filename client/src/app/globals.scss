@@ -13,8 +13,12 @@
 // ─────────────────────────────────────────────────────────
 
 @use 'variables' as *;
+@use 'breakpoints' as *;
 
 :root {
+  // Native UI (scrollbars, form controls, the default canvas) follows the theme too
+  color-scheme: light;
+
   // Surfaces
   --color-bg: #ffffff;
   --color-surface: #f6f6f4; // panels: featured band, newsletter card
@@ -63,6 +67,32 @@
     rgba(6, 6, 7, 0.5) 45%,
     rgba(6, 6, 7, 0) 75%
   );
+  // Обкладинка розділу: текст стоїть зліва внизу, а предмет на фото справа, тож темніє зліва
+  // (під заголовок і опис) і знизу, а решта кадру лишається світлою. Затемнення коротке: до
+  // 55% ширини зліва і до 65% висоти знизу, щоб не накривало техніку на фото (з довшим
+  // градієнтом F-35 на фото Air тонув у темряві). Однакова в обох темах, як і градієнт вище
+  --gradient-cover-overlay:
+    linear-gradient(
+      to right,
+      rgba(6, 6, 7, 0.72) 0%,
+      rgba(6, 6, 7, 0.5) 30%,
+      rgba(6, 6, 7, 0) 55%
+    ),
+    linear-gradient(
+      to top,
+      rgba(6, 6, 7, 0.6) 0%,
+      rgba(6, 6, 7, 0.15) 40%,
+      rgba(6, 6, 7, 0) 65%
+    );
+  // Те саме для телефона: фото займає всю ширину обкладинки, тож текст лежить прямо на ньому.
+  // Затемнення лише знизу, але щільніше й вище, щоб заголовок і опис читались на будь-якому
+  // фото
+  --gradient-cover-overlay-sm: linear-gradient(
+    to top,
+    rgba(6, 6, 7, 0.82) 0%,
+    rgba(6, 6, 7, 0.55) 55%,
+    rgba(6, 6, 7, 0.2) 100%
+  );
 
   // Category tags (kept constant across themes — only tints change)
   --color-cat-air: #2f6fed;
@@ -77,27 +107,41 @@
   --color-cat-space-tint: #ece9f3;
   --color-cat-uav: #d97706;
   --color-cat-uav-tint: #f5ecdf;
-  // TODO: розділу Industry немає — --color-cat-industry* прибрати (і в темному блоці)
-  --color-cat-industry: #6b7280;
-  --color-cat-industry-tint: #eeece5;
+  // Category colors, in two roles. -solid: the background of a section cover and of the
+  // hero label, under WHITE text (--section-solid); the same in both themes. -text: the
+  // color of small text and icons on the page (--section-color); the same as -solid in
+  // the light theme, lighter in the dark one (see below). Measured against the darkest
+  // background they sit on: the corner of the Top stories panel on /news
+  // (--color-surface plus the 6% accent glow), where small 11px labels need 4.5:1.
+  // Air, Cyber, Land and UAV are darkened to ≥ 4.7:1 there (on white ≥ 5.4:1);
+  // Naval (4.63) and Space (4.93) pass as they are. The base --color-cat-* above are
+  // not used as text
+  --color-cat-air-solid: #185feb;
+  --color-cat-land-solid: #14793a;
+  --color-cat-naval-solid: #0e7490;
+  --color-cat-space-solid: var(--color-cat-space);
+  --color-cat-cyber-solid: #cd1a41;
+  --color-cat-uav-solid: #aa4f09;
 
-  // Category colors as text (section titles, labels). Land, Naval and UAV
-  // base colors fall under 4.5:1 on white, so darker shades (≈5:1);
-  // Air, Cyber and Space pass as they are
-  --color-cat-air-text: var(--color-cat-air);
-  --color-cat-land-text: #15803d;
-  --color-cat-naval-text: #0e7490;
-  --color-cat-space-text: var(--color-cat-space);
-  --color-cat-cyber-text: var(--color-cat-cyber);
-  --color-cat-uav-text: #b45309;
+  --color-cat-air-text: var(--color-cat-air-solid);
+  --color-cat-land-text: var(--color-cat-land-solid);
+  --color-cat-naval-text: var(--color-cat-naval-solid);
+  --color-cat-space-text: var(--color-cat-space-solid);
+  --color-cat-cyber-text: var(--color-cat-cyber-solid);
+  --color-cat-uav-text: var(--color-cat-uav-solid);
 
-  // "War in Ukraine" live-coverage hub
+  // "War in Ukraine" live-coverage hub. -blue: the flag stripe and the section cover
+  // background (white text on it); -blue-text: the same blue as text, lighter in the
+  // dark theme
   --color-ukraine-panel: #eef3fb;
   --color-ukraine-blue: #0057b7;
+  --color-ukraine-blue-text: var(--color-ukraine-blue);
   --color-ukraine-yellow: #ffd700;
 }
 
 :root[data-theme='dark'] {
+  color-scheme: dark;
+
   --color-bg: #101012;
   --color-surface: #18181b;
   --color-surface-2: #1f1f23;
@@ -124,14 +168,19 @@
   --color-cat-naval-tint: #12262b;
   --color-cat-space-tint: #241c33;
   --color-cat-uav-tint: #2c2013;
-  --color-cat-industry-tint: #202023;
 
-  // TODO: --color-cat-*-text для темної теми — світліші відтінки: темні
-  // з :root на темному тлі не проходять за контрастом. Підібрати разом
-  // із перемикачем теми
-  // TODO: --color-ukraine-blue (#0057b7) як текст на темному тлі ≈ 2.8:1 — світліший
-  // відтінок для темної теми. Той самий токен — фон обкладинки /news/ukraine з білим
-  // текстом, тож для тексту й для фону можуть знадобитися два токени
+  // Section colors as text on the dark surfaces: the dark ones from :root would not pass
+  // the contrast. The same hues, only lighter (HSL lightness raised until the contrast is
+  // ≥ 5:1 on the darkest of them: the corner of the Top stories panel, --color-surface
+  // plus the 6% accent glow, and the War in Ukraine panel; ≥ 5.8:1 on --color-bg). The
+  // -solid colors (covers, hero labels under white text) do not change
+  --color-cat-air-text: #578bf0;
+  --color-cat-land-text: #1ba34e;
+  --color-cat-naval-text: #1399be;
+  --color-cat-space-text: #a374f2;
+  --color-cat-cyber-text: #eb5d7c;
+  --color-cat-uav-text: #e46a0c;
+  --color-ukraine-blue-text: #288eff;
 
   --color-ukraine-panel: #16202e;
 }
@@ -243,25 +292,30 @@ main {
   flex-grow: 1;
 }
 
-// Section color. Any element with data-section="<key>" gets --section-color:
-// the section's color as text (--color-cat-*-text, War in Ukraine — the flag
-// blue). Components use it as text color (card label, subcategory title) or
-// background (hero label pill). Keys match NEWS_SECTIONS. Longread and the
-// News fallback have no color: `initial` makes var() use the component's own
-// fallback instead of inheriting the color of a parent section
+// Section color. Any element with data-section="<key>" gets two custom properties:
+// --section-color, the section's color as text (--color-cat-*-text, War in Ukraine —
+// the flag blue): card label, subcategory title, icons; and --section-solid, the same
+// color as a background under white text (--color-cat-*-solid): a section cover and the
+// hero label pill. They differ only in the dark theme, where text needs a lighter shade
+// than a background under white text. Keys match NEWS_SECTIONS. Longread and the News
+// fallback have no color: `initial` makes var() use the component's own fallback instead
+// of inheriting the color of a parent section
 @each $name in air, land, naval, space, cyber, uav {
   [data-section='#{$name}'] {
     --section-color: var(--color-cat-#{$name}-text);
+    --section-solid: var(--color-cat-#{$name}-solid);
   }
 }
 
 [data-section='ukraine'] {
-  --section-color: var(--color-ukraine-blue);
+  --section-color: var(--color-ukraine-blue-text);
+  --section-solid: var(--color-ukraine-blue);
 }
 
 [data-section='longread'],
 [data-section='news'] {
   --section-color: initial;
+  --section-solid: initial;
 }
 
 // Centers content and caps its width at $container-max.
@@ -269,14 +323,30 @@ main {
 // added on top: the content itself stays exactly $container-max wide.
 // For full-bleed bands (e.g. the header), put the background on an
 // outer element and .container inside it. Don't nest containers.
-// TODO: адаптив — зараз лише десктоп: $gutter 64px, сітки 3/2 колонки й 7:5 без @media, а
-// bp-up з breakpoints.scss ніде не використовується. Додати брейкпоінти для .container,
-// головної, сторінки новини, /news і розділів, Header і Footer
+// The side gutter is the --gutter custom property: 64px on desktop, narrower below the
+// breakpoints (the skip link takes its left offset from it too). A custom property
+// instead of a SCSS variable, so one value serves every place that needs the gutter
+:root {
+  --gutter: #{$gutter};
+}
+
+@include bp-down($bp-lg) {
+  :root {
+    --gutter: #{$gutter-md};
+  }
+}
+
+@include bp-down($bp-md) {
+  :root {
+    --gutter: #{$gutter-sm};
+  }
+}
+
 .container {
   width: 100%;
   max-width: $container-max + 2 * $gutter;
   margin-inline: auto;
-  padding-inline: $gutter;
+  padding-inline: var(--gutter);
 }
 
 // ─────────────────────────────────────────────────────────
@@ -303,7 +373,7 @@ main {
 .skip-link {
   position: absolute;
   top: $space-4;
-  left: $gutter;
+  left: var(--gutter);
   z-index: 100;
   padding: $space-3 $space-5;
   border-radius: $radius-pill;

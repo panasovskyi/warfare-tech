@@ -16,8 +16,10 @@ type Props = {
 
 // За замовчуванням — Top stories на /news: колонка 1fr із 2.55fr без проміжку між
 // колонками (40px), полів панелі (2 × 40px) і полів сторінки (2 × 64px).
-// 1528px = контейнер 1400 + поля
-const DEFAULT_SIZES = '(min-width: 1528px) 502px, calc((100vw - 248px) / 2.55)';
+// 1528px = контейнер 1400 + поля. Нижче 1024px середні картки — дві колонки під великою
+// (проміжок 24), нижче 640px одна: поля сторінки 32 і панелі 24 від 768px, а нижче по 20
+const DEFAULT_SIZES =
+  '(min-width: 1528px) 502px, (min-width: 1024px) calc((100vw - 248px) / 2.55), (min-width: 768px) calc((100vw - 136px) / 2), (min-width: 640px) calc((100vw - 104px) / 2), calc(100vw - 80px)';
 
 // Середня картка: широке фото зверху, мітка, заголовок, автор і час, без опису.
 // Друга й третя новини в Top stories на /news
@@ -51,13 +53,14 @@ export const ArticleCardSide: React.FC<Props> = ({
       </Link>
 
       <Heading className={styles.card__title}>
-        {/* TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug */}
-        <Link href={`/${article.slug}`} className={styles.card__link}>
+       <Link href={`/${article.slug}`} className={styles.card__link}>
           {article.title}
         </Link>
       </Heading>
 
+  
       <ArticleByline
+        readingTime={article.readingTime}
         author={article.author}
         createdAt={article.createdAt}
         className={styles.card__byline}

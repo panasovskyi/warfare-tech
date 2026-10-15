@@ -1,10 +1,9 @@
+import type { Metadata } from 'next';
 import { articleApi } from '@/features/article/article.api';
-import {
-  ArticleCategory,
-  type ArticleDetails,
-} from '@/features/article/article.types';
+import { type ArticleDetails } from '@/features/article/article.types';
 import { ApiError } from '@/lib/api/api-error';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import styles from './ArticleDetails.module.scss';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -14,13 +13,11 @@ import { RelativeTime } from '@/components/ui/RelativeTime/RelativeTime';
 import { SectionBreadcrumbs } from '@/features/article/components/SectionBreadcrumbs/SectionBreadcrumbs';
 import { Avatar } from '@/components/ui/Avatar/Avatar';
 import {
-  NEWS_SECTIONS,
-  SECTION_ICONS,
-  SubcategoryKey,
-} from '@/features/article/article.constants';
-import { getSectionTagAndLink } from '@/features/article/article.utils';
-import { ArticleHeadline } from '@/features/article/components/ArticleHeadline/ArticleHeadline';
+  getAuthorPath,
+  getSectionTagAndLink,
+} from '@/features/article/article.utils';
 import { ArticleBody } from '@/features/article/components/ArticleBody/ArticleBody';
+import { AsideSection } from './_components/AsideSection/AsideSection';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -38,33 +35,40 @@ const getArticleOrNotFound = async (slug: string): Promise<ArticleDetails> => {
   }
 };
 
-// TODO: generateMetadata — title, description, openGraph з mainPicture (зараз на всіх
-// сторінках "Create Next App"). Брати статтю через getArticleOrNotFound: fetch у межах
-// одного рендера мемоізується, запит буде один. Кешування — як на головній (TODO в app/page.tsx)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticleOrNotFound(slug);
+  const { sectionLabel } = getSectionTagAndLink(article);
+
+  return {
+    title: article.title,
+    description: article.description,
+    authors: [{ name: article.author.fullName }],
+    openGraph: {
+      type: 'article',
+      siteName: 'Warfare Tech',
+      locale: 'en_US',
+      publishedTime: article.createdAt,
+      modifiedTime: article.updatedAt,
+      section: sectionLabel,
+      tags: article.tags,
+      // alt поки заголовок статті: опису фото в даних немає (TODO про photoAlt у schema.prisma)
+      images: [{ url: article.mainPicture, alt: article.title }],
+    },
+  };
+}
+
+// TODO: кешування сторінки статті. Зараз її не кешуємо взагалі: динамічний маршрут без
+// generateStaticParams рендериться на кожен запит. Потрібні export const revalidate = N
+// (5–15 хв: статті не змінюються, оновлюються лише aside і "3 hours ago") і
+// generateStaticParams, що повертає [] (інакше ISR у рантаймі не працює). Перевірити, що
+// generateMetadata і сторінка кешуються разом. loading.tsx тут не додавати: [slug] ловить
+// невідомі адреси, і з ним їхній статус 404 став би 200. Решта — як на головній (TODO в
+// app/page.tsx)
 export default async function ArticleDetailsPage({ params }: Props) {
   const { slug } = await params;
   const article = await getArticleOrNotFound(slug);
-  // TODO: лонгріди — окремий роут (/longreads/[slug]) чи цей? Якщо окремий: звіряти
-  // article.category і permanentRedirect на правильну адресу (див. TODO про getArticlePath у картках)
-  const { href, sectionLabel, section } = getSectionTagAndLink(article);
-  const sectionArticlesFilter =
-    section === 'longread'
-      ? { category: ArticleCategory.LONGREAD }
-      : section === 'news'
-        ? {category: ArticleCategory.NEWS }
-        : NEWS_SECTIONS[section].filter;
-  
-  // TODO: якщо цей запит упаде, впаде вся сторінка (error.tsx замість статті), і стаття
-  // ще й чекає на нього. Варіанти:
-  // 1) try/catch тут: залогувати помилку, список порожній — aside просто не покажеться;
-  // 2) винести aside в окремий async-компонент у <Suspense>: стаття показується одразу,
-  //    список догружається, помилку компонент обробляє сам
-  const latestNewsResponse = await articleApi.getArticles({ ...sectionArticlesFilter, limit: 10 });
-  const latestNews = latestNewsResponse.items.filter(item => item.id !== article.id);
-  // TODO: <SectionIcon section={section} /> замість SECTION_ICONS: дублює вибір іконки, а
-  // ukraine зараз без прапора в aside (те саме в SectionBreadcrumbs) — чи потрібен там прапор?
-  const SectionIcon =
-      section in SECTION_ICONS ? SECTION_ICONS[section as SubcategoryKey] : null;
+  const { section } = getSectionTagAndLink(article);
 
   return (
     <article className={styles.page}>
@@ -73,8 +77,6 @@ export default async function ArticleDetailsPage({ params }: Props) {
           <SectionBreadcrumbs section={section} />
           <h1 className={styles.page__title}>{article.title}</h1>
           <p className={styles.page__description}>{article.description}</p>
-          {/* TODO: сторінки /authors/[login] ще немає — обидва посилання на автора (тут і в картці
-              внизу) ведуть на 404, як і в ArticleByline на всіх картках */}
           <div className={styles.author}>
             <Avatar
               name={article.author.fullName}
@@ -82,7 +84,7 @@ export default async function ArticleDetailsPage({ params }: Props) {
               className={styles.author__avatar}
             />
             <Link
-              href={`/authors/${article.author.login}`}
+              href={getAuthorPath(article.author.login)}
               className={styles.author__link}
             >
               {article.author.fullName}
@@ -95,9 +97,6 @@ export default async function ArticleDetailsPage({ params }: Props) {
         </header>
         <figure className={styles.page__mainPicWrapper}>
           {/*
-            fill: обгортці потрібні position: relative і aspect-ratio (або висота),
-            інакше фото розтягнеться на весь екран. preload — це найбільший елемент першого екрана.
-            alt порожній, бо опису фото в даних немає.
             TODO: поле на сервері для опису фото (alt)
           */}
           <Image
@@ -105,7 +104,7 @@ export default async function ArticleDetailsPage({ params }: Props) {
             alt=''
             fill
             preload
-            sizes='(min-width: 1528px) 1400px, calc(100vw - 128px)'
+            sizes='(min-width: 1528px) 1400px, (min-width: 1024px) calc(100vw - 128px), (min-width: 768px) calc(100vw - 64px), calc(100vw - 40px)'
             className={styles.page__mainPic}
           />
           {article.photoCredit && (
@@ -115,41 +114,10 @@ export default async function ArticleDetailsPage({ params }: Props) {
           )}
         </figure>
         <div className={styles.page__content}>
-          {/*
-            TODO: ArticleBody поки малює лише абзаци й посилання (react-markdown без `components`).
-            Не зроблено: зовнішні посилання з target/rel, картинки (figure + figcaption; img
-            лягає в <p>), відео YouTube, зсув рівнів заголовків. Доки не зроблено — картинок і
-            відео в тексті статей не вставляти
-          */}
           <ArticleBody body={article.body} />
-          {latestNews.length > 0 && (
-            <aside
-              className={styles.aside}
-              aria-labelledby='section-latest-title'
-              data-section={section}
-            >
-              <h2 id='section-latest-title' className={styles.aside__title}>
-                {SectionIcon && <SectionIcon className={styles.aside__icon} />}
-                Latest in {sectionLabel}
-              </h2>
-
-              <ul className={styles.aside__list}>
-                {latestNews.map((item) => (
-                  <li key={item.id} className={styles.aside__item}>
-                    <ArticleHeadline article={item} />
-                  </li>
-                ))}
-              </ul>
-
-              <ArrowLink
-                href={href}
-                className={styles.aside__link}
-                aria-label={`View all in ${sectionLabel}`}
-              >
-                View all
-              </ArrowLink>
-            </aside>
-          )}
+          <Suspense fallback={null}>
+            <AsideSection section={section} articleId={article.id} />
+          </Suspense>
         </div>
         <footer className={styles.page__footer}>
           {/* TODO: теги — посилання на сторінку тегу, коли вона з'явиться (у макеті це посилання) */}
@@ -188,7 +156,7 @@ export default async function ArticleDetailsPage({ params }: Props) {
               <span>{article.author.fullName}</span>
             </div>
             <ArrowLink
-              href={`/authors/${article.author.login}`}
+              href={getAuthorPath(article.author.login)}
               className={styles.writer__link}
             >
               More from this author

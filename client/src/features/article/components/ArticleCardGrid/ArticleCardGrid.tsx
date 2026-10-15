@@ -14,8 +14,10 @@ type Props = {
 };
 
 // За замовчуванням — сітка сторінки розділу: три колонки через 48px, як у
-// ArticleCardCompact. 1528px = контейнер 1400 + поля 2 × 64px
-const DEFAULT_SIZES = '(min-width: 1528px) 435px, calc((100vw - 224px) / 3)';
+// ArticleCardCompact. 1528px = контейнер 1400 + поля 2 × 64px. Нижче 1024px дві колонки
+// (поля 32, проміжок 32), нижче 640px одна (поля 20)
+const DEFAULT_SIZES =
+  '(min-width: 1528px) 435px, (min-width: 1024px) calc((100vw - 224px) / 3), (min-width: 640px) calc((100vw - 96px) / 2), calc(100vw - 40px)';
 
 // Картка сітки сторінки розділу: фото зверху, заголовок, опис у два рядки, автор і час.
 // Без мітки розділу — розділ уже відомий зі сторінки
@@ -39,15 +41,14 @@ export const ArticleCardGrid: React.FC<Props> = ({
       </div>
 
       <Heading className={styles.card__title}>
-        {/* TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug */}
         <Link href={`/${article.slug}`} className={styles.card__link}>
           {article.title}
         </Link>
       </Heading>
 
       <p className={styles.card__description}>{article.description}</p>
-
       <ArticleByline
+        readingTime={article.readingTime}
         author={article.author}
         createdAt={article.createdAt}
         className={styles.card__byline}

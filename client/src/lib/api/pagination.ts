@@ -6,10 +6,20 @@ export type PaginatedResponse<T> = {
   totalPages: number;
 };
 
-// undefined is also empty: that's what a result taken from an array by index
-// looks like under noUncheckedIndexedAccess
 export function getItemsOrEmpty<T>(
   res: PromiseSettledResult<PaginatedResponse<T>> | undefined,
 ): T[] {
   return res?.status === 'fulfilled' ? res.value.items : [];
 }
+
+const MAX_PAGE = 999;
+
+export const getPageNumber = (page: string | string[] | undefined): number => {
+  const pageNumber = typeof page === 'string' ? Number(page) : NaN;
+
+  return Number.isInteger(pageNumber) &&
+    pageNumber >= 1 &&
+    pageNumber <= MAX_PAGE
+    ? pageNumber
+    : 1;
+};

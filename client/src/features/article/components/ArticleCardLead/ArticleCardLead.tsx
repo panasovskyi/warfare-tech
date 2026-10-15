@@ -18,9 +18,10 @@ type Props = {
 
 // За замовчуванням — Top stories на /news: колонка 1.55fr із 2.55fr без проміжку між
 // колонками (40px), полів панелі (2 × 40px) і полів сторінки (2 × 64px).
-// 1528px = контейнер 1400 + поля
+// 1528px = контейнер 1400 + поля. Нижче 1024px одна колонка на всю панель: від 768px поля
+// сторінки 32 і панелі 24, нижче 768px обидва по 20
 const DEFAULT_SIZES =
-  '(min-width: 1528px) 779px, calc((100vw - 248px) * 1.55 / 2.55)';
+  '(min-width: 1528px) 779px, (min-width: 1024px) calc((100vw - 248px) * 1.55 / 2.55), (min-width: 768px) calc(100vw - 112px), calc(100vw - 80px)';
 
 // Велика картка: фото зверху, мітка, заголовок, опис, автор і час.
 // Перша новина в Top stories на /news
@@ -56,7 +57,7 @@ export const ArticleCardLead: React.FC<Props> = ({
       </Link>
 
       <Heading className={styles.card__title}>
-        {/* TODO: адресу брати з getArticlePath: новини — /slug, лонгріди — /longreads/slug */}
+        
         <Link href={`/${article.slug}`} className={styles.card__link}>
           {article.title}
         </Link>
@@ -64,7 +65,9 @@ export const ArticleCardLead: React.FC<Props> = ({
 
       <p className={styles.card__description}>{article.description}</p>
 
+
       <ArticleByline
+        readingTime={article.readingTime}
         author={article.author}
         createdAt={article.createdAt}
         className={styles.card__byline}

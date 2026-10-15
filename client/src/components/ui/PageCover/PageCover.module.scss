@@ -1,0 +1,101 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+
+// Обкладинка на всю ширину: фон на самому елементі, .container всередині (див. globals).
+// Колір розділу — --section-solid з globals за data-section (фон під білим текстом, однаковий
+// в обох темах), текст світлий, як на фото. Білий на -solid відтінках проходить за контрастом. Без розділу (/news) фон завжди темний,
+// а не var(--color-text): у темній темі той токен світлий, і білий текст зник би.
+// Без фото висота від вмісту (відступи нижче)
+.cover {
+  padding-block: $space-24 $space-14;
+  background: var(--section-solid, #060607);
+  color: var(--color-on-image);
+
+  @include bp-down($bp-md) {
+    padding-block: $space-16 $space-10;
+  }
+}
+
+// З фото: окремий контекст накладання (isolation) і від'ємний z-index фото та градієнта, як у
+// Hero, інакше вони підуть під фон сторінки. Текст притиснутий донизу (flex-end), предмет на
+// фото висить праворуч. overflow: clip обрізає фото по краях, не роблячи блок прокручуваним.
+// Нижча на вужчих екранах; ті самі висоти в PageCoverSkeleton
+.cover--withPhoto {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: $cover-photo-height;
+  overflow: clip;
+
+  @include bp-down($bp-lg) {
+    min-height: $cover-photo-height-md;
+  }
+
+  @include bp-down($bp-md) {
+    min-height: $cover-photo-height-sm;
+  }
+}
+
+// Фото в правій частині обкладинки, а не на всю ширину: при ширині 100% на широкому екрані
+// (3.7:1) від знімка лишалася тонка смуга, сильно збільшена. 72% ширини дають менше збільшення
+// і зсувають предмет праворуч. Лівий край згасає маскою в колір обкладинки, тож межі фото не
+// видно; затухання коротке (до 25% ширини), щоб крайній предмет (F-35 на фото Air) не тонув
+// у ньому. -webkit-mask-image — для старіших браузерів.
+// На телефоні обкладинка вузька, і 72% дали б тонку смугу: фото займає всю ширину без маски
+// (текст читається завдяки щільнішому градієнту нижче)
+.cover__photo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  width: $cover-photo-width;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 25%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 25%);
+
+  @include bp-down($bp-md) {
+    width: $cover-photo-width-sm;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+// Фото напівпрозоре поверх кольору обкладинки (він видно крізь нього): різні за кольором і
+// експозицією знімки отримують спільний відтінок. object-position задає компонент
+.cover__image {
+  object-fit: cover;
+  opacity: 0.65;
+}
+
+// Градієнт під текст: окремий шар над фото. Останній шар у header, тож лягає над фото
+.cover__shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--gradient-cover-overlay);
+
+  @include bp-down($bp-md) {
+    background: var(--gradient-cover-overlay-sm);
+  }
+}
+
+.cover__inner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+// Автор фото в правому нижньому куті: зліва текст обкладинки. Підкладка --color-image-scrim,
+// бо під дрібним текстом може опинитись будь-яка світла частина знімка
+.cover__credit {
+  position: absolute;
+  right: $space-4;
+  bottom: $space-3;
+  padding: $space-1 $space-2;
+  border-radius: $radius-sm;
+  background: var(--color-image-scrim);
+  font-size: $fs-xs;
+  color: var(--color-on-image);
+}

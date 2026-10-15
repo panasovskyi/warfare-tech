@@ -1,44 +1,27 @@
 import Link from 'next/link';
 import styles from './Footer.module.scss';
 import { Logo } from '@/components/layout/Logo/Logo';
+import { NEWS_SECTIONS } from '@/features/article/article.constants';
 
-// TODO: розділи брати з NEWS_SECTIONS (article.constants) — мапа вже є, той самий
-// список, що в Header
+const entries = Object.entries(NEWS_SECTIONS);
+const items = entries.map(([key, value]) => ({
+  id: key,
+  label: value.label,
+  link: `/news/${key}`,
+}));
+
 const FOOTER_NAV = [
   {
     section: 'Sections',
-    items: [
-      { id: 1, label: 'Air', link: '/news/air', external: false },
-      { id: 2, label: 'Land', link: '/news/land', external: false },
-      { id: 3, label: 'Naval', link: '/news/naval', external: false },
-      { id: 4, label: 'Space', link: '/news/space', external: false },
-      { id: 5, label: 'Cyber', link: '/news/cyber', external: false },
-      { id: 6, label: 'UAV', link: '/news/uav', external: false },
-    ],
+    sectionItems: items.filter(item => item.id !== 'ukraine'),
   },
-
-  // TODO: сторінок About, Advertise, Contact, Careers ще немає — посилання ведуть на головну
   {
     section: 'Company',
-    items: [
-      { id: 1, label: 'About', link: '/', external: false },
-      { id: 2, label: 'Advertise', link: '/', external: false },
-      { id: 3, label: 'Contact', link: '/', external: false },
-      { id: 4, label: 'Careers', link: '/', external: false },
-    ],
-  },
-
-  // TODO: адреси соцмереж — зараз заглушки '/': усі чотири ведуть на головну. Потрібні
-  // реальні посилання на акаунти (контент від власника)
-  // TODO: соцмережі — не навігація сайту, їх варто винести з nav в окремий список
-  // (тоді поміняється сітка футера). Для target="_blank" — rel="noopener noreferrer"
-  {
-    section: 'Socials',
-    items: [
-      { id: 1, label: 'Twitter', link: '/', external: true },
-      { id: 2, label: 'Facebook', link: '/', external: true },
-      { id: 3, label: 'YouTube', link: '/', external: true },
-      { id: 4, label: 'Telegram', link: '/', external: true },
+    sectionItems: [
+      { id: 1, label: 'About', link: '/about', },
+      { id: 2, label: 'Advertise', link: '/advertise', },
+      { id: 3, label: 'Contact', link: '/contact', },
+      { id: 4, label: 'Careers', link: '/careers', },
     ],
   },
 ];
@@ -57,22 +40,15 @@ export const Footer = () => {
         </div>
 
         <nav className={styles.nav} aria-label='Footer'>
-          {FOOTER_NAV.map(({ section, items }) => (
+          {FOOTER_NAV.map(({ section, sectionItems }) => (
             <div key={section} className={styles.nav__section}>
               <h2 className={styles.nav__sectionTitle}>{section}</h2>
               <ul className={styles.nav__list}>
-                {items.map((item) => (
-                  <li key={item.id} className={styles.nav__item}>
-                    {/** потім буде  a target blank */}
-                    {item.external ? (
-                      <a href={item.link} className={styles.nav__link}>
-                        {item.label}
-                      </a>
-                    ) : (
-                      <Link href={item.link} className={styles.nav__link}>
-                        {item.label}
-                      </Link>
-                    )}
+                {sectionItems.map((item) => (
+                  <li key={item.id}>
+                    <Link href={item.link} className={styles.nav__link}>
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -82,7 +58,6 @@ export const Footer = () => {
 
         <div className={styles.footer__legal}>
           <p>© {new Date().getFullYear()} Warfare Tech. All rights reserved.</p>
-          {/* Вимога DVIDS до фото військових США: dvidshub.net/about/copyright. Один раз на сайті, не під кожним фото */}
           <p>
             The appearance of U.S. Department of War (DoW) visual information
             does not imply or constitute DoW endorsement.

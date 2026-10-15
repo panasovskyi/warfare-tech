@@ -1,0 +1,80 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+
+// Колір --color-surface-2 є в обох темах (там же плейсхолдери фото). Пульсація замість
+// блиску: проста й однаково виглядає на світлому й темному тлі
+.skeleton {
+  border-radius: $radius-sm;
+  background: var(--color-surface-2);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+// Користувачі, які просили менше руху, анімації не бачать
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+// h1 сторінки: висота як у розміру заголовка, на тих самих кроках (display-lg → md → xs)
+.skeleton--heading {
+  width: 40%;
+  max-width: 360px;
+  height: $fs-display-lg;
+
+  @include bp-down($bp-lg) {
+    height: $fs-display-md;
+  }
+
+  @include bp-down($bp-md) {
+    width: 60%;
+    height: $fs-display-xs;
+  }
+}
+
+.skeleton--title {
+  width: 80%;
+  height: $space-6;
+}
+
+.skeleton--line {
+  height: $space-3;
+}
+
+.skeleton--lineShort {
+  width: 55%;
+  height: $space-3;
+}
+
+.skeleton--photo {
+  aspect-ratio: $ratio-card;
+  border-radius: $radius-lg;
+}
+
+.skeleton--thumb {
+  aspect-ratio: $ratio-thumb;
+  border-radius: $radius-md;
+}
+
+.skeleton--chip {
+  width: $space-24;
+  height: $space-10;
+  border-radius: $radius-pill;
+}
+
+// Без власної форми й розміру: розмір і положення задає батько через className (фото
+// обкладинки в PageCoverSkeleton), без заокруглення
+.skeleton--block {
+  border-radius: 0;
+}

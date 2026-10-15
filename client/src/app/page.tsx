@@ -2,19 +2,15 @@ import styles from './page.module.scss';
 import { HeroSection } from '@/app/_components/HeroSection/HeroSection';
 import { WarInUkraineSection } from '@/app/_components/WarInUkraineSection/WarInUkraineSection';
 import { SubcategorySection } from '@/app/_components/SubcategorySection/SubcategorySection';
-// import { SpecialReportSection } from '@/app/_components/SpecialReportSection/SpecialReportSection';
 import { LatestSection } from '@/app/_components/LatestSection/LatestSection';
 import { articleApi } from '@/features/article/article.api';
 import { ArticleCategory } from '@/features/article/article.types';
 import {
   NEWS_SECTIONS,
-  type NewsSectionKey,
+  type SubcategoryKey,
 } from '@/features/article/article.constants';
 import { getItemsOrEmpty } from '@/lib/api/pagination';
 
-// Блоки підкатегорій на головній, у порядку показу. З цього списку будуються
-// і запити, і секції, тож розійтися вони не можуть
-// TODO: у satisfies — SubcategoryKey з article.constants замість Exclude<NewsSectionKey, 'ukraine'>
 const HOMEPAGE_SUBCATEGORIES = [
   'air',
   'land',
@@ -22,9 +18,8 @@ const HOMEPAGE_SUBCATEGORIES = [
   'space',
   'cyber',
   'uav',
-] as const satisfies readonly Exclude<NewsSectionKey, 'ukraine'>[];
+] as const satisfies readonly SubcategoryKey[];
 
-// allSettled не відхиляється, тож без цього запит, що впав, тихо зник би зі сторінки
 function logIfRejected(
   name: string,
   result: PromiseSettledResult<unknown> | undefined,
@@ -35,9 +30,6 @@ function logIfRejected(
 }
 
 export default async function Home() {
-  // TODO: дублі між блоками. Найсвіжіші новини в Latest майже напевно ті самі,
-  // що стоять першими в блоках категорій і War in Ukraine.
-
   // TODO: кешування. У Next 16 fetch за замовчуванням не кешується, тож кожен
   // перегляд головної — 9 запитів до API. Вирішити, як часто оновлювати
   // (use cache / revalidate); тоді й "3 hours ago" застаріватиме на час кешу
@@ -50,7 +42,7 @@ export default async function Home() {
   const ukraineRequest = articleApi.getArticles({
     ...NEWS_SECTIONS.ukraine.filter,
     isFeatured: false,
-    limit: 4,
+    limit: 9,
   });
   const latestRequest = articleApi.getArticles({
     category: ArticleCategory.NEWS,
@@ -81,15 +73,14 @@ export default async function Home() {
 
   const featuredArticles = getItemsOrEmpty(featuredNews);
 
-  // TODO: коли API недоступний, на сторінці лишаються лише дві однакові заглушки
-  // (War in Ukraine і Latest). Можливо, краще одне повідомлення на рівні сторінки,
-  // якщо впали всі запити
+  const isError = [...mainResults, ...subcategoryResults].every(item => item.status === 'rejected')
+  
+  if (isError) {
+    throw new Error('Homepage: all requests failed');
+  }
+
   return (
     <div className={styles.page}>
-      {/*
-        h1 сторінки — у HeroSection. Якщо featured-новини немає (запит упав), Hero повертає
-        null, і на головній не було б жодного h1: тоді запасний, візуально прихований
-      */}
       {featuredArticles.length === 0 && <h1 className='sr-only'>Warfare Tech</h1>}
       <HeroSection articles={featuredArticles} />
 
@@ -105,9 +96,6 @@ export default async function Home() {
             />
           ))}
         </div>
-
-        {/* <SpecialReportSection /> */}
-
         <LatestSection articles={getItemsOrEmpty(latestNews)} />
 
         {/* TODO: форма підписки (розсилка) під Latest — вирішити сервіс, текст і куди веде форма */}

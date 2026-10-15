@@ -1,0 +1,14 @@
+@use 'variables' as *;
+
+// Опис під заголовком у справжній сторінці обмежений тією ж шириною
+.description {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  max-width: 60ch;
+}
+
+// Заголовок "Latest" коротший за типовий заголовок картки
+.latestTitle {
+  width: 120px;
+}
