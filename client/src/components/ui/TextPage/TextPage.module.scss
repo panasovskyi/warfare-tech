@@ -1,0 +1,116 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+
+// Відступи сторінки й розміри заголовка — як у сторінки статті
+.textPage {
+  padding-block: $space-12 $space-24;
+
+  @include bp-down($bp-md) {
+    padding-block: $space-6 $space-14;
+  }
+}
+
+// Шапка й текст — одна колонка
+.textPage__inner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+
+  @include bp-down($bp-md) {
+    gap: $space-8;
+  }
+}
+
+.textPage__header {
+  display: flex;
+  flex-direction: column;
+  gap: $space-5;
+  max-width: $article-text-width;
+}
+
+.textPage__title {
+  letter-spacing: $ls-heading;
+  font-size: $fs-display-lg;
+  font-weight: $fw-extrabold;
+  line-height: $lh-tight;
+  text-wrap: balance;
+
+  @include bp-down($bp-lg) {
+    font-size: $fs-display-md;
+  }
+
+  @include bp-down($bp-md) {
+    font-size: $fs-display-xs;
+  }
+}
+
+.textPage__lead {
+  font-size: $fs-xl;
+  line-height: $lh-normal;
+  color: var(--color-text-muted);
+
+  @include bp-down($bp-md) {
+    font-size: $fs-lg;
+  }
+}
+
+// Вміст приходить дітьми (section, h2, p, ul, ol, a), тому стилі — за тегами, як у
+// ArticleBody. gap тут — відстань між розділами. Ширина й шрифт — як у тексту статті
+.textPage__body {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+  max-width: $article-text-width;
+  font-size: $fs-lg;
+  line-height: $lh-loose;
+  // Довга адреса в тексті не має розпирати колонку
+  overflow-wrap: break-word;
+
+  @include bp-down($bp-md) {
+    gap: $space-10;
+  }
+}
+
+// Розділ: заголовок, абзаци й списки з однаковою відстанню між собою
+.textPage__body section {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.textPage__body h2 {
+  font-size: $fs-2xl;
+  font-weight: $fw-extrabold;
+  line-height: $lh-snug;
+}
+
+// reset прибирає маркери й відступ в усіх списків (там це структура: меню, картки), а в
+// тексті вони потрібні
+.textPage__body ul,
+.textPage__body ol {
+  padding-left: $space-6;
+}
+
+.textPage__body ul {
+  list-style: disc;
+}
+
+.textPage__body ol {
+  list-style: decimal;
+}
+
+.textPage__body li + li {
+  margin-top: $space-2;
+}
+
+// Як у тексті статті: колір тексту, а підкреслення акцентом
+.textPage__body a {
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+.textPage__body a:hover {
+  text-decoration-thickness: 3px;
+}
