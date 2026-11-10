@@ -19,6 +19,12 @@ const dateWithYearFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 });
 
+const monthYearFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: TIME_ZONE,
+  month: 'long',
+  year: 'numeric',
+});
+
 const calendarPartsFormat = new Intl.DateTimeFormat('en-US', {
   timeZone: TIME_ZONE,
   year: 'numeric',
@@ -83,4 +89,12 @@ export function formatRelativeTime(isoString: string): string {
   return published.year === today.year
     ? dateFormat.format(publishedDate)
     : dateWithYearFormat.format(publishedDate);
+}
+
+// "October 2026": місяць і рік без дня, для сторінки автора. Невалідна дата — порожній рядок,
+// як у formatRelativeTime
+export function formatMonthYear(isoString: string): string {
+  const date = new Date(isoString);
+
+  return Number.isNaN(date.getTime()) ? '' : monthYearFormat.format(date);
 }
