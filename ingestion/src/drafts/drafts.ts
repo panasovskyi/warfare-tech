@@ -1,50 +1,49 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import slugify from 'slugify';
 import type { ArticleDraft } from '../article/article.schema';
 import type { GenerateResult } from '../llm/llm.client';
 import { highlightMatches, type OverlapReport } from '../rewriting/overlap';
+import { findHighestDraftNumber } from './find-drafts';
 
 export const DRAFTS_DIR = path.join(process.cwd(), 'drafts');
-const MAX_SLUG_LENGTH = 60;
+// Сюди переїжджає опублікована чернетка разом з усіма супутніми файлами
+export const PUBLISHED_DIR = path.join(process.cwd(), 'published');
 
 export type DraftInput = {
   article: ArticleDraft;
-  // Rules the server would reject: publishing refuses the file until they are fixed
+  // Порушення правил сервера: публікація відмовить, доки їх не виправлено
   problems: string[];
-  // Quality hints: worth a look, never blocking
+  // Підказки щодо якості: варто глянути, але вони нічого не блокують
   warnings: string[];
   overlap: OverlapReport;
-  // Only for a Ukrainian source: the Ukrainian rewrite the English article comes from.
-  // The overlap belongs to it, so the bold highlights go into its own file.
+  // Лише для українського джерела: український рерайт, з якого зроблено англійську статтю.
+  // Збіги з джерелом стосуються саме його, тому жирні виділення йдуть у його власний файл.
   intermediate?: { title: string; description: string; body: string };
   model: string;
   usage: GenerateResult['usage'];
-  sourceText: string;
   publishedAt?: string;
 };
 
 export type SavedDraft = {
   draftPath: string;
-  sourcePath: string;
   ukrainianPath?: string;
 };
 
-// The timestamp keeps every run in its own file, so a draft you have already
-// edited by hand is never overwritten
-const buildFileName = (title: string): string => {
-  const iso = new Date().toISOString();
-  const stamp = `${iso.slice(0, 10)}-${iso.slice(11, 19).replace(/:/g, '')}`;
-  const slug = slugify(title, { lower: true, strict: true })
-    .slice(0, MAX_SLUG_LENGTH)
-    .replace(/-+$/, '');
+// Ім'я, набране руками: «1», «1.md» чи «1.uk» — це файл у теці drafts,
+// усе, де є тека (drafts/1.md, абсолютний шлях), береться як є
+export const resolveDraftPath = (arg: string): string => {
+  if (/[\\/]/.test(arg)) {
+    return arg;
+  }
 
-  return `${stamp}-${slug || 'article'}`;
+  return path.join(DRAFTS_DIR, arg.toLowerCase().endsWith('.md') ? arg : `${arg}.md`);
 };
 
+// Список для шапки YAML: кожен елемент у лапках, з нового рядка
 const toYamlList = (key: string, items: string[]): string =>
   `${key}:\n${items.map((item) => `  - ${JSON.stringify(item)}`).join('\n')}`;
 
+// Збирає текст чернетки: поля статті, потім нотатки для перегляду (вони не публікуються), потім текст
 const buildDraft = (
   {
     article,
@@ -58,7 +57,7 @@ const buildDraft = (
   }: DraftInput,
   ukrainianFileName?: string,
 ): string => {
-  // JSON.stringify gives a valid quoted YAML string: colons and quotes are safe
+  // JSON.stringify дає коректний YAML-рядок у лапках: двокрапки й лапки не заважають
   const metadata = [
     `title: ${JSON.stringify(article.title)}`,
     `description: ${JSON.stringify(article.description)}`,
@@ -100,7 +99,7 @@ const buildDraft = (
     metadata.push(toYamlList('warnings', warnings));
   }
 
-  // The ranges describe the Ukrainian text when there is one: never put them on the English body
+  // Діапазони описують український текст, коли він є: на англійський текст їх не накладаємо
   const body = intermediate
     ? article.body
     : highlightMatches(article.body, overlap.ranges);
@@ -108,6 +107,7 @@ const buildDraft = (
   return `---\n${metadata.join('\n')}\n---\n\n${body}\n`;
 };
 
+// Файл української версії (N.uk.md): рерайт з виділеними жирним збігами з джерелом
 const buildUkrainianDraft = ({
   intermediate,
   overlap,
@@ -117,24 +117,38 @@ const buildUkrainianDraft = ({
   return `---\ntitle: ${JSON.stringify(rewrite.title)}\ndescription: ${JSON.stringify(rewrite.description)}\noverlap: ${JSON.stringify(overlap.summary)}\n---\n\n${highlightMatches(rewrite.body, overlap.ranges)}\n`;
 };
 
+// Зберігає чернетку під наступним вільним номером (і N.uk.md для українського джерела)
 export const saveDraft = async (input: DraftInput): Promise<SavedDraft> => {
   await mkdir(DRAFTS_DIR, { recursive: true });
 
-  const name = buildFileName(input.article.title);
-  const draftPath = path.join(DRAFTS_DIR, `${name}.md`);
-  const sourcePath = path.join(DRAFTS_DIR, `${name}.source.txt`);
-  const ukrainianName = `${name}.uk.md`;
+  // Номер береться після найбільшого серед drafts/ і published/, тому не повторюється
+  let number = (await findHighestDraftNumber([DRAFTS_DIR, PUBLISHED_DIR])) + 1;
 
-  await writeFile(draftPath, buildDraft(input, ukrainianName), { flag: 'wx' });
-  await writeFile(sourcePath, `${input.sourceText.trim()}\n`, { flag: 'wx' });
+  // 'wx' ніколи не перезаписує чернетку, яку ти вже правив руками: зайнятий номер — беремо наступний
+  for (;;) {
+    const draftPath = path.join(DRAFTS_DIR, `${number}.md`);
+    const ukrainianName = `${number}.uk.md`;
 
-  if (!input.intermediate) {
-    return { draftPath, sourcePath };
+    try {
+      await writeFile(draftPath, buildDraft(input, ukrainianName), { flag: 'wx' });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+        number += 1;
+
+        continue;
+      }
+
+      throw error;
+    }
+
+    if (!input.intermediate) {
+      return { draftPath };
+    }
+
+    const ukrainianPath = path.join(DRAFTS_DIR, ukrainianName);
+
+    await writeFile(ukrainianPath, buildUkrainianDraft(input), { flag: 'wx' });
+
+    return { draftPath, ukrainianPath };
   }
-
-  const ukrainianPath = path.join(DRAFTS_DIR, ukrainianName);
-
-  await writeFile(ukrainianPath, buildUkrainianDraft(input), { flag: 'wx' });
-
-  return { draftPath, sourcePath, ukrainianPath };
 };

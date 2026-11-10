@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 loadEnv({ quiet: true });
 
+// Змінні для публікації: де API і під ким заходити (адмін із server/.env)
 const envSchema = z.object({
   API_BASE_URL: z
     .string('API_BASE_URL is required')
@@ -28,6 +29,7 @@ export type PublishingConfig = {
   password: string;
 };
 
+// Читається на вимогу, а не при імпорті: ці змінні потрібні лише командам, що ходять на сервер
 export const getPublishingConfig = (): PublishingConfig => {
   const parsed = envSchema.safeParse(process.env);
 
@@ -38,6 +40,7 @@ export const getPublishingConfig = (): PublishingConfig => {
   const { API_BASE_URL, ADMIN_LOGIN, ADMIN_PASSWORD } = parsed.data;
 
   return {
+    // Кінцевий слеш прибираємо, щоб при склеюванні адрес не було подвійного
     apiBaseUrl: API_BASE_URL.replace(/\/+$/, ''),
     login: ADMIN_LOGIN,
     password: ADMIN_PASSWORD,

@@ -1,3 +1,4 @@
+// Що перевіряємо: заголовок, опис, текст, назву видання й текст джерела
 export type CheckInput = {
   title: string;
   description: string;
@@ -7,20 +8,29 @@ export type CheckInput = {
 };
 
 // TODO: ліміти — перші припущення, відкалібрувати на справжніх чернетках
+// Скільки разів дозволено назвати видання в тексті (далі — лише «the outlet said»)
 const MAX_OUTLET_NAME_MENTIONS = 1;
+// Скільки разів дозволено написати «the outlet» або «the publication»
 const MAX_GENERIC_REFERENCES = 3;
-// If the source text itself names the outlet this often, the outlet is also the
-// subject (a company's own press release), so naming it repeatedly is natural
+// Якщо видання стільки разів названо в самому тексті джерела, воно ще й предмет статті
+// (прес-реліз компанії про себе), тож повторювати його назву природно
 const FIRST_PARTY_MIN_MENTIONS = 3;
+// Скільки відносних дат показувати в одному попередженні
 const MAX_LISTED_DATES = 5;
 
+// Прямі цитати: текст у лапках
 const QUOTED = /“[^”]*”|"[^"]*"/g;
+// «the source» без уточнення: англомовний читач сприйме це як анонімного інформатора
 const BARE_SOURCE = /\bthe source(?: article| material)?\b(?! of\b)/gi;
+// «the outlet» / «the publication»: загальні посилання на видання
 const GENERIC_OUTLET = /\bthe (?:outlet|publication)\b/gi;
+// Рядок на кшталт «Source: …» чи «Via: …»
 const SOURCE_LINE = /^\s*(?:sources?|via|credits?|read more)\s*:/i;
+// Відносні вирази часу (yesterday, last week…), які мають стати абсолютними датами
 const RELATIVE_DATE =
   /\b(?:yesterday|today|tomorrow|tonight|(?:last|this|next) (?:week|month|year|spring|summer|autumn|fall|winter|weekend)|(?:a|one|two|three|several|few) (?:days?|weeks?|months?|years?) ago|on (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b/gi;
 
+// Одиниці виміру, які пишуться з малої літери навіть у заголовку
 const LOWERCASE_UNITS = new Set([
   'km',
   'm',
@@ -35,14 +45,18 @@ const LOWERCASE_UNITS = new Set([
   'nm',
   'ft',
 ]);
+// Скільки слів із малої літери показувати в попередженні
 const MAX_LISTED_WORDS = 5;
 
+// Екранує спецсимволи, щоб назву видання шукати як звичайний текст
 const escapeRegExp = (text: string): string =>
   text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+// Усі збіги шаблону в тексті (порожній список, якщо збігів нема)
 const findAll = (text: string, pattern: RegExp): string[] =>
   text.match(pattern) ?? [];
 
+// Знаходить три слова підряд, що повторюються (ознака збою в заголовку)
 const findRepeatedPhrase = (text: string): string | null => {
   const words = text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
   const seen = new Set<string>();
@@ -60,6 +74,7 @@ const findRepeatedPhrase = (text: string): string | null => {
   return null;
 };
 
+// Перевірки стилю й правил видання. Повертає список попереджень: вони не блокують публікацію
 export const checkDraft = ({
   title,
   description,
@@ -68,7 +83,7 @@ export const checkDraft = ({
   sourceText,
 }: CheckInput): string[] => {
   const warnings: string[] = [];
-  // Direct quotes keep the source's own words, so they are not checked
+  // Прямі цитати зберігають слова джерела, тому їх не перевіряємо
   const text = body.replace(QUOTED, ' ');
   const nameMatcher = new RegExp(escapeRegExp(sourceName), 'gi');
 
@@ -98,7 +113,7 @@ export const checkDraft = ({
     );
   }
 
-  // The body is Markdown: lines with no blank line between them are joined into one paragraph
+  // Текст — це Markdown: рядки без порожнього між ними склеюються в один абзац
   const brokenParagraph = body
     .split(/\n\s*\n/)
     .find(
@@ -116,6 +131,7 @@ export const checkDraft = ({
     );
   }
 
+  // Останній рядок тексту: сайт показує джерело окремо, тож рядок «Source: …» тут зайвий
   const lastLine = body.trim().split(/\r?\n/).at(-1) ?? '';
 
   if (SOURCE_LINE.test(lastLine)) {
@@ -132,6 +148,7 @@ export const checkDraft = ({
     );
   }
 
+  // Слова заголовка з малої літери (крім одиниць виміру): у заголовку кожне слово з великої
   const lowercaseWords = title
     .split(/\s+/)
     .map((word) => word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}/]+$/gu, ''))

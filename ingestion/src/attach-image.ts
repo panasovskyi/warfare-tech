@@ -1,8 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { getMainPicture } from './cloudinary/cloudinary';
 import {
+  deletePhoto,
   findNewestPhoto,
-  moveToUsed,
   PHOTOS_DIR,
 } from './cloudinary/photos-folder';
 import { readDraft } from './drafts/draft-file';
@@ -12,23 +12,24 @@ import {
   setPhotoAlt,
   setPhotoCredit,
 } from './drafts/draft-file.schema';
-import { DRAFTS_DIR } from './drafts/drafts';
+import { DRAFTS_DIR, resolveDraftPath } from './drafts/drafts';
 import { findNewestDraft, mainDraftOf } from './drafts/find-drafts';
 import { extractArticle } from './fetching/extract-article';
 import { fetchPage } from './fetching/fetch-page';
 
 const USAGE = `Usage:
-  npm run attach-image                                  (the newest draft + the newest photo in ${PHOTOS_DIR})
-  npm run attach-image -- <picture file | url | page>   (the newest draft)
-  npm run attach-image -- <path to a draft .md>         (the newest photo in the folder)
-  npm run attach-image -- <path to a draft .md> <picture file | url | page>
+  npm run image                                  (the newest draft + the newest photo in ${PHOTOS_DIR})
+  npm run image -- <picture file | url | page>   (the newest draft)
+  npm run image -- <draft: 1, 1.md or a path>    (the newest photo in the folder)
+  npm run image -- <draft> <picture file | url | page>
 Add --credit="Airbus" to any of them to fill photoCredit (the author shown under the photo)
 and --alt="A jet on the runway" to fill photoAlt (the description for screen readers; empty means a decorative picture).`;
 
-// Puts a picture into a draft that is already written and edited: no model call,
-// nothing else in the file changes
+// Кладе фото в уже написану й відредаговану чернетку: без виклику моделі,
+// ніщо інше у файлі не змінюється
 const main = async () => {
   const args = process.argv.slice(2);
+  // --credit і --alt необов'язкові: порожнє значення означає «не задано»
   const credit =
     args
       .find((arg) => arg.startsWith('--credit='))
@@ -45,12 +46,15 @@ const main = async () => {
     throw new Error(USAGE);
   }
 
-  // A lone argument is a draft when it ends with .md, otherwise it is the picture
-  const isFirstDraft = Boolean(second) || first?.toLowerCase().endsWith('.md');
+  // Єдиний аргумент — це чернетка, коли він число (1) або закінчується на .md, інакше це фото
+  const isFirstDraft =
+    Boolean(second) || (first !== undefined && /^\d+$|\.md$/i.test(first));
   const draftArg = isFirstDraft ? first : undefined;
   let imageArg = second ?? (isFirstDraft ? undefined : first);
 
-  const draftPath = draftArg ?? (await findNewestDraft(DRAFTS_DIR));
+  const draftPath = draftArg
+    ? resolveDraftPath(draftArg)
+    : await findNewestDraft(DRAFTS_DIR);
 
   if (!draftPath) {
     throw new Error(`There are no drafts in ${DRAFTS_DIR}`);
@@ -68,12 +72,16 @@ const main = async () => {
 
   const { article, publishedAs } = await readDraft(draftPath);
 
+  // Імена файлів — лише числа: заголовок показує, якій статті дістанеться фото
+  console.log(`Title: "${article.title}"`);
+
   if (publishedAs) {
     throw new Error(
       `This draft is already published as "${publishedAs}": a new picture would not reach the site`,
     );
   }
 
+  // Фото з теки photos після успіху видаляється, а явно названий файл лишається
   let photoFromFolder: string | undefined;
 
   if (!imageArg) {
@@ -91,6 +99,7 @@ const main = async () => {
 
   let imageUrl = imageArg;
 
+  // «page» — взяти головне фото зі сторінки статті-джерела
   if (imageArg === 'page') {
     const page = await fetchPage(article.sourceLink);
     const extracted = extractArticle(page.html, page.finalUrl);
@@ -105,6 +114,7 @@ const main = async () => {
   const picture = await getMainPicture(imageUrl);
   const original = await readFile(draftPath, 'utf-8');
 
+  // Правимо лише рядки фото в шапці, решта файла лишається як була
   const withPicture = dropPictureWarnings(setMainPicture(original, picture));
   const withCredit = credit
     ? setPhotoCredit(withPicture, credit)
@@ -122,14 +132,14 @@ const main = async () => {
     console.log(`Photo alt: ${alt}`);
   }
 
-  // The picture is already attached, so a failed move is only worth a warning
+  // Фото вже додано (і воно на Cloudinary), тож збій видалення вартий лише попередження
   if (photoFromFolder) {
     try {
-      await moveToUsed(photoFromFolder);
-      console.log('The photo was moved to photos/used');
+      await deletePhoto(photoFromFolder);
+      console.log('The photo was deleted from the photos folder');
     } catch (error) {
       console.warn(
-        `WARNING: could not move the photo out of the folder (${error instanceof Error ? error.message : String(error)}): delete it by hand, or the next article would pick it up`,
+        `WARNING: could not delete the photo (${error instanceof Error ? error.message : String(error)}): delete it by hand, or the next article would pick it up`,
       );
     }
   }

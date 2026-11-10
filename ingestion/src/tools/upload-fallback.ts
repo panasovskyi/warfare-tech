@@ -6,7 +6,8 @@ import {
 } from '../cloudinary/fallback';
 import { getCloudinaryConfig } from '../config/cloudinary.config';
 
-// Run it again after editing assets/fallback.svg: the old picture is replaced
+// Завантажує assets/fallback.svg у Cloudinary як фірмову заглушку й перевіряє, що її адреса відповідає.
+// Запусти знову після зміни assets/fallback.svg: стара картинка буде замінена
 const main = async () => {
   const file = path.join(process.cwd(), 'assets', 'fallback.svg');
 

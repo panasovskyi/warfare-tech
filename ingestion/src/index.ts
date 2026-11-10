@@ -4,7 +4,7 @@ import { validateArticle } from './article/article.schema';
 import { normalizeSourceLink } from './article/source-link';
 import { getMainPicture } from './cloudinary/cloudinary';
 import { getPublishingConfig } from './config/publishing.config';
-import { DRAFTS_DIR, saveDraft } from './drafts/drafts';
+import { DRAFTS_DIR, PUBLISHED_DIR, saveDraft } from './drafts/drafts';
 import { findDraftsBySourceLink } from './drafts/find-drafts';
 import { extractArticle } from './fetching/extract-article';
 import { fetchPage } from './fetching/fetch-page';
@@ -12,12 +12,14 @@ import { findPublishedBySourceLink, type PublishedMatch } from './publishing/dup
 import { rewrite } from './rewriting/rewriting';
 import { resolveSource } from './rewriting/sources';
 
+// Формат дати публікації
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 const USAGE = `Usage:
   npm start -- <article url> [publication date YYYY-MM-DD] [--image=<picture url>|page] [--credit="Photo author"] [--alt="Picture description"] [--force]
   npm start -- <article url> <path to a text file> [publication date YYYY-MM-DD] [--image=<picture url>] [--credit="Photo author"] [--alt="Picture description"] [--force]`;
 
+// Текст помилки для виводу в консоль
 const reasonOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
@@ -25,6 +27,8 @@ const reasonOf = (error: unknown): string =>
 // дублів уже є; кожна стаття — окремий платний виклик, тож потрібен ліміт на запуск)
 // TODO: автотести: перевірки (checks, overlap, body-rules, читання й заміна у файлі чернетки)
 // поки були лише одноразовими скриптами
+
+// Створення чернетки: аргументи → дублі → текст → фото → рерайт → файл чернетки
 const main = async () => {
   const args = process.argv.slice(2);
   const imageOption = args
@@ -47,7 +51,7 @@ const main = async () => {
     throw new Error(USAGE);
   }
 
-  // A date (or nothing) in the second place means there is no text file: the page is fetched
+  // Дата (або нічого) на другому місці означає, що файла з текстом нема: сторінку завантажуємо
   const isFetching = !second || DATE_PATTERN.test(second);
   const textPath = isFetching ? undefined : second;
   const dateOption = isFetching ? second : third;
@@ -64,14 +68,19 @@ const main = async () => {
     console.log(`Link cleaned (no tracking, no fragment): ${sourceLink}`);
   }
 
-  // First, before reading anything or calling the model: unknown sources stop here
+  // Спершу, до читання чогось і до виклику моделі: невідомі джерела зупиняються тут
   const source = resolveSource(sourceLink);
 
+  // Попередження збираються по ходу запуску й потрапляють у чернетку
   const warnings: string[] = [];
 
-  // Before the paid call: the same article twice is the most expensive mistake
+  // До платного виклику: двічі та сама стаття — найдорожча помилка
   if (!isForced) {
-    const [existingDraft] = await findDraftsBySourceLink(DRAFTS_DIR, sourceLink);
+    // Опублікована чернетка лежить у власній теці, але лишається чернеткою цієї статті
+    const [existingDraft] = [
+      ...(await findDraftsBySourceLink(DRAFTS_DIR, sourceLink)),
+      ...(await findDraftsBySourceLink(PUBLISHED_DIR, sourceLink)),
+    ];
 
     if (existingDraft) {
       throw new Error(
@@ -94,6 +103,7 @@ const main = async () => {
     }
   }
 
+  // Текст джерела: з файла, який ти дав, або зі сторінки
   let sourceText: string;
   let pageDate: string | undefined;
   let pageImage: string | undefined;
@@ -113,6 +123,7 @@ const main = async () => {
     );
   }
 
+  // Дата, яку ти вказав, важливіша за дату зі сторінки
   const publishedAt = dateOption ?? pageDate;
 
   if (publishedAt && !dateOption) {
@@ -125,10 +136,10 @@ const main = async () => {
     );
   }
 
-  // Before the model: it is cheap, and a broken Cloudinary setup should show up
-  // now, not after a paid reply. A failed picture never stops the run.
-  // The page's own picture is used only when asked for (--image=page): re-hosting
-  // someone else's photo is a decision, not a default.
+  // Перед моделлю: це дешево, а зламані налаштування Cloudinary мають виявитись зараз,
+  // а не після оплаченої відповіді. Збій із фото ніколи не зупиняє запуск.
+  // Фото зі сторінки береться лише на вимогу (--image=page): перезавантаження чужого
+  // фото на свій сервер — це рішення, а не поведінка за замовчуванням.
   let mainPicture: string | undefined;
   const pictureUrl = imageOption === 'page' ? pageImage : imageOption;
 
@@ -150,21 +161,23 @@ const main = async () => {
     );
   }
 
-  // The credit belongs to a real picture: the placeholder is ours and needs none
+  // Підпис стосується справжнього фото: заглушка наша й підпису не потребує
   if (creditOption && !mainPicture) {
     warnings.push(
       '--credit is ignored: no picture was attached (the placeholder needs no credit)',
     );
   }
 
-  // The same for the description: it belongs to a real picture
+  // Так само з описом: він стосується справжнього фото
   if (altOption && !mainPicture) {
     warnings.push(
       '--alt is ignored: no picture was attached (the placeholder stays decorative)',
     );
   }
 
+  // Платний виклик моделі
   const result = await rewrite({ sourceText, sourceName: source, publishedAt });
+  // Решту запису (тип, теги, фото) збираємо ми, а не модель
   const article = buildArticle(result.article, {
     source,
     sourceLink,
@@ -172,6 +185,7 @@ const main = async () => {
     photoCredit: mainPicture ? creditOption : undefined,
     photoAlt: mainPicture ? altOption : undefined,
   });
+  // Порушення правил сервера: публікація відмовить, доки їх не виправлено
   const problems = validateArticle(article);
 
   warnings.push(...result.warnings);
@@ -182,7 +196,8 @@ const main = async () => {
     );
   }
 
-  const { draftPath, sourcePath, ukrainianPath } = await saveDraft({
+  // Зберігаємо чернетку під наступним номером
+  const { draftPath, ukrainianPath } = await saveDraft({
     article,
     problems,
     warnings,
@@ -190,12 +205,12 @@ const main = async () => {
     intermediate: result.intermediate,
     model: result.model,
     usage: result.usage,
-    sourceText,
     publishedAt,
   });
 
   console.log(`Draft: ${draftPath}`);
-  console.log(`Source text: ${sourcePath}`);
+  // Ім'я файла — лише число: заголовок підказує, про яку це статтю
+  console.log(`Title: "${article.title}"`);
 
   if (ukrainianPath) {
     console.log(`Ukrainian rewrite: ${ukrainianPath}`);

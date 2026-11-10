@@ -1,10 +1,9 @@
 import { access, readFile, writeFile } from 'node:fs/promises';
 import { parse } from 'yaml';
 import { splitDraft, stripHighlights } from './drafts/draft-file.schema';
-import { DRAFTS_DIR } from './drafts/drafts';
+import { DRAFTS_DIR, resolveDraftPath } from './drafts/drafts';
 import { findNewestDraft, mainDraftOf } from './drafts/find-drafts';
 import { checkDraft } from './rewriting/checks';
-import { measureOverlap } from './rewriting/overlap';
 import {
   applyTranslations,
   collectCyrillicItems,
@@ -14,13 +13,16 @@ import {
 import { translateArticle, translateItems } from './translation/translate';
 
 const USAGE =
-  'Usage: npm run translate [-- <path to a draft .md, or to its .uk.md>] (no path: the newest draft)';
+  'Usage: npm run translate [-- <draft: 1 or 1.md, its Ukrainian version: 1.uk or 1.uk.md, or a path>] (no argument: the newest draft)';
 
+// Закінчення імені файла української версії
 const UKRAINIAN_SUFFIX = /\.uk\.md$/;
 
+// Значення з YAML як рядок; усе інше стає порожнім рядком
 const asText = (value: unknown): string =>
   typeof value === 'string' ? value : '';
 
+// Теги з YAML: масив або рядок через кому
 const asTags = (value: unknown): string[] => {
   if (Array.isArray(value)) {
     return value.map(String);
@@ -31,17 +33,19 @@ const asTags = (value: unknown): string[] => {
     : [];
 };
 
+// Чи існує файл
 const fileExists = (path: string): Promise<boolean> =>
   access(path).then(
     () => true,
     () => false,
   );
 
+// Текст помилки для виводу в консоль
 const reasonOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-// Keeps the draft as it was next to the translated file: a translation is not undoable
-// in an editor once the file is closed
+// Зберігає чернетку такою, як вона була, поруч із перекладеною: після закриття файла
+// переклад у редакторі вже не скасуєш
 const saveBackup = async (draftPath: string, original: string): Promise<string> => {
   const base = draftPath.replace(/\.md$/, '');
 
@@ -60,11 +64,10 @@ const saveBackup = async (draftPath: string, original: string): Promise<string> 
   }
 };
 
-// The Ukrainian version (<draft>.uk.md) is what the owner edits for a Ukrainian source:
-// it is translated whole and replaces the title, the description and the text of the draft
+// Українська версія (<номер>.uk.md) — те, що власник правит для українського джерела:
+// вона перекладається цілком і замінює заголовок, опис і текст чернетки
 const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
   const draftPath = ukrainianPath.replace(UKRAINIAN_SUFFIX, '.md');
-  const sourcePath = ukrainianPath.replace(UKRAINIAN_SUFFIX, '.source.txt');
 
   let ukrainian: string;
   let original: string;
@@ -83,6 +86,9 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
 
   const draftData = (parse(splitDraft(original).front) ?? {}) as Record<string, unknown>;
 
+  // Імена файлів — лише числа: заголовок показує, яку статтю перекладаємо
+  console.log(`Title: "${asText(draftData.title)}"`);
+
   if (draftData.publishedAs) {
     throw new Error('This draft is already published: translating it changes nothing on the site');
   }
@@ -90,7 +96,7 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
   const { front, body } = splitDraft(ukrainian);
   const data = (parse(front) ?? {}) as Record<string, unknown>;
 
-  // The ** marks of the overlap highlights are not part of the text
+  // Зірочки ** виділення збігів не є частиною тексту
   const clean = (text: string): string =>
     stripHighlights(text, { boldHighlights: true }).trim();
 
@@ -126,32 +132,14 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
     ...applied.warnings,
   ];
 
-  // The edits are made to close passages in the first place: show if any are left
-  let sourceText = '';
-
-  try {
-    sourceText = await readFile(sourcePath, 'utf-8');
-  } catch {
-    warnings.push(`${sourcePath} was not found: the overlap with the source was not measured`);
-  }
-
-  if (sourceText) {
-    const overlap = measureOverlap(article.body, sourceText);
-
-    console.log(`Overlap of the Ukrainian text with the source: ${overlap.summary}`);
-
-    if (overlap.warning) {
-      warnings.push(`The Ukrainian text: ${overlap.warning}`);
-    }
-  }
-
+  // Текст джерела не зберігається: виняток для першої особи (компанія називає себе) тут не діє
   warnings.push(
     ...checkDraft({
       title: translated.title,
       description: translated.description,
       body: translated.body,
       sourceName: asText(draftData.source),
-      sourceText,
+      sourceText: '',
     }),
   );
 
@@ -160,11 +148,13 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
   }
 };
 
-// Ukrainian written straight into the English draft: only the parts with Cyrillic are translated
+// Українська, вписана прямо в англійську чернетку: перекладаються лише частини з кирилицею
 const translateDraft = async (draftPath: string): Promise<void> => {
   const original = await readFile(draftPath, 'utf-8');
   const { front, body } = splitDraft(original);
   const data = (parse(front) ?? {}) as Record<string, unknown>;
+
+  console.log(`Title: "${asText(data.title)}"`);
 
   if (data.publishedAs) {
     throw new Error('This draft is already published: translating it changes nothing on the site');
@@ -182,7 +172,7 @@ const translateDraft = async (draftPath: string): Promise<void> => {
   const hasUkrainianVersion = await fileExists(ukrainianPath);
 
   if (items.length === 0) {
-    // Nothing to translate in the English draft, but its Ukrainian version may have been edited
+    // В англійській чернетці перекладати нічого, але її українську версію могли відредагувати
     if (hasUkrainianVersion) {
       console.log(`No Cyrillic text in the draft: translating its Ukrainian version instead`);
 
@@ -222,9 +212,10 @@ const translateDraft = async (draftPath: string): Promise<void> => {
   }
 };
 
+// Вибір чернетки (за аргументом або найновіша) і режиму: переклад з .uk.md чи лише кириличних частин
 const main = async () => {
   const [pathArg] = process.argv.slice(2).filter((arg) => !arg.startsWith('--'));
-  const target = pathArg ?? (await findNewestDraft(DRAFTS_DIR));
+  const target = pathArg ? resolveDraftPath(pathArg) : await findNewestDraft(DRAFTS_DIR);
 
   if (!target) {
     throw new Error(`There are no drafts in ${DRAFTS_DIR}.\n${USAGE}`);
@@ -238,7 +229,7 @@ const main = async () => {
     return translateFromUkrainian(target);
   }
 
-  // What is left is the text kept before an earlier translation: not a draft to work on
+  // Лишається текст, збережений до попереднього перекладу: це не чернетка для роботи
   const mainDraft = mainDraftOf(target);
 
   if (mainDraft) {

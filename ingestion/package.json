@@ -2,13 +2,14 @@
   "name": "ingestion",
   "version": "1.0.0",
   "description": "",
+  "private": true,
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
-    "publish-draft": "tsx src/publish.ts",
-    "attach-image": "tsx src/attach-image.ts",
-    "upload-image": "tsx src/upload-image.ts",
+    "image": "tsx src/attach-image.ts",
     "translate": "tsx src/translate.ts",
+    "pub": "tsx src/publish.ts",
+    "upload-image": "tsx src/upload-image.ts",
     "upload-fallback": "tsx src/tools/upload-fallback.ts",
     "typecheck": "tsc --noEmit"
   },

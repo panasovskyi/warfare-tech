@@ -5,11 +5,12 @@ import {
   IMAGE_HOSTNAME,
 } from './body-rules';
 
-// Mirror of server/src/article/schemas/create-article.schema.ts: keep the two in
-// sync, because the server is the one that finally accepts or rejects an article.
+// Дзеркало server/src/article/schemas/create-article.schema.ts: тримати їх у синхроні,
+// бо остаточно статтю приймає чи відхиляє сервер.
 // TODO: автотест, що це дзеркало дає ті самі результати, що серверна схема (зараз це
 // перевіряв одноразовий скрипт)
 
+// Значення, які знає сервер (дзеркало enum-ів Prisma): об'єкт as const замість TS enum
 export const ArticleType = {
   NEWS: "NEWS",
   LONGREAD: "LONGREAD",
@@ -89,6 +90,8 @@ export const articleSchema = z
       .optional(),
   })
 
+  // Правило статті: новина — або «війна в Україні», або підкатегорія (рівно одне з двох);
+  // лонгрід — ні підкатегорії, ні «війни в Україні»
   .superRefine((data, ctx) => {
     if (data.type === ArticleType.NEWS) {
       if (data.isWarInUkraine && data.subcategory) {
@@ -128,6 +131,7 @@ export const articleSchema = z
     }
   })
 
+  // source і sourceLink мають бути разом: або обидва, або жодного
   .superRefine((data, ctx) => {
     if (data.source && !data.sourceLink) {
       ctx.addIssue({
@@ -146,14 +150,15 @@ export const articleSchema = z
     }
   })
 
+  // Текст має бути Markdown у межах того, що вміє малювати сайт
   .superRefine((data, ctx) => {
     for (const message of checkBodyMarkdown(data.body)) {
       ctx.addIssue({ code: "custom", path: ["body"], message });
     }
   });
 
-// What a draft file holds. A draft has no status (publishing sets it), and a missing
-// subcategory is written as null, which the server schema would reject.
+// Що зберігає файл чернетки. У чернетці нема статусу (його ставить публікація), а відсутня
+// підкатегорія записується як null, який серверна схема відхилила б.
 export type ArticleDraft = {
   type: (typeof ArticleType)[keyof typeof ArticleType];
   subcategory:
@@ -162,9 +167,9 @@ export type ArticleDraft = {
   isFeatured: boolean;
   isWarInUkraine: boolean;
   mainPicture: string;
-  // Empty when the picture needs no credit (our own placeholder)
+  // Порожнє, коли фото не потребує підпису (наша заглушка)
   photoCredit?: string;
-  // Description of the main picture for screen readers; empty means a decorative picture
+  // Опис головного фото для скрінрідерів; порожнє означає декоративне фото
   photoAlt?: string;
   title: string;
   description: string;
@@ -174,14 +179,14 @@ export type ArticleDraft = {
   sourceLink: string;
 };
 
-// Returns the problems the server would report; an empty list means it would accept
+// Повертає проблеми, про які повідомив би сервер; порожній список означає, що сервер прийме статтю
 export const validateArticle = (article: ArticleDraft): string[] => {
   const result = articleSchema.safeParse({
     ...article,
     subcategory: article.subcategory ?? undefined,
   });
 
-  // Not a server rule: words that `upload-image` leaves for the owner to replace
+  // Це не правило сервера: слова-заглушки, які upload-image лишає власникові на заміну
   const placeholders = findImagePlaceholders(article.body).map(
     (message) => `body: ${message}`,
   );

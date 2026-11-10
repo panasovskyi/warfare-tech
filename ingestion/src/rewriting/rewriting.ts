@@ -9,18 +9,19 @@ import {
 import { measureOverlap, type OverlapReport } from './overlap';
 import { getRewritePrompt, SOURCE_TAG, type OutputLanguage } from './rules';
 
+// Що потрібно для рерайту: текст джерела, назва видання й дата публікації
 export type RewriteInput = {
   sourceText: string;
   sourceName: string;
-  // YYYY-MM-DD: lets the model turn "last month" into "September 2026"
+  // YYYY-MM-DD: щоб модель могла перетворити «last month» на «September 2026»
   publishedAt?: string;
 };
 
 export type RewriteResult = {
-  // The English article, ready for the site
+  // Англійська стаття, готова для сайту
   article: ModelArticle;
-  // Only for a Ukrainian source: the Ukrainian rewrite the English text was translated from.
-  // The overlap with the source is measured on it, in the language of the source.
+  // Лише для українського джерела: український рерайт, з якого перекладено англійський текст.
+  // Збіги з джерелом міряються саме на ньому, мовою джерела.
   intermediate?: { title: string; description: string; body: string };
   model: string;
   usage: GenerateResult['usage'];
@@ -28,18 +29,21 @@ export type RewriteResult = {
   warnings: string[];
 };
 
+// Помилка рерайту: порожній текст або неправильна дата
 export class RewritingError extends Error {}
 
-// The model decided there is no article in the text (a paywall stub, an empty page)
+// Модель вирішила, що в тексті нема статті (заглушка paywall, порожня сторінка)
 export class UnusableSourceError extends RewritingError {}
 
+// Відкриваючий або закриваючий тег, яким у промпті обгорнуто джерело
 const SOURCE_TAG_PATTERN = new RegExp(`</?${SOURCE_TAG}\\s*>`, 'gi');
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+// Перетворює YYYY-MM-DD на дату з днем тижня для промпта («Friday, October 2, 2026»); неправильна дата — помилка
 const formatPublicationDate = (publishedAt: string): string => {
   const date = new Date(`${publishedAt}T00:00:00Z`);
 
-  // The round trip catches dates the parser silently rolls over, like 2026-02-30
+  // Перевірка «туди й назад» ловить дати, які парсер мовчки зсуває, на кшталт 2026-02-30
   if (
     !ISO_DATE.test(publishedAt) ||
     Number.isNaN(date.getTime()) ||
@@ -50,7 +54,7 @@ const formatPublicationDate = (publishedAt: string): string => {
     );
   }
 
-  // The weekday is computed here, not by the model: models are unreliable at it
+  // День тижня рахуємо тут, а не модель: моделі в цьому ненадійні
   return date.toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -60,6 +64,7 @@ const formatPublicationDate = (publishedAt: string): string => {
   });
 };
 
+// Повідомлення для моделі: видання, дата публікації й текст джерела в тегах
 const buildPrompt = (
   sourceText: string,
   sourceName: string,
@@ -74,8 +79,8 @@ const buildPrompt = (
   return `${header.join('\n')}\n\n<${SOURCE_TAG}>\n${sourceText}\n</${SOURCE_TAG}>`;
 };
 
-// The page text is untrusted: if it contained the closing tag, the rest of it
-// would be read as instructions instead of as material
+// Тексту сторінки не довіряємо: якби в ньому був закриваючий тег, решту тексту
+// прочитали б як інструкції, а не як матеріал
 const cleanSourceText = (sourceText: string): string => {
   const text = sourceText.replace(SOURCE_TAG_PATTERN, '').trim();
 
@@ -86,6 +91,7 @@ const cleanSourceText = (sourceText: string): string => {
   return text;
 };
 
+// Складає токени двох викликів: рерайту й перекладу
 const sumUsage = (
   first: GenerateResult['usage'],
   second: GenerateResult['usage'],
@@ -94,12 +100,15 @@ const sumUsage = (
   outputTokens: first.outputTokens + second.outputTokens,
 });
 
+// Рерайт: визначає мову джерела, просить модель переписати, міряє збіги з джерелом і збирає попередження.
+// Для українського джерела додає другий виклик — переклад англійською.
 export const rewrite = async ({
   sourceText,
   sourceName,
   publishedAt,
 }: RewriteInput): Promise<RewriteResult> => {
   const text = cleanSourceText(sourceText);
+  // Українське джерело переписуємо українською, а англійською його перекладає окремий виклик
   const language: OutputLanguage = isMostlyCyrillic(text) ? 'uk' : 'en';
 
   const result = await generateJson({
@@ -116,11 +125,12 @@ export const rewrite = async ({
     );
   }
 
-  // Measured in the language of the source, which is what the rewrite is compared with
+  // Міряємо мовою джерела: саме з ним порівнюється рерайт
   const overlap = measureOverlap(rewritten.body, text);
   const descriptionRepeats =
     measureOverlap(rewritten.description, text).ranges.length > 0;
 
+  // Англійське джерело: рерайт уже англійською, лишається зібрати попередження
   if (language === 'en') {
     return {
       article: rewritten,
@@ -143,6 +153,7 @@ export const rewrite = async ({
     };
   }
 
+  // Українське джерело: другий платний виклик перекладає рерайт англійською
   const translated = await translateArticle(rewritten);
   const article: ModelArticle = {
     ...rewritten,

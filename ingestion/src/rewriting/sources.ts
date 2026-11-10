@@ -1,3 +1,5 @@
+// Дозволені джерела: точний домен без www. → назва видання (вона йде в текст статті й у поле source).
+// Нове джерело додається одним рядком тут.
 export const ALLOWED_SOURCES: Record<string, string> = {
   "defensenews.com": "Defense News",
   "defence-ua.com": "Defense Express",
@@ -16,6 +18,7 @@ export const ALLOWED_SOURCES: Record<string, string> = {
   "state.gov": "US Department of State",
 };
 
+// Повертає назву видання за адресою. Невідомий домен — помилка: інші сайти ми не обробляємо
 export const resolveSource = (url: string) => {
   const hostname = new URL(url).hostname.replace(/^www\./, "");
   const source = ALLOWED_SOURCES[hostname];

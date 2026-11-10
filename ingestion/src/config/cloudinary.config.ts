@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 loadEnv({ quiet: true });
 
+// Три змінні облікового запису Cloudinary, куди потрапляють усі наші фото
 const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z
     .string('CLOUDINARY_CLOUD_NAME is required')
@@ -24,7 +25,7 @@ export type CloudinaryConfig = {
   apiSecret: string;
 };
 
-// Read on demand, not at import: only the runs that upload a picture need it
+// Читається на вимогу, а не при імпорті: ключі Cloudinary потрібні лише запускам, що завантажують фото
 export const getCloudinaryConfig = (): CloudinaryConfig => {
   const parsed = envSchema.safeParse(process.env);
 

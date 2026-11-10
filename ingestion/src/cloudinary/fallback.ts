@@ -1,8 +1,8 @@
-// The branded picture for articles that have no photo of their own. The source is
-// assets/fallback.svg; `npm run upload-fallback` puts it under this public id.
+// Фірмова картинка для статей без власного фото. Джерело — assets/fallback.svg;
+// `npm run upload-fallback` кладе її в Cloudinary під цим публічним id.
 export const FALLBACK_PUBLIC_ID = 'warfare-tech/fallback';
 
-// .png on purpose: the SVG is rasterized by Cloudinary, because next/image refuses remote SVG.
-// No version in the URL: re-uploading the file replaces the picture everywhere.
+// Саме .png: SVG розтеризує Cloudinary, бо next/image не приймає віддалений SVG.
+// Без версії в адресі: повторне завантаження файла замінює картинку скрізь.
 export const getFallbackPictureUrl = (cloudName: string): string =>
   `https://res.cloudinary.com/${cloudName}/image/upload/${FALLBACK_PUBLIC_ID}.png`;

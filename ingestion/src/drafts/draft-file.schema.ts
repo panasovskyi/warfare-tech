@@ -2,10 +2,14 @@ import { z } from 'zod';
 import { toSubcategory } from '../article/article';
 import { ArticleType, type ArticleDraft } from "../article/article.schema";
 
+// Шапка між двома --- і текст після неї
 const DRAFT_PATTERN = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
+// Закриваюче --- шапки: перед ним дописуємо publishedAs
 const CLOSING_DELIMITER = /\r?\n---\r?\n/;
+// Кирилична літера
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 
+// Ділить файл на шапку (YAML) і текст статті; без шапки — помилка
 export const splitDraft = (text: string): { front: string; body: string } => {
   const match = DRAFT_PATTERN.exec(text.replace(/^﻿/, ''));
 
@@ -16,7 +20,7 @@ export const splitDraft = (text: string): { front: string; body: string } => {
   return { front: match[1] ?? '', body: match[2] ?? '' };
 };
 
-// A comma-separated string is accepted too: easy to type by hand
+// Теги можна писати й рядком через кому: так легше набирати руками
 const tagsSchema = z
   .union([
     z.array(z.string()),
@@ -26,7 +30,7 @@ const tagsSchema = z
   ])
   .default([]);
 
-// Only the article fields; the review notes (model, tokens, overlap, ...) are ignored
+// Лише поля статті; нотатки для перегляду (model, tokens, overlap, ...) ігноруються
 export const frontMatterSchema = z.object({
   title: z.string("title is required"),
   description: z.string("description is required"),
@@ -38,12 +42,12 @@ export const frontMatterSchema = z.object({
   isFeatured: z.boolean("isFeatured must be true or false").default(false),
   tags: tagsSchema,
   mainPicture: z.string("mainPicture is required"),
-  // Absent, null and "" all mean "no credit": the line is only a place to fill in
+  // Відсутнє, null і "" означають «підпису нема»: рядок лише місце, куди його вписати
   photoCredit: z
     .string()
     .nullish()
     .transform((value) => value?.trim() || undefined),
-  // The same way: absent, null and "" all mean "no description" (a decorative picture)
+  // Так само: відсутнє, null і "" означають «опису нема» (декоративне фото)
   photoAlt: z
     .string()
     .nullish()
@@ -53,10 +57,10 @@ export const frontMatterSchema = z.object({
   publishedAs: z.string().optional(),
 });
 
-// Passages that repeat the source are marked with ** (bold). Whatever the owner left
-// in the text is removed on publishing, but only when the draft's own review note says
-// the draft was highlighted that way (delete the note line to keep real bold).
-// <mark> tags (an earlier marker) are always removed.
+// Місця, що повторюють джерело, позначені ** (жирним). Усе, що власник лишив у тексті,
+// видаляється при публікації, але лише коли нотатка самої чернетки каже, що її
+// виділено саме так (видали рядок нотатки, щоб зберегти справжній жирний).
+// Теги <mark> (попередній маркер) прибираються завжди.
 export const stripHighlights = (
   body: string,
   { boldHighlights = false }: { boldHighlights?: boolean } = {},
@@ -66,10 +70,11 @@ export const stripHighlights = (
   return boldHighlights ? withoutMarks.replaceAll('**', '') : withoutMarks;
 };
 
-// The review note of a highlighted draft talks about "**bold**": this is how it is recognized
+// Нотатка виділеної чернетки згадує "**bold**": за цим її й упізнають
 export const usesBoldHighlights = (frontText: string): boolean =>
   frontText.includes('**bold**');
 
+// Перетворює прочитану шапку й текст на запис статті; хибна шапка — помилка з поясненням
 export const toArticleDraft = (
   front: unknown,
   body: string,
@@ -91,6 +96,7 @@ export const toArticleDraft = (
   };
 };
 
+// Поля, де лишилась кирилиця: публікація такого не пропускає
 export const findCyrillicFields = (article: ArticleDraft): string[] => {
   const fields: Record<string, string> = {
     title: article.title,
@@ -105,7 +111,7 @@ export const findCyrillicFields = (article: ArticleDraft): string[] => {
     .map(([field]) => field);
 };
 
-// Changes only the front matter and leaves every other byte of the file as it was
+// Змінює лише шапку й залишає кожен інший байт файла як був
 export const editFrontMatter = (
   text: string,
   edit: (front: string) => string,
@@ -120,6 +126,7 @@ export const editFrontMatter = (
   return text.slice(0, span[0]) + edit(text.slice(span[0], span[1])) + text.slice(span[1]);
 };
 
+// Замінює адресу головного фото в шапці
 export const setMainPicture = (text: string, url: string): string =>
   editFrontMatter(text, (front) => {
     if (!/^mainPicture:.*$/m.test(front)) {
@@ -129,7 +136,7 @@ export const setMainPicture = (text: string, url: string): string =>
     return front.replace(/^mainPicture:.*$/m, `mainPicture: ${JSON.stringify(url)}`);
   });
 
-// Fills the photoCredit line, or adds it under mainPicture when an older draft has none
+// Заповнює рядок photoCredit або додає його під mainPicture, коли в старій чернетці його нема
 export const setPhotoCredit = (text: string, credit: string): string =>
   editFrontMatter(text, (front) => {
     const line = `photoCredit: ${JSON.stringify(credit)}`;
@@ -147,7 +154,7 @@ export const setPhotoCredit = (text: string, credit: string): string =>
     return front.replace(/^mainPicture:.*$/m, (mainPicture) => `${mainPicture}${eol}${line}`);
   });
 
-// Fills the photoAlt line, or adds it under photoCredit (or mainPicture) when an older draft has none
+// Заповнює рядок photoAlt або додає його під photoCredit (чи mainPicture), коли в старій чернетці його нема
 export const setPhotoAlt = (text: string, alt: string): string =>
   editFrontMatter(text, (front) => {
     const line = `photoAlt: ${JSON.stringify(alt)}`;
@@ -169,10 +176,11 @@ export const setPhotoAlt = (text: string, alt: string): string =>
     return front.replace(anchor, (found) => `${found}${eol}${line}`);
   });
 
-// Warnings that were true until a picture was attached and are only noise afterwards
+// Попередження, що були правдиві, доки фото не додали, а відтоді — лише шум
 const PICTURE_WARNING =
   /No --image given|The picture was not uploaded|--image=page needs/;
 
+// Прибирає з блоку warnings застарілі попередження про фото
 export const dropPictureWarnings = (text: string): string =>
   editFrontMatter(text, (front) => {
     const lines = front.split(/\r?\n/);
@@ -199,7 +207,7 @@ export const dropPictureWarnings = (text: string): string =>
     ].join(front.includes('\r\n') ? '\r\n' : '\n');
   });
 
-// Remembers the slug in the draft itself, so the same file is not published twice
+// Запам'ятовує slug у самій чернетці, щоб той самий файл не опублікували двічі
 export const addPublishedMarks = (text: string, slug: string): string => {
   const closing = CLOSING_DELIMITER.exec(text);
 
