@@ -1,0 +1,97 @@
+name: CI
+
+# Перевірки запускаються на pull request у main і на кожен push у develop
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [develop]
+
+jobs:
+  client:
+    name: Client
+    runs-on: ubuntu-latest
+
+    # Усі команди завдання виконуються в теці client
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Типи PageProps і LayoutProps Next генерує сам; без dev і build їх дає typegen
+      - name: Generate route types
+        run: npx next typegen
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      # next build тут не запускається: збірка ходить до API, а її й так робить Vercel
+  server:
+    name: Server
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+        
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npx eslint "{src,test}/**/*.ts"
+
+  ingestion:
+    name: Ingestion
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ingestion
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ingestion/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Лінту в ingestion нема, лише перевірка типів
+      - name: Type check
+        run: npm run typecheck
