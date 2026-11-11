@@ -99,7 +99,7 @@ npm start -- <source link>  # creates drafts/<number>.md
 npm run pub -- <number>     # publishes the edited draft
 ```
 
-All commands and flags are listed in [`ingestion/STEPS.md`](ingestion/STEPS.md).
+The other commands (`npm run image`, `npm run translate`, `npm run upload-image`) are the scripts in [`ingestion/package.json`](ingestion/package.json).
 
 ## Deployment
 
@@ -114,7 +114,7 @@ The `main` branch is deployed; `develop` is the working branch. The API has to b
 
 ## Notes for readers of the code
 
-The working notes in this repository ([`CLAUDE.md`](CLAUDE.md), [`BACKLOG.md`](BACKLOG.md), [`DEPLOY.md`](DEPLOY.md), the guides in `server/` and `ingestion/`) and the code comments are written in Ukrainian. The code, the interface and the site content are in English.
+The working notes in this repository ([`BACKLOG.md`](BACKLOG.md), [`DEPLOY.md`](DEPLOY.md)) are written in Ukrainian. The code, the interface and the site content are in English.
 
 ## Content and photos
 

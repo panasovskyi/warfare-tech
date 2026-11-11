@@ -53,7 +53,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: article.updatedAt,
       section: sectionLabel,
       tags: article.tags,
-      // alt — опис фото, а без нього заголовок статті
       images: [{ url: article.mainPicture, alt: article.photoAlt ?? article.title }],
     },
   };

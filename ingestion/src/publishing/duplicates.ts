@@ -4,14 +4,9 @@ import type { PublishingConfig } from '../config/publishing.config';
 import { toPublishingError } from './errors';
 
 const TIMEOUT_MS = 15_000;
-// Скільки статей просимо за один запит
 const PAGE_SIZE = 40;
-// 400 найновіших статей і обмеження кількості запитів. Старіші дублі навмисно не шукаємо:
-// така сама історія з іншого видання все одно дозволена, тож ця перевірка — зручність,
-// а не гарантія
 const MAX_PAGES = 10;
 
-// Стаття, знайдена на сайті
 export type PublishedMatch = {
   slug: string;
   title: string;
@@ -20,7 +15,6 @@ export type PublishedMatch = {
 type ListItem = { slug: string; title: string; sourceLink: string | null };
 type ListResponse = { items: ListItem[]; totalPages: number };
 
-// Ключ адреси або null, якщо адреса зіпсована
 const keyOrNull = (link: string): string | null => {
   try {
     return sourceLinkKey(link);
@@ -29,8 +23,6 @@ const keyOrNull = (link: string): string | null => {
   }
 };
 
-// Сервер не вміє фільтрувати за адресою джерела (і вона там не унікальна), тож найновіші
-// опубліковані статті читаємо сторінками й порівнюємо за нормалізованою адресою
 export const findPublishedBySourceLink = async (
   { apiBaseUrl }: PublishingConfig,
   link: string,

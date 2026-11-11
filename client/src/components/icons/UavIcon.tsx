@@ -1,7 +1,5 @@
 import { IconBase, type IconProps } from '@/components/icons/IconBase';
 
-// Дрон, вигляд спереду: пропелери, стійки моторів, корпус з камерою, шасі.
-// Не згори: чотири кола навколо квадрата читаються як символ ⌘
 export const UavIcon: React.FC<IconProps> = (props) => (
   <IconBase {...props}>
     <path d='M2.5 4.5h7M14.5 4.5h7M6 4.5V7M18 4.5V7M6 7l3 2.5M18 7l-3 2.5' />

@@ -1,10 +1,8 @@
-// Діапазон символів тексту рерайту: від start до end
 export type OverlapRange = {
   start: number;
   end: number;
 };
 
-// Результат порівняння рерайту з джерелом: числа, рядок-підсумок, попередження й місця для виділення
 export type OverlapReport = {
   longestRun: number;
   longestRunStart: string;
@@ -12,37 +10,25 @@ export type OverlapReport = {
   isTooClose: boolean;
   summary: string;
   warning: string | null;
-  // Діапазони символів рерайту, що повторюють джерело: вони виділяються в чернетці
   ranges: OverlapRange[];
 };
 
-// TODO: пороги — перші припущення, відкалібрувати на кількох справжніх статтях
-// Довжина «послідовності» слів, яку порівнюємо з джерелом
 const GRAM_SIZE = 8;
-// Скільки в послідовності має бути звичайних слів (не назв і чисел), щоб збіг рахувався
 const MIN_ORDINARY_WORDS_IN_GRAM = 4;
-// Однаковий уривок довший за це (у звичайних словах) вважається надто близьким
 const MAX_IDENTICAL_RUN = 12;
-// Частка спільних послідовностей, вище якої текст надто близький до джерела
 const MAX_SHARED_RATIO = 0.12;
-// Скільки слів показати в попередженні, щоб можна було знайти найдовший уривок
 const LOCATOR_WORDS = 6;
-// Відповідає правилу в промпті: більше п'яти звичайних слів підряд — забагато
 const HIGHLIGHT_MIN_ORDINARY_WORDS = 6;
 
 const QUOTED = /“[^”]*”|"[^"]*"/g;
 
-// Одне слово тексту разом з позицією, щоб потім можна було виділити його в чернетці
 type Token = {
   word: string;
-  // Назви, позначення, числа й перше слово речення: вони мають лишатися як у джерелі,
-  // тож не враховуються, коли вирішуємо, що текст «надто близький»
   isData: boolean;
   start: number;
   end: number;
 };
 
-// Розбиває текст на слова (літери й цифри) і запам'ятовує, де кожне слово стоїть
 const toTokens = (text: string, offset = 0): Token[] =>
   [...text.matchAll(/[\p{L}\p{N}]+/gu)].map((match) => {
     const start = offset + (match.index ?? 0);
@@ -55,7 +41,6 @@ const toTokens = (text: string, offset = 0): Token[] =>
     };
   });
 
-// Прямі цитати можуть збігатися з джерелом, тому порівнюється лише текст навколо них
 const splitOutsideQuotes = (
   text: string,
 ): Array<{ text: string; offset: number }> => {
@@ -73,11 +58,9 @@ const splitOutsideQuotes = (
   return parts;
 };
 
-// Кількість звичайних слів, без назв, позначень і чисел
 const countOrdinaryWords = (tokens: Token[]): number =>
   tokens.filter((token) => !token.isData).length;
 
-// Усі послідовності з GRAM_SIZE слів підряд, зі зсувом на одне слово
 const toGrams = (tokens: Token[]): Token[][] => {
   const grams: Token[][] = [];
 
@@ -88,11 +71,9 @@ const toGrams = (tokens: Token[]): Token[][] => {
   return grams;
 };
 
-// Ключ послідовності для пошуку в наборі: її слова через пробіл
 const gramKey = (gram: Token[]): string =>
   gram.map((token) => token.word).join(' ');
 
-// Шукає найдовші уривки рерайту, що слово в слово є в джерелі
 const findMaximalRuns = (tokens: Token[], source: Token[]): Token[][] => {
   const runs: Token[][] = [];
   let i = 0;
@@ -124,16 +105,12 @@ const findMaximalRuns = (tokens: Token[], source: Token[]): Token[][] => {
   return runs;
 };
 
-// Обгортає діапазони в ** (жирний): власник прибирає їх під час редагування,
-// а публікація видаляє те, що лишилось. Діапазон ріжеться на переносах рядків:
-// маркер не переходить через абзаци
 export const highlightMatches = (
   text: string,
   ranges: OverlapRange[],
 ): string => {
   let result = text;
 
-  // Йдемо з кінця, щоб попередні зміщення лишалися правильними, поки текст росте
   for (const { start, end } of [...ranges].sort((a, b) => b.start - a.start)) {
     const marked = result
       .slice(start, end)
@@ -149,16 +126,11 @@ export const highlightMatches = (
   return result;
 };
 
-// TODO: для перекладених статей (джерело не англійською) збіги завжди ≈0%, хоча текст іде за джерелом абзац за абзацом — метрика тут нічого не гарантує; вирішити, як оцінювати близькість до джерела (ручна перевірка чи перевірка моделлю)
-
-// Порівнює рерайт із джерелом: частка спільних послідовностей слів, найдовший однаковий уривок,
-// місця для виділення. Цитати в лапках не рахуються
 export const measureOverlap = (
   rewrite: string,
   source: string,
 ): OverlapReport => {
   const sourceTokens = toTokens(source);
-  // Усі послідовності джерела в наборі: для швидкого пошуку збігів
   const sourceGrams = new Set(toGrams(sourceTokens).map(gramKey));
 
   const segments = splitOutsideQuotes(rewrite)
@@ -175,7 +147,6 @@ export const measureOverlap = (
     for (const gram of toGrams(tokens)) {
       totalGrams += 1;
 
-      // Перелік назв і чисел — не копіювання: у послідовності мають переважати звичайні слова
       if (
         sourceGrams.has(gramKey(gram)) &&
         countOrdinaryWords(gram) >= MIN_ORDINARY_WORDS_IN_GRAM
@@ -204,11 +175,9 @@ export const measureOverlap = (
   }
 
   const sharedRatio = totalGrams > 0 ? sharedGrams / totalGrams : 0;
-  // Надто близько: або є завеликий однаковий уривок, або забагато спільних послідовностей
   const isTooClose =
     longestRun > MAX_IDENTICAL_RUN || sharedRatio > MAX_SHARED_RATIO;
 
-  // Рядок-підсумок: потрапляє в чернетку й консоль
   const summary = `${Math.round(sharedRatio * 100)}% of ${GRAM_SIZE}-word sequences also appear in the source; longest identical passage: ${longestRun} ordinary words (names, numbers and quotes not counted)`;
   const warning = isTooClose
     ? `Too close to the source: rephrase the identical passages. The longest one (${longestRun} ordinary words) starts with "${longestRunStart}…"`

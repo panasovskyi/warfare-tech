@@ -1,65 +1,33 @@
-// ─────────────────────────────────────────────────────────
-// globals.scss
-// Color tokens as CSS custom properties (var()), not SCSS
-// $variables — $vars are resolved once at compile time and
-// can never change again, so a light/dark toggle couldn't
-// touch them at runtime. Custom properties live in the actual
-// CSS output and can be reassigned per-theme just by swapping
-// the [data-theme] attribute on <html>, no rebuild needed.
-//
-// Imported once in app/layout.tsx, before the components, so
-// module styles come after it. A theme toggle (not built yet)
-// would set document.documentElement.dataset.theme = 'dark'.
-// ─────────────────────────────────────────────────────────
-
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
 :root {
-  // Native UI (scrollbars, form controls, the default canvas) follows the theme too
   color-scheme: light;
 
-  // Surfaces
   --color-bg: #ffffff;
-  --color-surface: #f6f6f4; // panels: featured band, newsletter card
-  --color-surface-2: #eeece5; // secondary surface: image/thumbnail placeholders
+  --color-surface: #f6f6f4;
+  --color-surface-2: #eeece5;
 
-  // Text
   --color-ink: #0e0e0f;
   --color-ink-rgb: 14, 14, 15;
   --color-text: var(--color-ink);
   --color-text-muted: #54565a;
   --color-text-faint: #9ca3af;
 
-  // Borders
   --color-border: #eeeeec;
-  // For tinted panels (War in Ukraine), where --color-border blends into
-  // the background. Built from ink, so it follows the theme on its own
   --color-border-translucent: rgba(var(--color-ink-rgb), 0.08);
 
-  // Accent (links, tags, buttons on hover, CTAs)
   --color-accent: #ff5a1f;
   --color-accent-rgb: 255, 90, 31;
   --color-accent-hover: #e14512;
 
-  // Keyboard focus ring. Darker than the accent on purpose: #ff5a1f
-  // falls under 3:1 on the tinted panels, this keeps 3.7:1+ on every
-  // light surface. Same value as accent-hover but a separate token,
-  // so retuning the hover doesn't touch the ring
   --color-focus: #e14512;
 
-  // Buttons
   --color-button-bg: var(--color-ink);
   --color-button-text: #ffffff;
 
-  // Text and overlay on photos (hero). The same in both themes: the photo
-  // always sits under a dark gradient, so text on it is always light.
-  // Not built from --color-ink-rgb — under the dark theme ink is light
   --color-on-image: #ffffff;
   --color-on-image-muted: rgba(255, 255, 255, 0.82);
-  // Підкладка під дрібним текстом прямо на фото (автор фото): під текстом може
-  // опинитись будь-яка частина знімка, і на білому небі біле без підкладки не читається.
-  // 0.65 тримає білий текст вище 6:1 навіть на чисто білому фоні
   --color-image-scrim: rgba(6, 6, 7, 0.65);
   --gradient-image-overlay: linear-gradient(
     to top,
@@ -67,10 +35,6 @@
     rgba(6, 6, 7, 0.5) 45%,
     rgba(6, 6, 7, 0) 75%
   );
-  // Обкладинка розділу: текст стоїть зліва внизу, а предмет на фото справа, тож темніє зліва
-  // (під заголовок і опис) і знизу, а решта кадру лишається світлою. Затемнення коротке: до
-  // 55% ширини зліва і до 65% висоти знизу, щоб не накривало техніку на фото (з довшим
-  // градієнтом F-35 на фото Air тонув у темряві). Однакова в обох темах, як і градієнт вище
   --gradient-cover-overlay:
     linear-gradient(
       to right,
@@ -84,9 +48,6 @@
       rgba(6, 6, 7, 0.15) 40%,
       rgba(6, 6, 7, 0) 65%
     );
-  // Те саме для телефона: фото займає всю ширину обкладинки, тож текст лежить прямо на ньому.
-  // Затемнення лише знизу, але щільніше й вище, щоб заголовок і опис читались на будь-якому
-  // фото
   --gradient-cover-overlay-sm: linear-gradient(
     to top,
     rgba(6, 6, 7, 0.82) 0%,
@@ -94,7 +55,6 @@
     rgba(6, 6, 7, 0.2) 100%
   );
 
-  // Category tags (kept constant across themes — only tints change)
   --color-cat-air: #2f6fed;
   --color-cat-air-tint: #e9eef2;
   --color-cat-land: #16a34a;
@@ -107,15 +67,6 @@
   --color-cat-space-tint: #ece9f3;
   --color-cat-uav: #d97706;
   --color-cat-uav-tint: #f5ecdf;
-  // Category colors, in two roles. -solid: the background of a section cover and of the
-  // hero label, under WHITE text (--section-solid); the same in both themes. -text: the
-  // color of small text and icons on the page (--section-color); the same as -solid in
-  // the light theme, lighter in the dark one (see below). Measured against the darkest
-  // background they sit on: the corner of the Top stories panel on /news
-  // (--color-surface plus the 6% accent glow), where small 11px labels need 4.5:1.
-  // Air, Cyber, Land and UAV are darkened to ≥ 4.7:1 there (on white ≥ 5.4:1);
-  // Naval (4.63) and Space (4.93) pass as they are. The base --color-cat-* above are
-  // not used as text
   --color-cat-air-solid: #185feb;
   --color-cat-land-solid: #14793a;
   --color-cat-naval-solid: #0e7490;
@@ -130,9 +81,6 @@
   --color-cat-cyber-text: var(--color-cat-cyber-solid);
   --color-cat-uav-text: var(--color-cat-uav-solid);
 
-  // "War in Ukraine" live-coverage hub. -blue: the flag stripe and the section cover
-  // background (white text on it); -blue-text: the same blue as text, lighter in the
-  // dark theme
   --color-ukraine-panel: #eef3fb;
   --color-ukraine-blue: #0057b7;
   --color-ukraine-blue-text: var(--color-ukraine-blue);
@@ -169,11 +117,6 @@
   --color-cat-space-tint: #241c33;
   --color-cat-uav-tint: #2c2013;
 
-  // Section colors as text on the dark surfaces: the dark ones from :root would not pass
-  // the contrast. The same hues, only lighter (HSL lightness raised until the contrast is
-  // ≥ 5:1 on the darkest of them: the corner of the Top stories panel, --color-surface
-  // plus the 6% accent glow, and the War in Ukraine panel; ≥ 5.8:1 on --color-bg). The
-  // -solid colors (covers, hero labels under white text) do not change
   --color-cat-air-text: #578bf0;
   --color-cat-land-text: #1ba34e;
   --color-cat-naval-text: #1399be;
@@ -184,10 +127,6 @@
 
   --color-ukraine-panel: #16202e;
 }
-
-// ─────────────────────────────────────────────────────────
-// Minimal global reset, wired to the tokens above
-// ─────────────────────────────────────────────────────────
 
 *,
 *::before,
@@ -210,12 +149,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-// Browsers give these elements their own margins (lists also get a 40px
-// indent and markers, figure 40px on the sides). Components have no
-// outer spacing — the parent sets the gaps — so everything starts at 0.
-// Headings also drop the browser size and weight: the level is document
-// structure, the size is design (a footer h2 is small, a card h3 is
-// bigger), so each component sets its own.
 h1,
 h2,
 h3,
@@ -233,8 +166,6 @@ blockquote {
   margin: 0;
 }
 
-// Lists here are structure (nav, card lists, tags). Markers in the
-// article text come back with the article body styles
 ul,
 ol {
   margin: 0;
@@ -247,41 +178,22 @@ a {
   text-decoration: none;
 }
 
-// height: auto keeps the aspect ratio when max-width shrinks an image
-// with width/height attributes. Images with fill aren't affected:
-// next/image sets their size inline
 img {
   max-width: 100%;
   height: auto;
   display: block;
 }
 
-// Form controls don't inherit fonts. font (not just font-family) brings
-// the size too — otherwise Chrome renders them at 13.33px
 button,
 input {
   font: inherit;
 }
 
-// Keyboard focus ring. :focus-visible matches only when the browser
-// decides focus should be shown (Tab, text fields), not on mouse clicks.
-// outline, not border or box-shadow: it doesn't shift the layout,
-// follows border-radius and stays in Windows high contrast mode
 :focus-visible {
   outline: $focus-ring-width solid var(--color-focus);
   outline-offset: $focus-ring-offset;
 }
 
-// ─────────────────────────────────────────────────────────
-// Layout
-// ─────────────────────────────────────────────────────────
-
-// Sticky footer: body is a column at least one screen tall, and <main>
-// (the only one, in app/layout.tsx) takes all the free space. On short
-// pages (not-found, error) the footer stays at the bottom instead of
-// floating mid-screen; long pages get their height from the content.
-// Next's own nodes in body (route announcer, dev overlay) are
-// position: absolute and stay out of the column.
 body {
   display: flex;
   flex-direction: column;
@@ -292,14 +204,6 @@ main {
   flex-grow: 1;
 }
 
-// Section color. Any element with data-section="<key>" gets two custom properties:
-// --section-color, the section's color as text (--color-cat-*-text, War in Ukraine —
-// the flag blue): card label, subcategory title, icons; and --section-solid, the same
-// color as a background under white text (--color-cat-*-solid): a section cover and the
-// hero label pill. They differ only in the dark theme, where text needs a lighter shade
-// than a background under white text. Keys match NEWS_SECTIONS. The News fallback
-// has no color: `initial` makes var() use the component's own fallback instead of
-// inheriting the color of a parent section
 @each $name in air, land, naval, space, cyber, uav {
   [data-section='#{$name}'] {
     --section-color: var(--color-cat-#{$name}-text);
@@ -317,14 +221,6 @@ main {
   --section-solid: initial;
 }
 
-// Centers content and caps its width at $container-max.
-// Padding counts inside max-width (border-box), so the gutters are
-// added on top: the content itself stays exactly $container-max wide.
-// For full-bleed bands (e.g. the header), put the background on an
-// outer element and .container inside it. Don't nest containers.
-// The side gutter is the --gutter custom property: 64px on desktop, narrower below the
-// breakpoints (the skip link takes its left offset from it too). A custom property
-// instead of a SCSS variable, so one value serves every place that needs the gutter
 :root {
   --gutter: #{$gutter};
 }
@@ -348,12 +244,6 @@ main {
   padding-inline: var(--gutter);
 }
 
-// ─────────────────────────────────────────────────────────
-// Accessibility utilities
-// ─────────────────────────────────────────────────────────
-
-// Visually hidden, but still read by screen readers. Used for text that has no
-// place in the design (fallback h1 on the homepage)
 .sr-only {
   position: absolute;
   width: 1px;
@@ -366,9 +256,6 @@ main {
   border: 0;
 }
 
-// "Skip to content": the first element in <body> (app/layout.tsx). Parked above the
-// viewport, not display: none, so it stays in the tab order; a keyboard focus slides
-// it into the top left corner. Colors follow the button tokens, so it works in both themes
 .skip-link {
   position: absolute;
   top: $space-4;
@@ -386,8 +273,6 @@ main {
   transform: none;
 }
 
-// <main> is only the programmatic focus target of the skip link (tabIndex -1), not an
-// interactive element, so it gets no focus ring
 main:focus {
   outline: none;
 }

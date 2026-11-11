@@ -3,8 +3,6 @@ import { ArticleCardSkeleton } from '@/features/article/components/ArticleCardSk
 
 const GRID_CARDS = 6;
 
-// Заглушка сітки новин розділу: її показують і loading.tsx (перший вхід у розділ), і
-// <Suspense> у сторінці (перехід між ?page=N, де loading.tsx не спрацьовує)
 export const SectionNewsListSkeleton = () => {
   return (
     <div className={styles.news}>

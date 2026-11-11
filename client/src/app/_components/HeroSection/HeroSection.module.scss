@@ -1,16 +1,6 @@
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
-// Картка на всю ширину контейнера: фото, поверх нього градієнт, текст знизу.
-// Шари знизу вгору: фото й градієнт (z-index: -1) → текст → розтягнуте
-// посилання заголовка → посилання на розділ і автора.
-// isolation: isolate — окремий контекст накладання: без нього шари з
-// від'ємним z-index пішли б під фон сторінки.
-// overflow: clip, а не hidden: так само обрізає фото по заокругленню, але
-// з hidden блок стає прокручуваним, і aspect-ratio вже не дає йому вирости
-// під довгий текст — текст обрізало б. З clip картка росте.
-// Нижче $bp-lg пропорція 5:2 замінена мінімальною висотою: у вузькій картці текст не
-// вміщувався б у таку низьку смугу, а висота й так росла б від нього нерівномірно
 .hero__article {
   position: relative;
   isolation: isolate;
@@ -22,7 +12,6 @@
   padding: $space-10 $space-12;
   border-radius: $radius-lg;
   overflow: clip;
-  // Фон, поки фото вантажиться
   background: var(--color-surface-2);
   color: var(--color-on-image);
 
@@ -44,7 +33,6 @@
   object-fit: cover;
 }
 
-// Градієнт — останній шар у картці, тож із тим самим z-index лягає над фото
 .hero__article::after {
   content: '';
   position: absolute;
@@ -53,9 +41,6 @@
   background: var(--gradient-image-overlay);
 }
 
-// Над розтягнутим посиланням заголовка, щоб лишатися клікабельним.
-// align-self — інакше у flex-колонці посилання розтягнулось би на всю ширину.
-// Великі літери — тут, а не в даних: скрінрідер читає текст з розмітки
 .hero__subcategoryLink {
   position: relative;
   z-index: 1;
@@ -69,15 +54,10 @@
   text-transform: uppercase;
 }
 
-// Плашка кольору розділу (--section-solid з globals за data-section) з білим
-// текстом, а не кольоровий текст: кольори розділів на темному фото дають
-// ≈ 3:1, а білий на них — від 4.5:1. Для запасного News кольору
-// немає — лишається білий текст без плашки
 .hero__subcategoryLink:hover {
   text-decoration: underline;
 }
 
-// max-width у ch — довжина рядка в символах (≈ 920px, як у макеті)
 .hero__title {
   max-width: 35ch;
   letter-spacing: $ls-heading;
@@ -91,8 +71,6 @@
   }
 }
 
-// Розтягує клік на всю картку: h1 і посилання не позиціоновані, тож inset
-// рахується від .hero__article
 .hero__titleLink::after {
   content: '';
   position: absolute;
@@ -103,8 +81,6 @@
   text-decoration: underline;
 }
 
-// ≈ 680px, як у макеті. На телефоні дрібніший і не довший за чотири рядки: інакше опис
-// займав би півекрана
 .hero__description {
   max-width: 60ch;
   font-size: $fs-lg;
@@ -120,7 +96,6 @@
   }
 }
 
-// Колір і розмір для ArticleByline — він їх успадковує
 .hero__byline {
   font-size: $fs-sm;
   color: var(--color-on-image-muted);

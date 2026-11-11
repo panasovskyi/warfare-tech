@@ -7,7 +7,6 @@
   gap: $space-6;
 }
 
-// Заголовок ліворуч, "View all" праворуч, на одній базовій лінії
 .latest__topWrapper {
   display: flex;
   justify-content: space-between;
@@ -21,8 +20,6 @@
   line-height: $lh-snug;
 }
 
-// Дві колонки через $space-12 — під цю сітку розраховані sizes
-// ArticleCardHorizontal за замовчуванням. На телефоні одна колонка
 .news {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

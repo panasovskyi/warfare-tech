@@ -1,6 +1,5 @@
 import { IconBase, type IconProps } from '@/components/icons/IconBase';
 
-// Посилання на сторонній ресурс: стрілка виходить із рамки. Для джерела статті
 export const ExternalLinkIcon: React.FC<IconProps> = (props) => (
   <IconBase {...props}>
     <path d='M14 4h6v6M20 4l-9 9' />

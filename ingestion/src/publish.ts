@@ -13,14 +13,12 @@ import {
 } from './publishing/duplicates';
 import { publishArticle } from './publishing/publishing';
 
-// Публікація чернетки: перевірки → попередження про фото → дублі на сайті → відправка → позначка й переїзд у published/
 const main = async () => {
   const args = process.argv.slice(2);
   const isDryRun = args.includes('--dry-run');
   const isForced = args.includes('--force');
   const [draftArg] = args.filter((arg) => !arg.startsWith('--'));
 
-  // Чернетки за замовчуванням нема, на відміну від translate та image: опубліковану статтю не відредагуєш і не видалиш
   if (!draftArg) {
     throw new Error(
       'Usage: npm run pub -- <draft: 1, 1.md or a path> [--dry-run] [--force]',
@@ -29,7 +27,6 @@ const main = async () => {
 
   const draftPath = resolveDraftPath(draftArg);
 
-  // Копії поруч із чернеткою схожі на чернетки, але ними не є: публікація такої поклала б на сайт старий текст
   const mainDraft = mainDraftOf(draftPath);
 
   if (mainDraft) {
@@ -46,7 +43,6 @@ const main = async () => {
     );
   }
 
-  // Файл правили руками, тож правила запускаємо знову тут, до відправки чогось
   const problems = [
     ...findCyrillicFields(article).map(
       (field) => `${field}: contains Cyrillic text, translate it to English first`,
@@ -68,7 +64,6 @@ const main = async () => {
     `Ready: "${article.title}" | ${section} | ${article.tags.length} tags | body ${article.body.length} chars`,
   );
 
-  // Не помилка: власне фото може не потребувати підпису, тож перед відправкою питаємо власника
   let pictureWarning: string | null = null;
 
   if (isPlaceholderPicture(article.mainPicture)) {
@@ -84,7 +79,6 @@ const main = async () => {
     console.warn(`WARNING: ${pictureWarning}`);
   }
 
-  // Інша чернетка тієї самої статті могла вже вийти: суддя тут сайт
   let duplicate: PublishedMatch | null = null;
 
   if (!isForced) {
@@ -110,7 +104,6 @@ const main = async () => {
     );
   }
 
-  // Пробний запуск: усе перевірено, на сервер нічого не відправляємо
   if (isDryRun) {
     console.log('Dry run: nothing was sent');
 
@@ -123,14 +116,12 @@ const main = async () => {
     return;
   }
 
-  // Усе перевірено: логін адміна й відправка
   const publishing = getPublishingConfig();
   const token = await login(publishing);
   const published = await publishArticle(publishing, token, article);
 
   console.log(`Published: ${published.slug}`);
 
-  // Спершу позначаємо чернетку як опубліковану, лише потім переносимо в published/
   try {
     await markPublished(draftPath, published.slug);
   } catch (error) {
@@ -140,7 +131,6 @@ const main = async () => {
       `WARNING: the article is live as "${published.slug}", but the file could not be marked (${reason}). Add publishedAs: "${published.slug}" to it by hand, or it can be published twice`,
     );
 
-    // Непозначена чернетка лишається в drafts/, щоб позначку ще можна було дописати руками
     return;
   }
 

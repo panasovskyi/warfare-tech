@@ -12,23 +12,18 @@ import { findPublishedBySourceLink, type PublishedMatch } from './publishing/dup
 import { rewrite } from './rewriting/rewriting';
 import { resolveSource } from './rewriting/sources';
 
-// Формат дати публікації
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 const USAGE = `Usage:
   npm start -- <article url> [publication date YYYY-MM-DD] [--image=<picture url>|page] [--credit="Photo author"] [--alt="Picture description"] [--force]
   npm start -- <article url> <path to a text file> [publication date YYYY-MM-DD] [--image=<picture url>] [--credit="Photo author"] [--alt="Picture description"] [--force]`;
 
-// Текст помилки для виводу в консоль
 const reasonOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-// TODO: пакетна обробка: список посилань або RSS замість однієї адреси за запуск (перевірка
-// дублів уже є; кожна стаття — окремий платний виклик, тож потрібен ліміт на запуск)
 // TODO: автотести: перевірки (checks, overlap, body-rules, читання й заміна у файлі чернетки)
 // поки були лише одноразовими скриптами
 
-// Створення чернетки: аргументи → дублі → текст → фото → рерайт → файл чернетки
 const main = async () => {
   const args = process.argv.slice(2);
   const imageOption = args
@@ -51,7 +46,6 @@ const main = async () => {
     throw new Error(USAGE);
   }
 
-  // Дата (або нічого) на другому місці означає, що файла з текстом нема: сторінку завантажуємо
   const isFetching = !second || DATE_PATTERN.test(second);
   const textPath = isFetching ? undefined : second;
   const dateOption = isFetching ? second : third;
@@ -68,15 +62,11 @@ const main = async () => {
     console.log(`Link cleaned (no tracking, no fragment): ${sourceLink}`);
   }
 
-  // Спершу, до читання чогось і до виклику моделі: невідомі джерела зупиняються тут
   const source = resolveSource(sourceLink);
 
-  // Попередження збираються по ходу запуску й потрапляють у чернетку
   const warnings: string[] = [];
 
-  // До платного виклику: двічі та сама стаття — найдорожча помилка
   if (!isForced) {
-    // Опублікована чернетка лежить у власній теці, але лишається чернеткою цієї статті
     const [existingDraft] = [
       ...(await findDraftsBySourceLink(DRAFTS_DIR, sourceLink)),
       ...(await findDraftsBySourceLink(PUBLISHED_DIR, sourceLink)),
@@ -103,7 +93,6 @@ const main = async () => {
     }
   }
 
-  // Текст джерела: з файла, який ти дав, або зі сторінки
   let sourceText: string;
   let pageDate: string | undefined;
   let pageImage: string | undefined;
@@ -123,7 +112,6 @@ const main = async () => {
     );
   }
 
-  // Дата, яку ти вказав, важливіша за дату зі сторінки
   const publishedAt = dateOption ?? pageDate;
 
   if (publishedAt && !dateOption) {
@@ -136,10 +124,6 @@ const main = async () => {
     );
   }
 
-  // Перед моделлю: це дешево, а зламані налаштування Cloudinary мають виявитись зараз,
-  // а не після оплаченої відповіді. Збій із фото ніколи не зупиняє запуск.
-  // Фото зі сторінки береться лише на вимогу (--image=page): перезавантаження чужого
-  // фото на свій сервер — це рішення, а не поведінка за замовчуванням.
   let mainPicture: string | undefined;
   const pictureUrl = imageOption === 'page' ? pageImage : imageOption;
 
@@ -161,23 +145,19 @@ const main = async () => {
     );
   }
 
-  // Підпис стосується справжнього фото: заглушка наша й підпису не потребує
   if (creditOption && !mainPicture) {
     warnings.push(
       '--credit is ignored: no picture was attached (the placeholder needs no credit)',
     );
   }
 
-  // Так само з описом: він стосується справжнього фото
   if (altOption && !mainPicture) {
     warnings.push(
       '--alt is ignored: no picture was attached (the placeholder stays decorative)',
     );
   }
 
-  // Платний виклик моделі
   const result = await rewrite({ sourceText, sourceName: source, publishedAt });
-  // Решту запису (тип, теги, фото) збираємо ми, а не модель
   const article = buildArticle(result.article, {
     source,
     sourceLink,
@@ -185,7 +165,6 @@ const main = async () => {
     photoCredit: mainPicture ? creditOption : undefined,
     photoAlt: mainPicture ? altOption : undefined,
   });
-  // Порушення правил сервера: публікація відмовить, доки їх не виправлено
   const problems = validateArticle(article);
 
   warnings.push(...result.warnings);
@@ -196,7 +175,6 @@ const main = async () => {
     );
   }
 
-  // Зберігаємо чернетку під наступним номером
   const { draftPath, ukrainianPath } = await saveDraft({
     article,
     problems,
@@ -209,7 +187,6 @@ const main = async () => {
   });
 
   console.log(`Draft: ${draftPath}`);
-  // Ім'я файла — лише число: заголовок підказує, про яку це статтю
   console.log(`Title: "${article.title}"`);
 
   if (ukrainianPath) {

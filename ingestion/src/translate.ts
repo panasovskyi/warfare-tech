@@ -15,14 +15,11 @@ import { translateArticle, translateItems } from './translation/translate';
 const USAGE =
   'Usage: npm run translate [-- <draft: 1 or 1.md, its Ukrainian version: 1.uk or 1.uk.md, or a path>] (no argument: the newest draft)';
 
-// Закінчення імені файла української версії
 const UKRAINIAN_SUFFIX = /\.uk\.md$/;
 
-// Значення з YAML як рядок; усе інше стає порожнім рядком
 const asText = (value: unknown): string =>
   typeof value === 'string' ? value : '';
 
-// Теги з YAML: масив або рядок через кому
 const asTags = (value: unknown): string[] => {
   if (Array.isArray(value)) {
     return value.map(String);
@@ -33,19 +30,15 @@ const asTags = (value: unknown): string[] => {
     : [];
 };
 
-// Чи існує файл
 const fileExists = (path: string): Promise<boolean> =>
   access(path).then(
     () => true,
     () => false,
   );
 
-// Текст помилки для виводу в консоль
 const reasonOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-// Зберігає чернетку такою, як вона була, поруч із перекладеною: після закриття файла
-// переклад у редакторі вже не скасуєш
 const saveBackup = async (draftPath: string, original: string): Promise<string> => {
   const base = draftPath.replace(/\.md$/, '');
 
@@ -64,8 +57,6 @@ const saveBackup = async (draftPath: string, original: string): Promise<string> 
   }
 };
 
-// Українська версія (<номер>.uk.md) — те, що власник правит для українського джерела:
-// вона перекладається цілком і замінює заголовок, опис і текст чернетки
 const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
   const draftPath = ukrainianPath.replace(UKRAINIAN_SUFFIX, '.md');
 
@@ -86,7 +77,6 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
 
   const draftData = (parse(splitDraft(original).front) ?? {}) as Record<string, unknown>;
 
-  // Імена файлів — лише числа: заголовок показує, яку статтю перекладаємо
   console.log(`Title: "${asText(draftData.title)}"`);
 
   if (draftData.publishedAs) {
@@ -96,7 +86,6 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
   const { front, body } = splitDraft(ukrainian);
   const data = (parse(front) ?? {}) as Record<string, unknown>;
 
-  // Зірочки ** виділення збігів не є частиною тексту
   const clean = (text: string): string =>
     stripHighlights(text, { boldHighlights: true }).trim();
 
@@ -132,7 +121,6 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
     ...applied.warnings,
   ];
 
-  // Текст джерела не зберігається: виняток для першої особи (компанія називає себе) тут не діє
   warnings.push(
     ...checkDraft({
       title: translated.title,
@@ -148,7 +136,6 @@ const translateFromUkrainian = async (ukrainianPath: string): Promise<void> => {
   }
 };
 
-// Українська, вписана прямо в англійську чернетку: перекладаються лише частини з кирилицею
 const translateDraft = async (draftPath: string): Promise<void> => {
   const original = await readFile(draftPath, 'utf-8');
   const { front, body } = splitDraft(original);
@@ -172,7 +159,6 @@ const translateDraft = async (draftPath: string): Promise<void> => {
   const hasUkrainianVersion = await fileExists(ukrainianPath);
 
   if (items.length === 0) {
-    // В англійській чернетці перекладати нічого, але її українську версію могли відредагувати
     if (hasUkrainianVersion) {
       console.log(`No Cyrillic text in the draft: translating its Ukrainian version instead`);
 
@@ -212,7 +198,6 @@ const translateDraft = async (draftPath: string): Promise<void> => {
   }
 };
 
-// Вибір чернетки (за аргументом або найновіша) і режиму: переклад з .uk.md чи лише кириличних частин
 const main = async () => {
   const [pathArg] = process.argv.slice(2).filter((arg) => !arg.startsWith('--'));
   const target = pathArg ? resolveDraftPath(pathArg) : await findNewestDraft(DRAFTS_DIR);
@@ -229,7 +214,6 @@ const main = async () => {
     return translateFromUkrainian(target);
   }
 
-  // Лишається текст, збережений до попереднього перекладу: це не чернетка для роботи
   const mainDraft = mainDraftOf(target);
 
   if (mainDraft) {

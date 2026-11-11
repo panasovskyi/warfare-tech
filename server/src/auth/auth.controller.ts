@@ -37,7 +37,6 @@ export class AuthController {
     return toSafeUser(user);
   }
 
-  // Ліміт частоти — у ThrottlerModule.forRoot (app.module.ts)
   @UseGuards(AppThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')

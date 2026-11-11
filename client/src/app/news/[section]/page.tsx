@@ -20,7 +20,6 @@ type Props = {
   searchParams: Promise<{ page?: string | string[] }>;
 };
 
-// Опис розділу береться з NEWS_SECTIONS: той самий текст стоїть під заголовком обкладинки.
 export async function generateMetadata({
   params,
   searchParams,
@@ -80,8 +79,6 @@ export default async function NewsSectionPage({ params, searchParams }: Props) {
       <div className={`container ${styles.page__content}`}>
         <SectionsList activeSection={section} />
 
-        {/* loading.tsx не спрацьовує, коли міняється лише ?page=N: старий список висів би до
-            кінця запиту. key змушує Suspense показати заглушку на кожну нову сторінку */}
         <Suspense
           key={normalizedPage}
           fallback={

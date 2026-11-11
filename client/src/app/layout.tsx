@@ -29,15 +29,11 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: 'Warfare Tech',
     locale: 'en_US',
-    // Картинка для соцмереж — файл app/opengraph-image.png (опис поруч, у .alt.txt)
   },
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    // suppressHydrationWarning: скрипт у <head> ставить data-theme на <html> до гідратації,
-    // тож атрибут на клієнті є, а в серверній розмітці його нема. Прапорець діє лише на сам
-    // <html>, не на вкладені елементи
     <html
       lang='en'
       className={`${manrope.variable} ${jetBrainsMono.variable}`}

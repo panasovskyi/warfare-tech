@@ -5,15 +5,8 @@ import {
 } from 'generated/prisma/enums';
 import z from 'zod';
 
-// Хости, з яких фронт показує фото: next/image кидає помилку на невідомому хості, і вся
-// сторінка списку віддає 500. Тримати в синхроні з images.remotePatterns у
-// client/next.config.ts (там і https як протокол) та з ingestion/src/article/article.schema.ts.
-// placehold.co — тестові дані й заглушка, res.cloudinary.com — фото, які завантажує ingestion
 const IMAGE_HOSTNAME = /^(placehold\.co|res\.cloudinary\.com)$/;
 
-// body — Markdown, але лише те, що вміє фронт: абзаци, посилання http(s) і картинки окремим
-// абзацом з описом і підписом, лише з дозволених хостів. Копія цих правил — у
-// ingestion/src/article/body-rules.ts: тримати в синхроні
 const MAX_BODY_IMAGES = 10;
 const IMAGE_IN_BODY = /!\[([^\]]*)\]\(\s*(\S+?)(?:\s+"([^"]*)")?\s*\)/g;
 const LINK_IN_BODY = /(?<!!)\[[^\]]*\]\(\s*(\S+?)(?:\s+"[^"]*")?\s*\)/g;
@@ -65,7 +58,6 @@ const checkBodyMarkdown = (body: string): string[] => {
     }
   }
 
-  // Картинки стоять між абзацами: фронт малює їх як figure на всю ширину колонки
   for (const paragraph of body.split(/\n\s*\n/)) {
     const found = [...paragraph.matchAll(IMAGE_IN_BODY)];
 

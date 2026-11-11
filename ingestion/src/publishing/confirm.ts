@@ -1,8 +1,6 @@
 import { createInterface } from 'node:readline/promises';
 
-// Ставить у терміналі питання y/n; Enter чи будь-що, крім y/yes, означає «ні»
 export const confirm = async (question: string): Promise<boolean> => {
-  // Без термінала відповісти нікому: readline чекав би вічно або прочитав порожню відповідь
   if (!process.stdin.isTTY) {
     throw new Error(
       'Not published: a question needs an answer, but this is not an interactive terminal. Run the command in a terminal',

@@ -7,16 +7,10 @@ import { getSectionTagAndLink } from '@/features/article/article.utils';
 
 type Props = {
   article: ArticleListItem;
-  // Рівень заголовка залежить від місця: під h2 блоку картка — h3
   headingLevel?: 2 | 3 | 4;
-  // Ширина фото на сторінці — підказка для next/image, яку версію фото вантажити.
-  // Залежить від сітки, в якій стоїть картка: секція з іншою сіткою передає своє значення
   sizes?: string;
 };
 
-// За замовчуванням — Latest: дві колонки через 48px, мініатюра — третина картки
-// без проміжку 20px. 1528px = контейнер 1400 + поля 2 × 64. Від 768px поля 32, нижче одна
-// колонка з полями 20
 const DEFAULT_SIZES =
   '(min-width: 1528px) 220px, (min-width: 1024px) calc((100vw - 216px) / 6), (min-width: 768px) calc((100vw - 152px) / 6), calc((100vw - 60px) / 3)';
 

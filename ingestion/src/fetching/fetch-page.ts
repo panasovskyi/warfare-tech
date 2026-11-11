@@ -1,20 +1,13 @@
 import { resolveSource } from '../rewriting/sources';
 
-// Помилка завантаження сторінки з поясненням для людини
 export class FetchError extends Error {}
 
-// Скільки чекаємо на відповідь сторінки
 const TIMEOUT_MS = 25_000;
-// Ліміт розміру сторінки
 const MAX_HTML_BYTES = 5 * 1024 * 1024;
-// Скільки редиректів дозволено пройти
 const MAX_REDIRECTS = 4;
-// Представляємось звичайним браузером: частина сайтів не віддає сторінку скриптам
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
 
-// Кожна адреса, яку збираємось запитати, — перша й кожна ціль редиректу —
-// має бути https і сайтом з ALLOWED_SOURCES: редирект ніколи не виведе нас за межі списку
 export const checkPageUrl = (value: string, base?: string): string => {
   let url: URL;
 
@@ -39,7 +32,6 @@ export const checkPageUrl = (value: string, base?: string): string => {
   return url.href;
 };
 
-// Завантажує сторінку, проходячи редиректи вручну. Повертає HTML і кінцеву адресу
 export const fetchPage = async (
   value: string,
 ): Promise<{ html: string; finalUrl: string }> => {
@@ -47,7 +39,6 @@ export const fetchPage = async (
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop += 1) {
     const response = await fetch(url, {
-      // Редиректи проходимо вручну, щоб перевірити кожну ціль до переходу
       redirect: 'manual',
       headers: {
         'User-Agent': USER_AGENT,
@@ -78,21 +69,18 @@ export const fetchPage = async (
       );
     }
 
-    // Нам потрібна саме HTML-сторінка (не PDF і не картинка)
     const contentType = response.headers.get('content-type') ?? '';
 
     if (!/html/i.test(contentType)) {
       throw new FetchError(`The address does not serve a web page (content-type: ${contentType || 'unknown'})`);
     }
 
-    // Розмір за заголовком: надто велику сторінку відсікаємо ще до завантаження
     const length = Number(response.headers.get('content-length') ?? 0);
 
     if (length > MAX_HTML_BYTES) {
       throw new FetchError('The page is too big');
     }
 
-    // Заголовок міг бути неправдивим чи відсутнім, тож перевіряємо ще й довжину самого тексту
     const html = await response.text();
 
     if (html.length > MAX_HTML_BYTES) {

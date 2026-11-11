@@ -1,11 +1,7 @@
-// Часовий пояс редакції: від нього залежать "yesterday" і дата. Задаємо явно,
-// бо інакше Intl бере пояс сервера, і локально й на проді дата могла б
-// різнитися на день
 const TIME_ZONE = 'Europe/Dublin';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Формати створюються один раз, а не на кожен виклик
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   timeZone: TIME_ZONE,
   month: 'short',
@@ -32,9 +28,6 @@ const calendarPartsFormat = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-// Календарна дата в TIME_ZONE: рік і номер дня. Номер — та сама дата як
-// північ UTC, поділена на добу: різниця двох номерів — точна кількість
-// календарних днів, без сюрпризів переходу на літній час
 function getCalendarDate(date: Date): { year: number; day: number } {
   const parts = calendarPartsFormat.formatToParts(date);
   const getPart = (type: Intl.DateTimeFormatPartTypes) =>
@@ -48,9 +41,6 @@ function getCalendarDate(date: Date): { year: number; day: number } {
   };
 }
 
-// "now", "5 mins ago", "3 hours ago", "yesterday", "Sep 27", "Sep 27, 2025".
-// Невалідна дата — порожній рядок: інакше Intl кидає RangeError, і падає
-// рендер усієї сторінки
 export function formatRelativeTime(isoString: string): string {
   const publishedDate = new Date(isoString);
 
@@ -77,8 +67,6 @@ export function formatRelativeTime(isoString: string): string {
     return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'} ago`;
   }
 
-  // Далі — за календарем у TIME_ZONE, а не за годинами: стаття з неділі 23:00
-  // у вівторок уранці — це вже дата, а не "yesterday"
   const published = getCalendarDate(publishedDate);
   const today = getCalendarDate(nowDate);
 
@@ -91,8 +79,6 @@ export function formatRelativeTime(isoString: string): string {
     : dateWithYearFormat.format(publishedDate);
 }
 
-// "October 2026": місяць і рік без дня, для сторінки автора. Невалідна дата — порожній рядок,
-// як у formatRelativeTime
 export function formatMonthYear(isoString: string): string {
   const date = new Date(isoString);
 
