@@ -4,7 +4,6 @@ import { ExternalLink } from '@/components/ui/ExternalLink/ExternalLink';
 import { TextPage } from '@/components/ui/TextPage/TextPage';
 import { GITHUB_REPO_URL } from '@/lib/links';
 
-// Вступ під заголовком, він же опис сторінки в <meta description>
 const DESCRIPTION =
   'Warfare Tech is a military technology news site built by one developer as a portfolio project. It is not a newsroom, and this page explains how the articles are made.';
 

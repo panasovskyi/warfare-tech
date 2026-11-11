@@ -18,7 +18,7 @@ type Props = {
 const DEFAULT_SIZES =
   '(min-width: 1528px) 435px, (min-width: 1024px) calc((100vw - 224px) / 3), (min-width: 640px) calc((100vw - 96px) / 2), calc(100vw - 40px)';
 
-// Фото і заголовок, без мітки й мети. Перша новина в SubcategorySection, картки SpecialReportSection
+// Фото і заголовок, без мітки й мети. Перша новина в SubcategorySection
 export const ArticleCardCompact: React.FC<Props> = ({
   article,
   headingLevel = 3,
