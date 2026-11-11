@@ -113,7 +113,6 @@ export const createArticleSchema = z
       .min(1, 'Photo credit cannot be empty')
       .max(200, 'Photo credit too long: maximum 200 characters')
       .optional(),
-    // Опис головного фото для скрінрідерів і соцмереж; без нього фото декоративне
     photoAlt: z
       .string()
       .trim()
