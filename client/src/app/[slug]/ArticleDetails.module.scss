@@ -9,7 +9,6 @@
   }
 }
 
-// Шапка, фото, текст з aside і футер — одна колонка з однаковими відступами
 .page__inner {
   display: flex;
   flex-direction: column;
@@ -20,7 +19,6 @@
   }
 }
 
-// ── Шапка ───────────────────────────────────────────────
 
 .page__header {
   display: flex;
@@ -28,7 +26,6 @@
   gap: $space-5;
 }
 
-// max-width у ch — довжина рядка в символах (≈ 1000px, як у макеті)
 .page__title {
   max-width: 34ch;
   letter-spacing: $ls-heading;
@@ -57,7 +54,6 @@
   }
 }
 
-// Аватар ліворуч на два рядки, праворуч ім'я над датою
 .author {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -83,11 +79,7 @@
   color: var(--color-text-muted);
 }
 
-// ── Головне фото ────────────────────────────────────────
 
-// Обгортка задає фото з fill розмір: position: relative — точка відліку,
-// aspect-ratio — висота від ширини, overflow: hidden — обрізає по заокругленню.
-// На телефоні пропорція 16:9 (як у карток): 2:1 дала б низьку смужку
 .page__mainPicWrapper {
   position: relative;
   aspect-ratio: $ratio-article;
@@ -105,9 +97,6 @@
   object-fit: cover;
 }
 
-// Автор фото на самому фото, у лівому нижньому куті. Пізніше за фото в розмітці й теж
-// positioned, тому лежить поверх нього без z-index. max-width — щоб довгий підпис
-// переносився, а не виходив за фото
 .page__mainPicCredit {
   position: absolute;
   left: $space-4;
@@ -121,11 +110,7 @@
   color: var(--color-on-image);
 }
 
-// ── Текст і aside ───────────────────────────────────────
 
-// Колонка тексту обмежена для зручної довжини рядка, aside праворуч.
-// Без aside лишається лише колонка тексту. Нижче $bp-lg одна колонка: текст, під ним aside
-// (без прилипання, див. AsideSection)
 .page__content {
   display: grid;
   grid-template-columns: minmax(0, $article-text-width) $article-aside-width;
@@ -139,11 +124,8 @@
   }
 }
 
-// Стилі самого aside — у _components/AsideSection
 
-// ── Футер статті ────────────────────────────────────────
 
-// Під колонкою тексту, тієї ж ширини
 .page__footer {
   display: flex;
   flex-direction: column;
@@ -171,7 +153,6 @@
   color: var(--color-text-muted);
 }
 
-// inline-flex + gap — відстань до іконки: у розмітці вони на різних рядках
 .source__link {
   display: inline-flex;
   align-items: center;
@@ -185,7 +166,6 @@
   text-decoration-color: var(--color-accent);
 }
 
-// Картка автора на тлі поверхні. wrap: на телефоні посилання переходить під ім'я
 .writer {
   display: flex;
   flex-wrap: wrap;
@@ -200,12 +180,10 @@
   }
 }
 
-// Аватар за замовчуванням того ж відтінку, що й картка, — тут біле тло
 .writer__avatar {
   background: var(--color-bg);
 }
 
-// Два span у розмітці: підпис "Written by" і ім'я
 .writer__name {
   display: flex;
   flex-direction: column;
@@ -219,8 +197,6 @@
   color: var(--color-text-muted);
 }
 
-// Вигляд посилання — в ArrowLink, тут лише розташування: праворуч у рядку картки, а на
-// телефоні окремим рядком під іменем
 .writer__link {
   margin-left: auto;
 

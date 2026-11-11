@@ -1,7 +1,5 @@
 @use 'variables' as *;
 
-// Кругла кнопка-іконка з рамкою, як стрілки пагінації. Розмір іконки — 1em, тож 20px
-// задає font-size. Кільце фокуса — глобальне :focus-visible
 .toggle {
   display: inline-flex;
   flex-shrink: 0;
@@ -23,8 +21,6 @@
   background: var(--color-surface);
 }
 
-// Обидві іконки в розмітці, а видима — за data-theme на <html>: так іконка правильна ще
-// до гідратації, без мерехтіння. Місяць у світлій темі, сонце в темній
 .toggle__sun {
   display: none;
 }

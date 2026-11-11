@@ -1,8 +1,6 @@
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
-// Нижній відступ перед футером, як у макеті (96px). Зверху відступу немає:
-// обкладинка йде впритул до хедера
 .page {
   padding-bottom: $space-24;
 
@@ -11,12 +9,6 @@
   }
 }
 
-// Обкладинка (фон, фото, градієнт, підпис) — у components/ui/PageCover. Тут лише вміст,
-// який стоїть усередині неї
-
-// Іконка розділу й заголовок в одному рядку. Розмір задає font-size обгортки: заголовок
-// наслідує його (reset у globals), а іконка малює 1em — тож вони завжди однакові.
-// 48px, як заголовок сторінки /news. Колір іконки — currentColor, тобто світлий
 .page__titleWrapper {
   display: flex;
   align-items: center;
@@ -39,17 +31,12 @@
   flex-shrink: 0;
 }
 
-// Верхня половина прапора синя, як і обкладинка Ukraine (--color-ukraine-blue), тож зливалась
-// з тлом. Світла обводка з проміжком повертає прапору форму. border-radius 6px — це
-// закруглення самого прапора (2 одиниці з 24 при ширині 1.5em × 48px), outline іде за ним
 [data-section='ukraine'] .page__icon {
   border-radius: 6px;
   outline: 2px solid var(--color-on-image);
   outline-offset: 2px;
 }
 
-// Опис розділу під заголовком, як опис у Hero: світлий приглушений текст, обмежена довжина
-// рядка
 .page__description {
   max-width: 60ch;
   font-size: $fs-lg;
@@ -57,15 +44,11 @@
   color: var(--color-on-image-muted);
 }
 
-// Капс — рішення дизайну, як у назв розділів на головній: підпис у даних звичайним
-// регістром ("Air"), тож скрінрідер читає його словом
 .page__title {
   text-transform: uppercase;
   letter-spacing: $ls-heading;
 }
 
-// Чипи, список і пагінація в одному .container з однаковим проміжком. gap, а не margin:
-// блок, що не відрендерився (список чи заглушка), не лишає після себе порожнього місця
 .page__content {
   display: flex;
   flex-direction: column;
@@ -78,7 +61,6 @@
   }
 }
 
-// Список, під ним пагінація
 .news {
   display: flex;
   flex-direction: column;
@@ -89,10 +71,6 @@
   }
 }
 
-// Три колонки з проміжками 48 і 56px — під цю сітку розраховані sizes у ArticleCardGrid.
-// minmax(0, 1fr), а не 1fr: звичайна колонка не стискається вужче за вміст,
-// і довге слово в заголовку розширило б свою колонку
-// На планшеті дві колонки, на телефоні одна
 .news__list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -109,7 +87,6 @@
   }
 }
 
-// Пагінація по центру, як у макеті сторінки розділу
 .news__pagination {
   display: flex;
   justify-content: center;

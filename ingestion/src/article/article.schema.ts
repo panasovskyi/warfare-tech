@@ -10,7 +10,6 @@ import {
 // TODO: автотест, що це дзеркало дає ті самі результати, що серверна схема (зараз це
 // перевіряв одноразовий скрипт)
 
-// Значення, які знає сервер (дзеркало enum-ів Prisma): об'єкт as const замість TS enum
 export const ArticleType = {
   NEWS: "NEWS",
 } as const;
@@ -89,7 +88,6 @@ export const articleSchema = z
       .optional(),
   })
 
-  // Правило статті: або «війна в Україні», або підкатегорія (рівно одне з двох)
   .superRefine((data, ctx) => {
     if (data.isWarInUkraine && data.subcategory) {
       ctx.addIssue({
@@ -109,7 +107,6 @@ export const articleSchema = z
     }
   })
 
-  // source і sourceLink мають бути разом: або обидва, або жодного
   .superRefine((data, ctx) => {
     if (data.source && !data.sourceLink) {
       ctx.addIssue({
@@ -128,15 +125,12 @@ export const articleSchema = z
     }
   })
 
-  // Текст має бути Markdown у межах того, що вміє малювати сайт
   .superRefine((data, ctx) => {
     for (const message of checkBodyMarkdown(data.body)) {
       ctx.addIssue({ code: "custom", path: ["body"], message });
     }
   });
 
-// Що зберігає файл чернетки. У чернетці нема статусу (його ставить публікація), а відсутня
-// підкатегорія записується як null, який серверна схема відхилила б.
 export type ArticleDraft = {
   type: (typeof ArticleType)[keyof typeof ArticleType];
   subcategory:
@@ -145,9 +139,7 @@ export type ArticleDraft = {
   isFeatured: boolean;
   isWarInUkraine: boolean;
   mainPicture: string;
-  // Порожнє, коли фото не потребує підпису (наша заглушка)
   photoCredit?: string;
-  // Опис головного фото для скрінрідерів; порожнє означає декоративне фото
   photoAlt?: string;
   title: string;
   description: string;
@@ -157,14 +149,12 @@ export type ArticleDraft = {
   sourceLink: string;
 };
 
-// Повертає проблеми, про які повідомив би сервер; порожній список означає, що сервер прийме статтю
 export const validateArticle = (article: ArticleDraft): string[] => {
   const result = articleSchema.safeParse({
     ...article,
     subcategory: article.subcategory ?? undefined,
   });
 
-  // Це не правило сервера: слова-заглушки, які upload-image лишає власникові на заміну
   const placeholders = findImagePlaceholders(article.body).map(
     (message) => `body: ${message}`,
   );

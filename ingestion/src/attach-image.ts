@@ -25,11 +25,8 @@ const USAGE = `Usage:
 Add --credit="Airbus" to any of them to fill photoCredit (the author shown under the photo)
 and --alt="A jet on the runway" to fill photoAlt (the description for screen readers; empty means a decorative picture).`;
 
-// Кладе фото в уже написану й відредаговану чернетку: без виклику моделі,
-// ніщо інше у файлі не змінюється
 const main = async () => {
   const args = process.argv.slice(2);
-  // --credit і --alt необов'язкові: порожнє значення означає «не задано»
   const credit =
     args
       .find((arg) => arg.startsWith('--credit='))
@@ -46,7 +43,6 @@ const main = async () => {
     throw new Error(USAGE);
   }
 
-  // Єдиний аргумент — це чернетка, коли він число (1) або закінчується на .md, інакше це фото
   const isFirstDraft =
     Boolean(second) || (first !== undefined && /^\d+$|\.md$/i.test(first));
   const draftArg = isFirstDraft ? first : undefined;
@@ -72,7 +68,6 @@ const main = async () => {
 
   const { article, publishedAs } = await readDraft(draftPath);
 
-  // Імена файлів — лише числа: заголовок показує, якій статті дістанеться фото
   console.log(`Title: "${article.title}"`);
 
   if (publishedAs) {
@@ -81,7 +76,6 @@ const main = async () => {
     );
   }
 
-  // Фото з теки photos після успіху видаляється, а явно названий файл лишається
   let photoFromFolder: string | undefined;
 
   if (!imageArg) {
@@ -99,7 +93,6 @@ const main = async () => {
 
   let imageUrl = imageArg;
 
-  // «page» — взяти головне фото зі сторінки статті-джерела
   if (imageArg === 'page') {
     const page = await fetchPage(article.sourceLink);
     const extracted = extractArticle(page.html, page.finalUrl);
@@ -114,7 +107,6 @@ const main = async () => {
   const picture = await getMainPicture(imageUrl);
   const original = await readFile(draftPath, 'utf-8');
 
-  // Правимо лише рядки фото в шапці, решта файла лишається як була
   const withPicture = dropPictureWarnings(setMainPicture(original, picture));
   const withCredit = credit
     ? setPhotoCredit(withPicture, credit)
@@ -132,7 +124,6 @@ const main = async () => {
     console.log(`Photo alt: ${alt}`);
   }
 
-  // Фото вже додано (і воно на Cloudinary), тож збій видалення вартий лише попередження
   if (photoFromFolder) {
     try {
       await deletePhoto(photoFromFolder);

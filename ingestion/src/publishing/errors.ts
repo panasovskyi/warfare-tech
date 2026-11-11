@@ -1,16 +1,13 @@
 import axios from 'axios';
 
-// Помилка публікації з готовим для людини повідомленням
 export class PublishingError extends Error {}
 
-// Форма тіла помилки сервера
 type ServerErrorBody = {
   message?: unknown;
   fieldErrors?: Record<string, string[]>;
   formErrors?: string[];
 };
 
-// Витягує з тіла відповіді всі пояснення: загальне повідомлення, помилки форми й окремих полів
 const readDetails = (data: unknown): string[] => {
   if (typeof data !== 'object' || data === null) {
     return [];
@@ -29,7 +26,6 @@ const readDetails = (data: unknown): string[] => {
   return [...new Set(details)];
 };
 
-// Сервер відповідає у формі { message, fieldErrors, formErrors }: показуємо все
 export const toPublishingError = (
   error: unknown,
   action: string,

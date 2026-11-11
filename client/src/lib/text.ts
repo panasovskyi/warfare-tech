@@ -1,7 +1,3 @@
-// Ініціали для аватара. Два слова й більше — перші літери першого й останнього
-// ("Editorial Team" → "ET", "John Ronald Tolkien" → "JT"), одне слово — дві
-// перші літери ("Reuters" → "RE"). Зайві пробіли не заважають: trim і розбиття
-// за будь-якою кількістю пробілів, тож порожніх "слів" не буде
 export function getInitials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   const first = words[0];

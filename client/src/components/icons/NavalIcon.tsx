@@ -1,7 +1,5 @@
 import { IconBase, type IconProps } from '@/components/icons/IconBase';
 
-// Корабель на хвилях, вигляд збоку: корпус, дві надбудови, щогла з вимпелом.
-// Вимпел — в один бік: щогла з поперечкою читалася б як хрест
 export const NavalIcon: React.FC<IconProps> = (props) => (
   <IconBase {...props}>
     <path d='M2 14.5h20l-2.5 4.5h-15z' />

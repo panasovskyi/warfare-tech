@@ -1,7 +1,5 @@
 import z from 'zod';
 
-// Схема пошуку не має бути суворішою за дані, що вже лежать у базі:
-// статті зі slug старого формату інакше отримають 400 замість сторінки.
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const getArticleDetailsSchema = z.object({

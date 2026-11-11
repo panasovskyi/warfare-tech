@@ -8,8 +8,6 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Скільки проксі стоїть перед сервером: від цього залежить req.ip, а на ньому тримається
-  // ліміт логіну. Саме число: рядок з env Express прочитав би як адресу, а не кількість
   const trustProxy = Number(process.env.TRUST_PROXY) || 1;
 
   app.set('trust proxy', trustProxy);

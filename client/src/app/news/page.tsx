@@ -22,7 +22,6 @@ export async function generateMetadata({
     title: pageNumber === 1 ? 'News' : `News — page ${pageNumber}`,
     description:
       'Every story across air, land, naval, space, cyber, UAV and the war in Ukraine, newest first.',
-    // Відносна адреса: домен додає metadataBase з кореневого layout
     alternates: {
       canonical: pageNumber === 1 ? '/news' : `/news?page=${pageNumber}`,
     },

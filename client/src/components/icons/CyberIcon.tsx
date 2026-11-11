@@ -1,6 +1,5 @@
 import { IconBase, type IconProps } from '@/components/icons/IconBase';
 
-// Мікросхема: корпус, кристал, по три виводи з кожного боку
 export const CyberIcon: React.FC<IconProps> = (props) => (
   <IconBase {...props}>
     <rect x='6' y='6' width='12' height='12' rx='2' />

@@ -9,9 +9,6 @@ const nextConfig: NextConfig = {
     ],
   },
   sassOptions: {
-    // Lets any .scss file write `@use 'variables'` without relative paths.
-    // process.cwd() instead of __dirname: on Node 22.18+ Next loads this
-    // file as native ESM, where __dirname is not defined.
     loadPaths: [path.join(process.cwd(), 'src/styles')],
   },
 };

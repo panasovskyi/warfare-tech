@@ -1,9 +1,6 @@
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
-// Тонована панель із прапорною смужкою зверху.
-// position: relative — для смужки; overflow: clip — обрізає її по заокругленню.
-// Поля панелі менші на вужчих екранах; від них залежать sizes ArticleCardVertical
 .ukraine {
   position: relative;
   display: flex;
@@ -23,8 +20,6 @@
   }
 }
 
-// Смужка декоративна, тож не елемент у розмітці, а ::before:
-// ліва половина синя, права жовта, як у макеті
 .ukraine::before {
   content: '';
   position: absolute;
@@ -37,11 +32,6 @@
   );
 }
 
-// Заголовок із підписом ліворуч, посилання праворуч.
-// center, а не baseline: базова лінія h2 — це його перший елемент, прапор-svg,
-// а в svg немає текстової базової лінії, тож браузер бере низ іконки —
-// і підпис та посилання сідали нижче за текст заголовка.
-// wrap: на телефоні заголовок із підписом і посилання не вміщаються в один рядок
 .ukraine__top {
   display: flex;
   flex-wrap: wrap;
@@ -57,8 +47,6 @@
   gap: $space-1 $space-3;
 }
 
-// inline-flex + gap — відстань між прапором і текстом: JSX прибирає пробіл
-// між тегом і текстом на різних рядках
 .ukraine__title {
   display: inline-flex;
   align-items: center;
@@ -68,7 +56,6 @@
   line-height: $lh-snug;
 }
 
-// Іконка має розмір 1.5em × 1em, тож менший font-size — менший прапор
 .ukraine__flag {
   font-size: $fs-lg;
 }
@@ -78,8 +65,6 @@
   color: var(--color-text-muted);
 }
 
-// Головна новина і список, 7 : 5. Під цю сітку розраховані sizes
-// ArticleCardVertical за замовчуванням. Нижче $bp-lg одна колонка: новина, під нею список
 .ukraine__content {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
@@ -103,7 +88,6 @@
   font-weight: $fw-bold;
 }
 
-// На тонованій панелі звичайну межу не видно — напівпрозора
 .ukraine__newsItem {
   padding-block: $space-3;
   border-top: 1px solid var(--color-border-translucent);

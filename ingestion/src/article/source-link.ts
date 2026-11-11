@@ -1,8 +1,6 @@
-// Параметри, що лише кажуть, звідки прийшов клік: без них стаття та сама
 const TRACKING_PARAMETER =
   /^(utm_.*|fbclid|gclid|dclid|msclkid|mc_cid|mc_eid|igshid|oref|ncid|cmpid)$/i;
 
-// Адреса, яка зберігається в чернетці й показується під статтею: без фрагмента й без трекінгу
 export const normalizeSourceLink = (value: string): string => {
   const url = new URL(value.trim());
 
@@ -17,8 +15,6 @@ export const normalizeSourceLink = (value: string): string => {
   return url.href;
 };
 
-// Що спільного в двох адрес однієї статті: www., кінцевий слеш і порядок решти параметрів
-// не роблять її іншою статтею
 export const sourceLinkKey = (value: string): string => {
   const url = new URL(normalizeSourceLink(value));
   const path = url.pathname.replace(/\/+$/, '') || '/';

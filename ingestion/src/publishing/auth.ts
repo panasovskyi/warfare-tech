@@ -4,7 +4,6 @@ import { PublishingError, toPublishingError } from './errors';
 
 const TIMEOUT_MS = 15_000;
 
-// Токен живе 30 днів, а оновлення нема, тому кожен запуск логіниться заново
 export const login = async ({
   apiBaseUrl,
   login: identifier,

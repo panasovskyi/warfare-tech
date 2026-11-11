@@ -15,10 +15,6 @@ type Props = {
   params: Promise<{ login: string }>;
 };
 
-// Next віддає сегмент адреси закодованим (логін "john doe" приходить як "john%20doe"), а
-// authorApi кодує логін сам, тож спершу розкодовуємо: інакше вийшло б подвійне кодування.
-// Невідомий логін (404) і логін, що не проходить правила сервера (400), — це "сторінки нема".
-// Решта помилок (5xx, мережа) піднімається до app/error.tsx
 const getAuthorOrNotFound = async (
   loginParam: string,
 ): Promise<AuthorProfile> => {
@@ -43,8 +39,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Як у сторінки статті: порожній список — сторінка автора генерується при першому візиті й
-// далі віддається з кешу, а не рендериться на кожен запит
 export async function generateStaticParams() {
   return [];
 }
@@ -56,7 +50,6 @@ export default async function AuthorPage({ params }: Props) {
   // TODO: профіль віддає лише 10 останніх статей автора. Для пагінації чи посилання «всі статті»
   // потрібен фільтр за автором у GET /articles на сервері
 
-  // Картка чекає статтю з автором, а профіль віддає статті без нього: автор тут один
   const author = { login: profile.login, fullName: profile.fullName };
   const articles: ArticleListItem[] = profile.articles.map((article) => ({
     ...article,

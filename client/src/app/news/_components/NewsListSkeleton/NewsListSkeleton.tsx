@@ -7,12 +7,9 @@ import { ArticleRowSkeleton } from '@/features/article/components/ArticleRowSkel
 const LATEST_ROWS = 6;
 
 type Props = {
-  // Top stories є лише на першій сторінці списку
   hasTopStories?: boolean;
 };
 
-// Заглушка списку новин: її показують і loading.tsx (перший вхід на /news), і <Suspense>
-// у сторінці (перехід між ?page=N, де loading.tsx не спрацьовує)
 export const NewsListSkeleton = ({ hasTopStories = true }: Props) => {
   return (
     <>

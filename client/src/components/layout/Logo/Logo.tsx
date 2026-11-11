@@ -1,13 +1,9 @@
 import styles from './Logo.module.scss';
 
 type Props = {
-  // Лише знак, без назви. Тоді в батьківського посилання має бути aria-label
   markOnly?: boolean;
 };
 
-// Логотип Warfare Tech: плитка кольору акценту з "wt" і назва поруч.
-// Літери намальовані лініями, а не шрифтом: знак не залежить від завантаження Manrope,
-// і той самий SVG годиться для favicon. Розмір — від font-size батька (знак 1.35em)
 export const Logo: React.FC<Props> = ({ markOnly = false }) => (
   <span className={styles.logo}>
     <svg

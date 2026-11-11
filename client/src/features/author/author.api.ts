@@ -1,7 +1,6 @@
 import type { AuthorProfile } from '@/features/author/author.types';
 import { api } from '@/lib/api/client';
 
-// Як у списків статей: нова стаття з'являється в профілі не пізніше ніж за 5 хвилин
 const PROFILE_REVALIDATE_SECONDS = 300;
 
 export const authorApi = {

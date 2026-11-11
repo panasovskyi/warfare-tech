@@ -1,7 +1,6 @@
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
-// Відступи сторінки й розміри заголовка — як у сторінки статті
 .textPage {
   padding-block: $space-12 $space-24;
 
@@ -10,7 +9,6 @@
   }
 }
 
-// Шапка й текст — одна колонка
 .textPage__inner {
   display: flex;
   flex-direction: column;
@@ -54,8 +52,6 @@
   }
 }
 
-// Вміст приходить дітьми (section, h2, p, ul, ol, a), тому стилі — за тегами, як у
-// ArticleBody. gap тут — відстань між розділами. Ширина й шрифт — як у тексту статті
 .textPage__body {
   display: flex;
   flex-direction: column;
@@ -63,7 +59,6 @@
   max-width: $article-text-width;
   font-size: $fs-lg;
   line-height: $lh-loose;
-  // Довга адреса в тексті не має розпирати колонку
   overflow-wrap: break-word;
 
   @include bp-down($bp-md) {
@@ -71,7 +66,6 @@
   }
 }
 
-// Розділ: заголовок, абзаци й списки з однаковою відстанню між собою
 .textPage__body section {
   display: flex;
   flex-direction: column;
@@ -84,8 +78,6 @@
   line-height: $lh-snug;
 }
 
-// reset прибирає маркери й відступ в усіх списків (там це структура: меню, картки), а в
-// тексті вони потрібні
 .textPage__body ul,
 .textPage__body ol {
   padding-left: $space-6;
@@ -103,7 +95,6 @@
   margin-top: $space-2;
 }
 
-// Як у тексті статті: колір тексту, а підкреслення акцентом
 .textPage__body a {
   text-decoration: underline;
   text-decoration-color: var(--color-accent);

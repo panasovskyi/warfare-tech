@@ -1,28 +1,22 @@
 import { Readability } from '@mozilla/readability';
 import { JSDOM, VirtualConsole } from 'jsdom';
 
-// Помилка видобування статті зі сторінки
 export class ExtractError extends Error {}
 
 export type ExtractedArticle = {
   title: string;
   text: string;
-  // YYYY-MM-DD, як указав видавець; undefined, якщо на сторінці дати нема
   publishedAt?: string;
   imageUrl?: string;
 };
 
-// Сервер вимагає від тексту статті 1000 символів: коротше джерело — це заглушка paywall або не стаття
 const MIN_TEXT_CHARS = 1000;
 
-// jsdom друкує кожну помилку розбору CSS сторінки: нам це не цікаво
 const quiet = () => new VirtualConsole();
 
-// Бере з рядка дату YYYY-MM-DD; неіснуюча дата (скажімо, 30 лютого) відкидається
 const toDay = (value: string | null | undefined): string | undefined => {
   const day = value?.trim().slice(0, 10);
 
-  // Перевірка «туди й назад» відкидає неіснуючі дати, тож хибне значення не дійде до моделі
   if (
     day &&
     /^\d{4}-\d{2}-\d{2}$/.test(day) &&
@@ -35,7 +29,6 @@ const toDay = (value: string | null | undefined): string | undefined => {
   return undefined;
 };
 
-// Рекурсивно шукає поле datePublished у JSON-LD будь-якої вкладеності
 const findDatePublished = (node: unknown): string | undefined => {
   if (Array.isArray(node)) {
     for (const item of node) {
@@ -68,9 +61,6 @@ const findDatePublished = (node: unknown): string | undefined => {
   return undefined;
 };
 
-// defence-ua.com не віддає дату в метаданих: для нього тут завжди undefined, і дату
-// вказують другим аргументом npm start.
-// Дата публікації: спершу мета-тег, потім JSON-LD, потім інші мета-теги
 const readPublishedAt = (document: Document): string | undefined => {
   const fromMeta = toDay(
     document
@@ -92,7 +82,6 @@ const readPublishedAt = (document: Document): string | undefined => {
         return day;
       }
     } catch {
-      // Зламаний блок JSON-LD трапляється часто: просто пробуємо наступний
     }
   }
 
@@ -103,8 +92,6 @@ const readPublishedAt = (document: Document): string | undefined => {
   );
 };
 
-// Адреса головного фото з og:image (або twitter:image). getAttribute сам перетворює
-// &amp; на &, а підписані адреси фото потребують саме &
 const readImageUrl = (document: Document, pageUrl: string): string | undefined => {
   const value = (
     document.querySelector('meta[property="og:image"]') ??
@@ -122,8 +109,6 @@ const readImageUrl = (document: Document, pageUrl: string): string | undefined =
   }
 };
 
-// Власний textContent у Readability губить розриви абзаців, тож текст збираємо з його HTML.
-// Підписи до фото навмисно не потрапляють: їх нема в цих тегах.
 const toParagraphs = (html: string): string => {
   const { document } = new JSDOM(html, { virtualConsole: quiet() }).window;
   const lines: string[] = [];
@@ -139,16 +124,12 @@ const toParagraphs = (html: string): string => {
   return lines.join('\n\n');
 };
 
-// Видобуває зі сторінки заголовок, текст абзацами, дату публікації й адресу фото.
-// Менше 1000 символів тексту — помилка
 export const extractArticle = (html: string, pageUrl: string): ExtractedArticle => {
-  // Скрипти не запускаються й нічого не вантажиться: jsdom лише розбирає розмітку
   const { document } = new JSDOM(html, {
     url: pageUrl,
     virtualConsole: quiet(),
   }).window;
 
-  // Читаємо до Readability: він переписує документ
   const publishedAt = readPublishedAt(document);
   const imageUrl = readImageUrl(document, pageUrl);
 

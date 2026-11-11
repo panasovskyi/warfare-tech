@@ -10,8 +10,6 @@ export type PublishedArticle = {
   slug: string;
 };
 
-// Лише поля, які знає серверна схема створення статті. Відсутня підкатегорія
-// пропускається, а не надсилається як null; статус визначаємо тут: ручна перевірка вже була.
 export const toPayload = (article: ArticleDraft) => ({
   type: article.type,
   subcategory: article.subcategory ?? undefined,
@@ -29,7 +27,6 @@ export const toPayload = (article: ArticleDraft) => ({
   sourceLink: article.sourceLink,
 });
 
-// Відправляє статтю на сервер і повертає id та slug створеної статті
 export const publishArticle = async (
   { apiBaseUrl }: PublishingConfig,
   token: string,

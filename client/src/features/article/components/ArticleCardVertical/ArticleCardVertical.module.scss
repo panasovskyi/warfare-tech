@@ -1,7 +1,5 @@
 @use 'variables' as *;
 
-// Фото зверху, під ним заголовок, опис і час.
-// position: relative — межі для розтягнутого посилання заголовка
 .card {
   position: relative;
   display: flex;
@@ -9,9 +7,6 @@
   gap: $space-2;
 }
 
-// Обгортка задає фото з fill розмір: position: relative — точка відліку,
-// aspect-ratio — висота від ширини, overflow: hidden — обрізає по заокругленню.
-// Фон видно, поки фото вантажиться
 .card__imageWrapper {
   position: relative;
   aspect-ratio: $ratio-card;
@@ -31,16 +26,12 @@
   line-height: $lh-snug;
 }
 
-// Розтягує клік на всю картку: заголовок і посилання не позиціоновані,
-// тож inset рахується від .card
 .card__link::after {
   content: '';
   position: absolute;
   inset: 0;
 }
 
-// Підкреслення акцентом, а не акцентний колір тексту: #ff5a1f на білому
-// як дрібний текст не проходить за контрастом
 .card:hover .card__link {
   text-decoration: underline;
   text-decoration-color: var(--color-accent);
@@ -50,8 +41,6 @@
   color: var(--color-text-muted);
 }
 
-// Час публікації й час читання в один рядок. Шрифт і колір — на рядку, діти їх успадковують.
-// Час окремо від автора — моноширинним, як у макеті
 .card__meta {
   display: flex;
   gap: $space-3;
@@ -60,11 +49,6 @@
   color: var(--color-text-muted);
 }
 
-// Час читання відділяється від часу публікації крапкою, а не лише проміжком. Селектор із
-// сусідом (.card__time + …): крапка є лише коли час публікації відрендерився. На зіпсованій
-// даті RelativeTime не малює нічого, і безумовна крапка стояла б у рядку першою. Крапка
-// декоративна: другий рядок у content ('') ховає її від скрінрідера. margin дорівнює gap
-// рядка, тож крапка посередині. nowrap — щоб "4 min read" не ламався на два рядки
 .card__readingTime {
   white-space: nowrap;
 }

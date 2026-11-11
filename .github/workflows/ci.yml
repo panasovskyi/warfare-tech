@@ -12,7 +12,6 @@ jobs:
     name: Client
     runs-on: ubuntu-latest
 
-    # Усі команди завдання виконуються в теці client
     defaults:
       run:
         working-directory: client
@@ -31,7 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Типи PageProps і LayoutProps Next генерує сам; без dev і build їх дає typegen
       - name: Generate route types
         run: npx next typegen
 
@@ -41,7 +39,6 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      # next build тут не запускається: збірка ходить до API, а її й так робить Vercel
   server:
     name: Server
     runs-on: ubuntu-latest
@@ -92,6 +89,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Лінту в ingestion нема, лише перевірка типів
       - name: Type check
         run: npm run typecheck

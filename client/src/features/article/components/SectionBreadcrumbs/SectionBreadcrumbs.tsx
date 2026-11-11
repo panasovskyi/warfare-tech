@@ -9,19 +9,11 @@ import { ChevronRightIcon } from '@/components/icons/ChevronRightIcon';
 
 type Props = {
   section: ArticleLabelSection;
-  // Іконка розділу біля його назви. Сторінка розділу вимикає її: там уже є велика
-  // іконка в заголовку
   isShowIcon?: boolean;
-  // Світлі крихти для кольорового тла (обкладинка розділу): колір розділу на такому
-  // тлі зливався б із ним
   isOnImage?: boolean;
-  // Остання ланка веде на саму сторінку (сторінка розділу): aria-current повідомляє про це
-  // скрінрідеру. На сторінці новини ланка розділу — батьківська, там проп не потрібен
   isCurrentPage?: boolean;
 };
 
-// Крихти розділу: News › розділ. Беруть ключ розділу, а не статтю: той самий вигляд
-// і на сторінці новини, і на сторінці розділу
 export const SectionBreadcrumbs: React.FC<Props> = ({
   section,
   isShowIcon = true,

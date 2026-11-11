@@ -7,19 +7,12 @@ import { getSectionTagAndLink } from '@/features/article/article.utils';
 
 type Props = {
   article: ArticleListItem;
-  // Рівень заголовка залежить від місця: під h2 блоку картка — h3
   headingLevel?: 2 | 3 | 4;
-  // Ширина фото на сторінці — підказка для next/image, яку версію фото вантажити.
-  // Залежить від сітки, в якій стоїть картка: секція з іншою сіткою передає своє значення
   sizes?: string;
 };
 
-// Мініатюра має фіксовану ширину, тож і sizes фіксований; на малому телефоні фото зверху на
-// всю ширину (поля 20)
 const DEFAULT_SIZES = '(min-width: 640px) 240px, calc(100vw - 40px)';
 
-// Рядок списку: мініатюра зліва, справа мітка, заголовок, опис, автор і час.
-// Список Latest на /news. Межі й відступи між рядками задає список
 export const ArticleCardRow: React.FC<Props> = ({
   article,
   headingLevel = 3,

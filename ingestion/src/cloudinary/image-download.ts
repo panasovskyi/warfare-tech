@@ -1,26 +1,19 @@
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 
-// Помилка завантаження чи читання фото
 export class ImageError extends Error {}
 
-// Максимальний розмір фото
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-// Дозволені формати фото (і для файлів з диска, і для завантажень)
 export const LOCAL_IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif']);
-// Скільки чекаємо на завантаження фото
 const TIMEOUT_MS = 20_000;
 const USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
 
-// Це не повний захист від SSRF (ім'я, що вказує на приватну адресу, проходить),
-// але досить, щоб відсіяти очевидні випадки, поки адресу вводить людина
 const isPrivateHost = (hostname: string): boolean => {
   if (hostname === 'localhost' || hostname.endsWith('.local')) {
     return true;
   }
 
-  // IPv6-адреси записуються в дужках
   if (hostname.startsWith('[')) {
     return true;
   }
@@ -44,7 +37,6 @@ const isPrivateHost = (hostname: string): boolean => {
   );
 };
 
-// Перевіряє адресу фото: лише https і не локальна мережа
 export const assertImageUrl = (value: string): URL => {
   let url: URL;
 
@@ -65,7 +57,6 @@ export const assertImageUrl = (value: string): URL => {
   return url;
 };
 
-// SVG навмисно не дозволено: у ньому можуть бути скрипти
 export const assertImageResponse = (
   contentType: string | null,
   contentLength: number | null,
@@ -88,7 +79,6 @@ export const assertImageResponse = (
   }
 };
 
-// Завантажує фото за адресою з усіма перевірками й повертає його вміст
 export async function downloadImage(value: string): Promise<Buffer> {
   const url = assertImageUrl(value);
 
@@ -107,7 +97,6 @@ export async function downloadImage(value: string): Promise<Buffer> {
     );
   }
 
-  // Редирект міг відвести від https
   if (!response.url.startsWith('https://')) {
     throw new ImageError('The image URL redirected away from https');
   }
@@ -128,7 +117,6 @@ export async function downloadImage(value: string): Promise<Buffer> {
   return buffer;
 }
 
-// Фото, що вже лежить на цьому комп'ютері: той самий ліміт розміру й ті самі формати, що й для завантаження
 export async function readLocalImage(filePath: string): Promise<Buffer> {
   const extension = path.extname(filePath).toLowerCase();
 

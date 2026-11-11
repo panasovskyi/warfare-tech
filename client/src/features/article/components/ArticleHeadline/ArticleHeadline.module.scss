@@ -1,9 +1,5 @@
 @use 'variables' as *;
 
-// Рядок без фото: необов'язковий час над заголовком. Межі й відступи між
-// рядками задає список, у якому стоїть рядок.
-// line-height тут, а не на посиланні: у рядкового елемента власний
-// line-height не зменшує висоту рядка блока
 .headline {
   position: relative;
   display: flex;
@@ -12,7 +8,6 @@
   line-height: $lh-snug;
 }
 
-// Час окремо від автора — моноширинним, як у макеті
 .headline__time {
   font-family: $font-mono;
   font-size: $fs-xs;
@@ -23,7 +18,6 @@
   font-weight: $fw-semibold;
 }
 
-// Клікабельний увесь рядок, разом із часом
 .headline__link::after {
   content: '';
   position: absolute;

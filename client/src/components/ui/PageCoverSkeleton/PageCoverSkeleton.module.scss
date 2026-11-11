@@ -1,8 +1,6 @@
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
-// Ті самі відступи, висота й вирівнювання донизу, що в PageCover з фото (на кожній ширині
-// екрана). Фон нейтральний: колір розділу заглушка не знає
 .cover {
   position: relative;
   isolation: isolate;
@@ -24,8 +22,6 @@
   }
 }
 
-// Місце фото: права частина обкладинки тієї самої ширини, лівий край так само згасає
-// (на телефоні — вся ширина без маски, як у PageCover)
 .cover__photo {
   position: absolute;
   top: 0;
@@ -43,7 +39,6 @@
   }
 }
 
-// Вміст колонкою, як .cover__inner у PageCover
 .cover__inner {
   display: flex;
   flex-direction: column;

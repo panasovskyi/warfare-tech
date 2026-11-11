@@ -1,6 +1,5 @@
 import { IconBase, type IconProps } from '@/components/icons/IconBase';
 
-// Сонце: перемикач теми показує його в темній темі (дія — увімкнути світлу)
 export const SunIcon: React.FC<IconProps> = (props) => (
   <IconBase {...props}>
     <circle cx='12' cy='12' r='4.25' />

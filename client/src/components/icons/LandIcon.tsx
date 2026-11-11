@@ -1,6 +1,5 @@
 import { IconBase, type IconProps } from '@/components/icons/IconBase';
 
-// Танк, вигляд збоку: гусениця з котками, корпус, башта з люком і гармата
 export const LandIcon: React.FC<IconProps> = (props) => (
   <IconBase {...props}>
     <rect x='2' y='14.5' width='20' height='6' rx='3' />

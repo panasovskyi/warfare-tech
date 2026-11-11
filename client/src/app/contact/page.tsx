@@ -8,7 +8,6 @@ import {
   GITHUB_REPO_URL,
 } from '@/lib/links';
 
-// Вступ під заголовком, він же опис сторінки в <meta description>
 const DESCRIPTION =
   'Warfare Tech is a one-person portfolio project, so there is no newsroom inbox. The way to reach its developer is GitHub.';
 

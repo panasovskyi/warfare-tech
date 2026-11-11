@@ -1,10 +1,8 @@
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
-// Ширина мініатюри, як у ArticleCardRow (там теж 240px: токена немає)
 $thumb-width: 240px;
 
-// На малому телефоні фото зверху, як у ArticleCardRow
 .row {
   display: grid;
   grid-template-columns: $thumb-width minmax(0, 1fr);

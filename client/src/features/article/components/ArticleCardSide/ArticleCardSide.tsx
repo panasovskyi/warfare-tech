@@ -7,22 +7,13 @@ import { getSectionTagAndLink } from '@/features/article/article.utils';
 
 type Props = {
   article: ArticleListItem;
-  // На /news у Top stories видимого h2 немає, тож сторінка передає тут 2
   headingLevel?: 2 | 3 | 4;
-  // Ширина фото на сторінці — підказка для next/image, яку версію фото вантажити.
-  // Залежить від сітки, в якій стоїть картка: секція з іншою сіткою передає своє значення
   sizes?: string;
 };
 
-// За замовчуванням — Top stories на /news: колонка 1fr із 2.55fr без проміжку між
-// колонками (40px), полів панелі (2 × 40px) і полів сторінки (2 × 64px).
-// 1528px = контейнер 1400 + поля. Нижче 1024px середні картки — дві колонки під великою
-// (проміжок 24), нижче 640px одна: поля сторінки 32 і панелі 24 від 768px, а нижче по 20
 const DEFAULT_SIZES =
   '(min-width: 1528px) 502px, (min-width: 1024px) calc((100vw - 248px) / 2.55), (min-width: 768px) calc((100vw - 136px) / 2), (min-width: 640px) calc((100vw - 104px) / 2), calc(100vw - 80px)';
 
-// Середня картка: широке фото зверху, мітка, заголовок, автор і час, без опису.
-// Друга й третя новини в Top stories на /news
 export const ArticleCardSide: React.FC<Props> = ({
   article,
   headingLevel = 3,

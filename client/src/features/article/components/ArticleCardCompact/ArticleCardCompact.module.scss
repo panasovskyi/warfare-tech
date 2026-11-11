@@ -1,7 +1,5 @@
 @use 'variables' as *;
 
-// Фото і заголовок під ним.
-// position: relative — межі для розтягнутого посилання заголовка
 .card {
   position: relative;
   display: flex;
@@ -9,9 +7,6 @@
   gap: $space-3;
 }
 
-// Обгортка задає фото з fill розмір: position: relative — точка відліку,
-// aspect-ratio — висота від ширини, overflow: hidden — обрізає по заокругленню.
-// Фон видно, поки фото вантажиться
 .card__imageWrapper {
   position: relative;
   aspect-ratio: $ratio-card;
@@ -30,16 +25,12 @@
   line-height: $lh-snug;
 }
 
-// Розтягує клік на всю картку: заголовок і посилання не позиціоновані,
-// тож inset рахується від .card
 .card__link::after {
   content: '';
   position: absolute;
   inset: 0;
 }
 
-// Підкреслення акцентом, а не акцентний колір тексту: #ff5a1f на білому
-// як дрібний текст не проходить за контрастом
 .card:hover .card__link {
   text-decoration: underline;
   text-decoration-color: var(--color-accent);

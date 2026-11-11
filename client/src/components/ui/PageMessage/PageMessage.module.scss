@@ -1,8 +1,6 @@
 @use 'variables' as *;
 @use 'breakpoints' as *;
 
-// По центру, у колонці контейнера. Лише padding-block: скорочене padding перекрило б
-// padding-inline від .container, і поля контейнера зникли б
 .pageMessage {
   display: flex;
   flex-direction: column;
@@ -26,7 +24,6 @@
   }
 }
 
-// max-width у ch — довжина рядка, щоб короткий текст не розтягувався на весь контейнер
 .pageMessage__text {
   max-width: 45ch;
   font-size: $fs-md;
@@ -34,7 +31,6 @@
   color: var(--color-text-muted);
 }
 
-// wrap: кнопка й посилання на вузькому екрані не вміщаються в ряд і переходять на другий
 .pageMessage__actions {
   display: flex;
   flex-wrap: wrap;
@@ -44,10 +40,6 @@
   margin-top: $space-4;
 }
 
-// Посилання або кнопка, що виглядає як кнопка: токени кнопки, як у skip-link.
-// Акцентний фон не годиться: білий текст на акценті дає ≈ 3:1.
-// border: 0 і cursor: pointer потрібні справжній <button>, посилання їх не помічає.
-// Кільце фокуса — глобальне :focus-visible
 .pageMessage__button {
   padding: $space-3 $space-6;
   border: 0;
@@ -64,7 +56,6 @@
   opacity: 0.85;
 }
 
-// Як ArrowLink: колір основного тексту, акцентне лише підкреслення при наведенні
 .pageMessage__link {
   font-size: $fs-base;
   font-weight: $fw-semibold;

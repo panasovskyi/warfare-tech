@@ -15,8 +15,6 @@ type Props = {
   page: number;
 };
 
-// Частина сторінки розділу, що залежить від номера сторінки: сама ходить за даними, тож
-// сторінка може обгорнути її в <Suspense key={page}> і показати заглушку на час запиту
 export const SectionNewsList = async ({ section, page }: Props) => {
   const { items, total, totalPages } = await articleApi.getArticles({
     type: ArticleType.NEWS,
