@@ -68,9 +68,8 @@ const findDatePublished = (node: unknown): string | undefined => {
   return undefined;
 };
 
-// TODO: defence-ua.com не віддає дату в метаданих — для нього тут завжди undefined, і дату
-// вказують другим аргументом npm start. Можна шукати її в тексті сторінки
-
+// defence-ua.com не віддає дату в метаданих: для нього тут завжди undefined, і дату
+// вказують другим аргументом npm start.
 // Дата публікації: спершу мета-тег, потім JSON-LD, потім інші мета-теги
 const readPublishedAt = (document: Document): string | undefined => {
   const fromMeta = toDay(
