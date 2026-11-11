@@ -6,13 +6,12 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { UserRole } from 'generated/prisma/enums';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginResponse } from 'src/auth/auth.types';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { AppThrottlerGuard } from 'src/auth/guards/app.throttler.guard';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { LoginThrottlerGuard } from 'src/auth/guards/login-throttle.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { type LoginPayload, loginSchema } from 'src/auth/schemas/login.schema';
 import {
@@ -26,10 +25,7 @@ import { SafeUser, toSafeUser } from 'src/user/safe-user';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // TODO: тротлінг тут зайвий (нешкідливий): до методу доходить лише адмін з токеном, JwtGuard і
-  // RolesGuard стоять раніше. Прибрати ThrottlerGuard і @Throttle разом з імпортом ThrottlerGuard
-  @UseGuards(JwtGuard, RolesGuard, ThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @UseGuards(JwtGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
   @Post('register')
   async register(
@@ -41,8 +37,8 @@ export class AuthController {
     return toSafeUser(user);
   }
 
-  @UseGuards(LoginThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  // Ліміт частоти — у ThrottlerModule.forRoot (app.module.ts)
+  @UseGuards(AppThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(

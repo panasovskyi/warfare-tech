@@ -11,13 +11,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
     AuthModule,
     ArticleModule,
     UserModule,
-    // TODO: ліміт 20 за хвилину ніде не діє: глобального гарда нема, а login і register
-    // перекривають його через @Throttle. Лишити один ліміт: або тут, або в декораторі
     ThrottlerModule.forRoot({
       throttlers: [
         {
           ttl: 60_000,
-          limit: 20,
+          limit: 5,
         },
       ],
       errorMessage: 'Too many requests. Please try again in a minute.',
