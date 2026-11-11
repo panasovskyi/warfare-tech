@@ -34,7 +34,7 @@ const tagsSchema = z
 export const frontMatterSchema = z.object({
   title: z.string("title is required"),
   description: z.string("description is required"),
-  type: z.enum(ArticleType, "type must be NEWS or LONGREAD"),
+  type: z.enum(ArticleType, "type must be NEWS"),
   subcategory: z.string().nullable().default(null).transform(toSubcategory),
   isWarInUkraine: z
     .boolean("isWarInUkraine must be true or false")

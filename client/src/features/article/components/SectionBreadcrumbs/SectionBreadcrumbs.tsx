@@ -20,8 +20,8 @@ type Props = {
   isCurrentPage?: boolean;
 };
 
-// Крихти розділу: News › розділ, для лонгрідів — лише Longreads. Беруть ключ розділу,
-// а не статтю: той самий вигляд і на сторінці новини, і на сторінці розділу
+// Крихти розділу: News › розділ. Беруть ключ розділу, а не статтю: той самий вигляд
+// і на сторінці новини, і на сторінці розділу
 export const SectionBreadcrumbs: React.FC<Props> = ({
   section,
   isShowIcon = true,
@@ -29,8 +29,6 @@ export const SectionBreadcrumbs: React.FC<Props> = ({
   isCurrentPage = false,
 }) => {
   const { sectionLabel, href } = getSectionLabelAndLink(section);
-  // Лонгріди — не новини, тож без першої ланки "News"
-  const isNews = section !== 'longread';
 
   return (
     <nav aria-label='Breadcrumb'>
@@ -41,19 +39,15 @@ export const SectionBreadcrumbs: React.FC<Props> = ({
             : styles.breadcrumbs
         }
       >
-        {isNews && (
-          <li className={styles.breadcrumbs__item}>
-            <Link href='/news' className={styles.breadcrumbs__link}>
-              News
-            </Link>
-          </li>
-        )}
+        <li className={styles.breadcrumbs__item}>
+          <Link href='/news' className={styles.breadcrumbs__link}>
+            News
+          </Link>
+        </li>
 
         {section !== 'news' && (
           <li className={styles.breadcrumbs__item} data-section={section}>
-            {isNews && (
-              <ChevronRightIcon className={styles.breadcrumbs__separator} />
-            )}
+            <ChevronRightIcon className={styles.breadcrumbs__separator} />
             <Link
               href={href}
               className={styles.breadcrumbs__link}
