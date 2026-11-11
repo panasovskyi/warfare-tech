@@ -1,12 +1,11 @@
-import { mkdir, readdir, rename, stat } from 'node:fs/promises';
+import { readdir, stat, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { LOCAL_IMAGE_EXTENSIONS } from './image-download';
 
-// The owner drops a downloaded photo here instead of typing its path
+// Власник кладе сюди завантажене фото замість того, щоб набирати його шлях
 export const PHOTOS_DIR = path.join(process.cwd(), 'photos');
-// A photo that has been uploaded moves here, so the next article never picks it up again
-const USED_DIR = path.join(PHOTOS_DIR, 'used');
 
+// Найновіше за часом зміни фото в теці photos (лише дозволені формати)
 export const findNewestPhoto = async (): Promise<string | undefined> => {
   let names: string[];
 
@@ -34,12 +33,5 @@ export const findNewestPhoto = async (): Promise<string | undefined> => {
   return newest?.path;
 };
 
-export const moveToUsed = async (filePath: string): Promise<string> => {
-  await mkdir(USED_DIR, { recursive: true });
-
-  const target = path.join(USED_DIR, `${Date.now()}-${path.basename(filePath)}`);
-
-  await rename(filePath, target);
-
-  return target;
-};
+// Завантажене фото видаляється, щоб наступна стаття ніколи не підхопила його знову
+export const deletePhoto = (filePath: string): Promise<void> => unlink(filePath);

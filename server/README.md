@@ -1,98 +1,126 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Warfare Tech API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The REST API behind [warfare-tech.com](https://warfare-tech.com): articles, author profiles and admin login. Built with NestJS 11, Prisma 7 and PostgreSQL.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The project overview is in the [root README](../README.md).
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **NestJS 11** on Express
+- **Prisma 7** with the `pg` driver adapter, PostgreSQL
+- **Zod 4** for request validation
+- **JWT** (`@nestjs/jwt`) and **bcrypt** for authentication
+- **`@nestjs/throttler`** and **`helmet`** for rate limiting and security headers
 
-## Project setup
+## Endpoints
 
-```bash
-$ npm install
+All routes are under the `/api` prefix.
+
+| Method | Route | Access | What it does |
+| --- | --- | --- | --- |
+| `GET` | `/articles` | public | Paginated list of published articles, newest first, without the body |
+| `GET` | `/articles/:slug` | public | One published article with the body |
+| `POST` | `/articles` | admin | Create an article |
+| `GET` | `/users/:login` | public | Author profile with the ten latest articles |
+| `POST` | `/auth/login` | public, 5 requests a minute per IP | Returns an access token |
+| `POST` | `/auth/register` | admin | Create a user |
+
+### `GET /articles` query parameters
+
+| Parameter | Values | Default |
+| --- | --- | --- |
+| `page` | 1–999 | 1 |
+| `limit` | 1–40 | 3 |
+| `type` | `NEWS` | any |
+| `subcategory` | `AIR`, `LAND`, `NAVAL`, `SPACE`, `CYBER`, `UAV` | any |
+| `isWarInUkraine` | `true`, `false` | any |
+| `isFeatured` | `true`, `false` | any |
+
+The response is `{ items, total, page, limit, totalPages }`.
+
+### Errors
+
+Every error has the same body, shaped for form libraries on the client:
+
+```json
+{
+  "message": "Validation error",
+  "fieldErrors": { "title": ["Title too short: minimum 5 characters"] },
+  "formErrors": []
+}
 ```
 
-## Compile and run the project
+Built-in NestJS exceptions (an unknown route, malformed JSON) keep their own body: `{ message, error, statusCode }`.
 
-```bash
-# development
-$ npm run start
+## Rules worth knowing
 
-# watch mode
-$ npm run start:dev
+- **Article rule.** An article has exactly one of two: a `subcategory` or the `isWarInUkraine` flag. The rule lives in the Zod schema, not in the database.
+- **Article body.** Markdown limited to what the website renders: paragraphs, http(s) links and images. An image is a paragraph of its own, needs a description and a caption, and must come from an allowed host. Raw HTML is rejected.
+- **Image hosts.** `mainPicture` must be an https address on an allowed host. The list is mirrored in the website's `next.config.ts` and in the ingestion schema, and the three have to change together.
+- **Slug.** Generated from the title plus a six-character suffix, so two articles with the same title do not collide.
+- **Reading time.** Calculated on the server when the article is created (250 words a minute, rounded up).
+- **User data.** Public responses select user fields from an allowlist, so the password hash never leaves the database layer.
+- **No registration.** There are no reader accounts. The only admin comes from the seed, and the access token lives for 30 days.
 
-# production mode
-$ npm run start:prod
+## Project structure
+
+```
+prisma/
+  schema.prisma        data model
+  migrations/          SQL migrations
+  seed.ts              creates or updates the admin user
+src/
+  main.ts              bootstrap: helmet, CORS, global prefix, exception filter
+  app.module.ts        modules and the rate limit
+  article/             controller, service, Zod schemas, query shapes
+  auth/                login, register, JWT and role guards, throttler guard
+  user/                author profile, user creation
+  exceptions/          ApiError, the global filter, Prisma error mapping
+  pipes/               ZodValidationPipe
+  prisma/              PrismaService
 ```
 
-## Run tests
+## Running locally
+
+You need Node.js 20.9 or newer and a PostgreSQL database.
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
+cp .env.example .env
+npm run prisma:migrate:deploy
+npm run prisma:seed
+npm run start:dev
 ```
 
-## Deployment
+`npm install` also generates the Prisma client. The API starts on `http://localhost:5000/api`; try `http://localhost:5000/api/articles`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Environment variables
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+| Variable | What it is |
+| --- | --- |
+| `PORT` | Port of the API |
+| `NODE_ENV` | `development` or `production` |
+| `CLIENT_URL` | Address of the website, the allowed CORS origin |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_ACCESS_SECRET` | Secret for signing access tokens |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | The admin account created by the seed |
+| `TRUST_PROXY` | Optional: how many proxies sit in front of the API (default 1) |
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+### Scripts
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+| Script | What it does |
+| --- | --- |
+| `npm run start:dev` | Start in watch mode |
+| `npm run build`, `npm run start:prod` | Build and run the compiled server |
+| `npm run prisma:migrate` | Create and apply a migration in development |
+| `npm run prisma:migrate:deploy` | Apply existing migrations |
+| `npm run prisma:generate` | Regenerate the Prisma client after a schema change |
+| `npm run prisma:seed` | Create the admin user or reset its password |
+| `npm run prisma:studio` | Open Prisma Studio |
+| `npm run lint`, `npm run format` | ESLint and Prettier |
 
-## Resources
+There are no automated tests yet.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Study notes
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+The files `SHORT_NEST_FLOW.md`, `ALGORITHM_STEPS.md`, `STEPS_LOGIC.md` and `PRISMA_TYPES.md` are notes written while learning NestJS and Prisma. They are in Ukrainian.

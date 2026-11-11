@@ -1,3 +1,4 @@
+// Єдине місце, де код розмовляє з Claude. Решта проєкту викликає лише generate та generateJson.
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { ZodType } from 'zod';
@@ -28,10 +29,12 @@ export type GenerateJsonResult<T> = {
 
 export class LlmError extends Error {}
 
+// Стеля довжини відповіді за замовчуванням (у токенах)
 const DEFAULT_MAX_TOKENS = 16000;
 
 const anthropic = new Anthropic({ apiKey: config.anthropicApiKey });
 
+// Перетворює помилки SDK на зрозумілі повідомлення: ключ, ліміт запитів, поганий запит, обрізана відповідь
 const toLlmError = (error: unknown): LlmError => {
   if (error instanceof Anthropic.AuthenticationError) {
     return new LlmError('Anthropic rejected the API key', { cause: error });
@@ -53,8 +56,8 @@ const toLlmError = (error: unknown): LlmError => {
     });
   }
 
-  // The SDK throws this when it cannot read a structured reply, usually because
-  // the JSON was cut off by max_tokens
+  // SDK кидає це, коли не може прочитати структуровану відповідь, найчастіше
+  // тому, що JSON обрізало на max_tokens
   if (error instanceof Anthropic.AnthropicError) {
     return new LlmError(
       `Could not read the structured reply (it may have been cut off by max_tokens): ${error.message}`,
@@ -67,6 +70,7 @@ const toLlmError = (error: unknown): LlmError => {
   });
 };
 
+// Модель може відмовитись відповідати: це не мережева помилка, тож причину перевіряємо окремо
 const assertNotRefused = (response: Anthropic.Beta.BetaMessage): void => {
   if (response.stop_reason === 'refusal') {
     const category = response.stop_details?.category ?? 'unknown category';
@@ -75,6 +79,7 @@ const assertNotRefused = (response: Anthropic.Beta.BetaMessage): void => {
   }
 };
 
+// Кількість токенів входу й виходу: друкується в консолі й записується в чернетку
 const toUsage = (
   response: Anthropic.Beta.BetaMessage,
 ): GenerateResult['usage'] => ({
@@ -82,6 +87,7 @@ const toUsage = (
   outputTokens: response.usage.output_tokens,
 });
 
+// Звичайний текстовий виклик: повертає текст відповіді як є
 export const generate = async ({
   system,
   prompt,
@@ -115,9 +121,8 @@ export const generate = async ({
   }
 };
 
-// The reply is constrained to the schema by the API, then checked against it by
-// zod. The API ignores length limits in a schema, so keep the schema lenient and
-// validate length rules separately.
+// Відповідь API обмежує схемою, а потім її перевіряє zod. API ігнорує обмеження довжини
+// в схемі, тому схема лишається м'якою, а довжини перевіряються окремо.
 export const generateJson = async <T>({
   system,
   prompt,

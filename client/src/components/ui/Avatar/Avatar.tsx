@@ -4,7 +4,7 @@ import { getInitials } from '@/lib/text';
 type Props = {
   // Повне ім'я: з нього рахуються ініціали
   name: string;
-  size?: 's' | 'm' | 'l';
+  size?: 's' | 'm' | 'l' | 'xl';
   // Клас від батька — наприклад, інше тло на панелі
   className?: string;
 };

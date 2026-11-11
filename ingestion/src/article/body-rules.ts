@@ -2,15 +2,19 @@
 // images.remotePatterns у client/next.config.ts. placehold.co — заглушка, res.cloudinary.com — наші фото
 export const IMAGE_HOSTNAME = /^(placehold\.co|res\.cloudinary\.com)$/;
 
-// Mirror of checkBodyMarkdown in server/src/article/schemas/create-article.schema.ts: keep
-// the two in sync. The body is Markdown, but only what the site renders: paragraphs, links
-// over http(s), and images as paragraphs of their own, with a description and a caption,
-// from allowed hosts only.
+// Дзеркало checkBodyMarkdown із server/src/article/schemas/create-article.schema.ts: тримати
+// в синхроні. Текст — це Markdown, але лише те, що малює сайт: абзаци, посилання через http(s)
+// та картинки окремими абзацами, з описом і підписом, лише з дозволених хостів.
+// Не більше стількох картинок у тексті
 const MAX_BODY_IMAGES = 10;
+// Картинка в Markdown: ![опис](адреса "підпис")
 const IMAGE_IN_BODY = /!\[([^\]]*)\]\(\s*(\S+?)(?:\s+"([^"]*)")?\s*\)/g;
+// Посилання в Markdown (картинки сюди не входять)
 const LINK_IN_BODY = /(?<!!)\[[^\]]*\]\(\s*(\S+?)(?:\s+"[^"]*")?\s*\)/g;
+// Будь-який HTML-тег: у тексті він заборонений
 const HTML_IN_BODY = /<\/?[a-z][^>]*>/i;
 
+// Чи адреса картинки https і з дозволеного хоста
 const isAllowedImage = (address: string): boolean => {
   try {
     const url = new URL(address);
@@ -21,9 +25,12 @@ const isAllowedImage = (address: string): boolean => {
   }
 };
 
+// Обрізає довгий рядок для повідомлення про помилку
 const shorten = (text: string): string =>
   text.length > 60 ? `${text.slice(0, 60)}…` : text;
 
+// Перевіряє текст як Markdown: HTML, кількість і правильність картинок, посилання.
+// Повертає список порушень
 export const checkBodyMarkdown = (body: string): string[] => {
   const problems: string[] = [];
 
@@ -81,13 +88,14 @@ export const checkBodyMarkdown = (body: string): string[] => {
   return [...new Set(problems)];
 };
 
-// What `npm run upload-image` prints when the description or caption is not given:
-// the draft cannot be published until these words are replaced
+// Те, що друкує `npm run upload-image`, коли опис чи підпис не задано:
+// чернетку не можна опублікувати, доки ці слова не замінено
 export const IMAGE_PLACEHOLDERS = {
   alt: 'DESCRIBE THE PHOTO',
   caption: 'CAPTION. Photo: AUTHOR',
 } as const;
 
+// Знаходить у тексті картинки, де лишилися слова-заглушки опису чи підпису
 export const findImagePlaceholders = (body: string): string[] => {
   const found: string[] = [];
 
@@ -102,10 +110,11 @@ export const findImagePlaceholders = (body: string): string[] => {
   return found;
 };
 
-// Double quotes and line breaks would break the Markdown syntax of the image
+// Подвійні лапки й переноси рядків зламали б синтаксис картинки в Markdown
 const clean = (text: string): string =>
   text.replace(/"/g, "'").replace(/[\r\n]+/g, ' ').replace(/[[\]]/g, '').trim();
 
+// Збирає рядок картинки для вставки в чернетку: ![опис](адреса "підпис")
 export const buildImageMarkdown = (
   address: string,
   alt: string,

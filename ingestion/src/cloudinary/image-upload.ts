@@ -1,9 +1,11 @@
 import { getCloudinary } from './client';
 
+// Тека в Cloudinary, куди потрапляють усі наші фото
 const UPLOAD_FOLDER = 'warfare-tech';
-// The original is never shown at full size: cap the width before storing it
+// Оригінал ніколи не показується в повному розмірі: обмежуємо ширину ще до збереження
 const MAX_WIDTH = 1600;
 
+// Завантажує фото з пам'яті в Cloudinary і повертає https-адресу вже нашого фото
 export const uploadBufferToCloudinary = (
   fileBuffer: Buffer,
 ): Promise<string> => {

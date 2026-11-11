@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { generateJson, type GenerateResult } from '../llm/llm.client';
 import { hasCyrillic } from './cyrillic';
 
+// Один шматок на переклад: id (щоб повернути на місце) і текст
 export type TranslationItem = {
   id: string;
   text: string;
@@ -14,13 +15,16 @@ export type TranslationResult = {
   usage: GenerateResult['usage'];
 };
 
+// Помилка перекладу: модель не повернула текст для якогось id
 export class TranslationError extends Error {}
 
-// Lenient on purpose, like the rewrite schema: ids and texts are checked on our side
+// Схема навмисно м'яка, як і для рерайту: id та тексти перевіряємо ми самі
 const translationSchema = z.object({
   items: z.array(z.object({ id: z.string(), text: z.string() })),
 });
 
+// Промпт перекладу (англійською: це інструкція для моделі). Головне: вірність змісту, назви й числа
+// без змін, англійський текст не чіпати, у заголовку кожне слово з великої літери
 const TRANSLATE_PROMPT = `You translate parts of a Warfare Tech article from Ukrainian into English. Warfare Tech is an English-language news site about military technology.
 
 The user's message holds a JSON list of items, each with an id and a text. Most texts are Ukrainian; some may be in English already, or mix both.
@@ -38,25 +42,28 @@ Rules
 
 Reply with a JSON object {"items": [{"id": "...", "text": "..."}]} that has one entry for every id in the input, with the same ids.`;
 
-// Numbers of two or more digits: single digits are often written out in English ("3" -> "three")
+// Числа з двох і більше цифр: одноцифрові в англійській часто пишуть словом («3» → «three»)
 const numbersOf = (text: string): string[] =>
   (text.replace(/(\d)[\s  ](?=\d{3}\b)/g, '$1').match(/\d+(?:[.,]\d+)*/g) ?? [])
     .map((number) => number.replace(/\D/g, ''))
     .filter((digits) => digits.length >= 2);
 
+// Слова латиницею (назви, позначення): переклад мусить їх зберегти
 const latinWordsOf = (text: string): string[] =>
   text.match(/[A-Za-z][A-Za-z0-9-]{2,}/g) ?? [];
 
+// Ділить текст на речення за крапкою, знаком оклику чи питання
 const sentencesOf = (text: string): string[] =>
   text
     .split(/(?<=[.!?])\s+/)
     .map((sentence) => sentence.trim())
     .filter(Boolean);
 
+// Зводить будь-які пробіли й переноси до одного пробіла, щоб порівнювати тексти
 const squash = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
-// Mistakes a translation can make without anyone noticing: a lost number, a changed
-// name, an English sentence that was rewritten, Ukrainian left behind
+// Помилки, які переклад може зробити непомітно: загублене число, змінена
+// назва, переписане англійське речення, лишена українська
 export const checkTranslation = (
   inputs: TranslationItem[],
   outputs: TranslationItem[],
@@ -112,6 +119,7 @@ export const checkTranslation = (
   return warnings;
 };
 
+// Перекладає список шматків одним викликом і перевіряє результат
 export const translateItems = async (
   items: TranslationItem[],
 ): Promise<TranslationResult> => {
@@ -123,7 +131,7 @@ export const translateItems = async (
 
   const byId = new Map(result.data.items.map((item) => [item.id, item.text.trim()]));
 
-  // The order and ids of the input are kept, whatever the model returned
+  // Порядок і id беремо з вхідних даних, що б не повернула модель
   const translated = items.map(({ id }) => {
     const text = byId.get(id);
 
@@ -142,7 +150,7 @@ export const translateItems = async (
   };
 };
 
-// The pieces of an article in one call, so the translation keeps one voice
+// Усі частини статті за один виклик, щоб переклад мав один стиль
 export const translateArticle = async (article: {
   title: string;
   description: string;

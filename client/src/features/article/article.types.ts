@@ -1,6 +1,5 @@
 export const ArticleType = {
   NEWS: 'NEWS',
-  LONGREAD: 'LONGREAD',
 } as const;
 
 export type ArticleType = (typeof ArticleType)[keyof typeof ArticleType];

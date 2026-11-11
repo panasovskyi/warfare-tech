@@ -10,6 +10,7 @@ import { UserRole } from 'generated/prisma/enums';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginResponse } from 'src/auth/auth.types';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { AppThrottlerGuard } from 'src/auth/guards/app.throttler.guard';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { type LoginPayload, loginSchema } from 'src/auth/schemas/login.schema';
@@ -36,6 +37,8 @@ export class AuthController {
     return toSafeUser(user);
   }
 
+  // Ліміт частоти — у ThrottlerModule.forRoot (app.module.ts)
+  @UseGuards(AppThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
@@ -43,7 +46,6 @@ export class AuthController {
   ): Promise<LoginResponse<SafeUser>> {
     const { accessToken, user } = await this.authService.login(payload);
     const safeUser = toSafeUser(user);
-
     return { accessToken, user: safeUser };
   }
 }

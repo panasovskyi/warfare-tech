@@ -65,4 +65,11 @@ export class ApiError extends HttpException {
   static notFound(message = 'Not Found') {
     return new ApiError({ message, statusCode: HttpStatus.NOT_FOUND });
   }
+
+  static tooManyRequests(message = 'Too Many Requests') {
+    return new ApiError({
+      message,
+      statusCode: HttpStatus.TOO_MANY_REQUESTS,
+    });
+  }
 }

@@ -4,6 +4,7 @@ import './globals.scss';
 import { Header } from '@/components/layout/Header/Header';
 import { Footer } from '@/components/layout/Footer/Footer';
 import { THEME_INIT_SCRIPT } from '@/lib/theme';
+import { SITE_URL } from '@/lib/links';
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -16,17 +17,19 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Warfare Tech — Military Technology News',
     template: '%s | Warfare Tech',
   },
   description:
-    'News and longreads on military technology: air, land, naval, space, cyber and UAVs, with ongoing coverage of the war in Ukraine.',
+    'Military technology news: air, land, naval, space, cyber and UAVs, with ongoing coverage of the war in Ukraine.',
   applicationName: 'Warfare Tech',
   openGraph: {
     type: 'website',
     siteName: 'Warfare Tech',
     locale: 'en_US',
+    // Картинка для соцмереж — файл app/opengraph-image.png (опис поруч, у .alt.txt)
   },
 };
 

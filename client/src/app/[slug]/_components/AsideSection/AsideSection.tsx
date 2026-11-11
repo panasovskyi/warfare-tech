@@ -24,11 +24,9 @@ export const AsideSection: React.FC<Props> = async ({ section, articleId }) => {
   const { sectionLabel, href } = getSectionLabelAndLink(section);
 
   const sectionArticlesFilter =
-    section === 'longread'
-      ? { type: ArticleType.LONGREAD }
-      : section === 'news'
-        ? { type: ArticleType.NEWS }
-        : NEWS_SECTIONS[section].filter;
+    section === 'news'
+      ? { type: ArticleType.NEWS }
+      : NEWS_SECTIONS[section].filter;
 
   let latestNews: ArticleListItem[] = [];
 

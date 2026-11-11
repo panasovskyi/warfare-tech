@@ -4,11 +4,12 @@ import { uploadImage } from './cloudinary/cloudinary';
 const USAGE =
   'Usage: npm run upload-image -- <https address | file path> [--alt="description"] [--caption="caption. Photo: author"]';
 
+// Значення прапора --name=…; порожній рядок, якщо прапора нема
 const optionOf = (args: string[], name: string): string =>
   args.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3) ?? '';
 
-// Puts a picture into Cloudinary and prints the line to paste into the draft, between two
-// paragraphs. The text itself is not changed here: you decide where the picture goes.
+// Кладе фото в Cloudinary і друкує рядок, який треба вставити в чернетку між двома
+// абзацами. Сам текст тут не змінюється: куди покласти фото, вирішуєш ти.
 const main = async () => {
   const args = process.argv.slice(2);
   const [source] = args.filter((arg) => !arg.startsWith('--'));

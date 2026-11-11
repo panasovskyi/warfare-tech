@@ -44,6 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: article.title,
     description: article.description,
     authors: [{ name: article.author.fullName }],
+    alternates: { canonical: `/${article.slug}` },
     openGraph: {
       type: 'article',
       siteName: 'Warfare Tech',

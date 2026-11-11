@@ -3,9 +3,7 @@ import loadingStyles from './NewsSectionLoading.module.scss';
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
 import { PageCoverSkeleton } from '@/components/ui/PageCoverSkeleton/PageCoverSkeleton';
 import { SectionsListSkeleton } from '@/app/news/_components/SectionsListSkeleton/SectionsListSkeleton';
-import { ArticleCardSkeleton } from '@/features/article/components/ArticleCardSkeleton/ArticleCardSkeleton';
-
-const GRID_CARDS = 6;
+import { SectionNewsListSkeleton } from '@/app/news/_components/SectionNewsListSkeleton/SectionNewsListSkeleton';
 
 export default function NewsSectionLoading() {
   return (
@@ -23,13 +21,7 @@ export default function NewsSectionLoading() {
       <div className={`container ${styles.page__content}`}>
         <SectionsListSkeleton />
 
-        <div className={styles.news}>
-          <div className={styles.news__list}>
-            {Array.from({ length: GRID_CARDS }, (_, index) => (
-              <ArticleCardSkeleton key={index} />
-            ))}
-          </div>
-        </div>
+        <SectionNewsListSkeleton />
       </div>
     </div>
   );

@@ -19,9 +19,7 @@ const FOOTER_NAV = [
     section: 'Company',
     sectionItems: [
       { id: 1, label: 'About', link: '/about', },
-      { id: 2, label: 'Advertise', link: '/advertise', },
-      { id: 3, label: 'Contact', link: '/contact', },
-      { id: 4, label: 'Careers', link: '/careers', },
+      { id: 2, label: 'Contact', link: '/contact', },
     ],
   },
 ];
@@ -35,7 +33,8 @@ export const Footer = () => {
             <Logo />
           </Link>
           <p className={styles.footer__description}>
-            Independent coverage of defense technology and security.
+            Military technology news, rewritten from credited sources. A
+            portfolio project.
           </p>
         </div>
 

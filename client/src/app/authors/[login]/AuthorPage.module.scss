@@ -1,0 +1,104 @@
+@use 'variables' as *;
+@use 'breakpoints' as *;
+
+// Відступи сторінки — як у сторінки статті й TextPage
+.page {
+  padding-block: $space-12 $space-24;
+
+  @include bp-down($bp-md) {
+    padding-block: $space-6 $space-14;
+  }
+}
+
+// Шапка профілю, під нею список статей
+.page__inner {
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+
+  @include bp-down($bp-md) {
+    gap: $space-8;
+  }
+}
+
+// ── Шапка профілю ───────────────────────────────────────
+
+// Аватар ліворуч, праворуч ім'я з підписом. На малому телефоні аватар стає над іменем:
+// поруч із ним на ім'я лишалося б пів екрана
+.profile {
+  display: flex;
+  align-items: center;
+  gap: $space-6;
+
+  @include bp-down($bp-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-4;
+  }
+}
+
+// min-width: 0 — flex-елемент не стискається вужче за вміст, і довге ім'я без пробілів
+// виходило б за екран
+.profile__text {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  min-width: 0;
+}
+
+// Розміри — як у заголовків інших сторінок
+.profile__name {
+  letter-spacing: $ls-heading;
+  font-size: $fs-display-lg;
+  font-weight: $fw-extrabold;
+  line-height: $lh-tight;
+  overflow-wrap: break-word;
+
+  @include bp-down($bp-lg) {
+    font-size: $fs-display-md;
+  }
+
+  @include bp-down($bp-md) {
+    font-size: $fs-display-xs;
+  }
+}
+
+.profile__meta {
+  font-size: $fs-lg;
+  color: var(--color-text-muted);
+}
+
+// Вигляд посилання — в ArrowLink. align-self — інакше у flex-колонці воно розтягнулось би
+// на всю ширину, і клікабельним був би порожній простір праворуч
+.profile__link {
+  align-self: flex-start;
+  margin-top: $space-1;
+}
+
+// ── Статті автора ───────────────────────────────────────
+
+.articles {
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+}
+
+.articles__title {
+  font-size: $fs-xl;
+  font-weight: $fw-extrabold;
+  line-height: $lh-snug;
+}
+
+// Рядки розділені лініями, як у списку Latest на /news
+.articles__item {
+  padding-block: $space-6;
+  border-top: 1px solid var(--color-border);
+
+  @include bp-down($bp-md) {
+    padding-block: $space-5;
+  }
+}
+
+.articles__item:last-child {
+  border-bottom: 1px solid var(--color-border);
+}

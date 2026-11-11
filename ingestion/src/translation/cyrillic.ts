@@ -1,8 +1,9 @@
 const CYRILLIC = /\p{Script=Cyrillic}/u;
 
+// Чи є в тексті хоч одна кирилична літера (за нею ловимо недоперекладений текст)
 export const hasCyrillic = (text: string): boolean => CYRILLIC.test(text);
 
-// A source counts as Ukrainian when most of its letters are Cyrillic
+// Джерело вважаємо українським, коли більшість його літер кириличні
 export const isMostlyCyrillic = (text: string): boolean => {
   const letters = text.match(/\p{L}/gu) ?? [];
 

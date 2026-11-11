@@ -1,29 +1,35 @@
 import { isPlaceholderPicture } from './article/article';
 import { validateArticle } from './article/article.schema';
 import { getPublishingConfig } from './config/publishing.config';
-import { markPublished, readDraft } from './drafts/draft-file';
+import { markPublished, moveToPublished, readDraft } from './drafts/draft-file';
 import { findCyrillicFields } from './drafts/draft-file.schema';
+import { PUBLISHED_DIR, resolveDraftPath } from './drafts/drafts';
 import { mainDraftOf } from './drafts/find-drafts';
 import { login } from './publishing/auth';
+import { confirm } from './publishing/confirm';
 import {
   findPublishedBySourceLink,
   type PublishedMatch,
 } from './publishing/duplicates';
 import { publishArticle } from './publishing/publishing';
 
+// Публікація чернетки: перевірки → попередження про фото → дублі на сайті → відправка → позначка й переїзд у published/
 const main = async () => {
   const args = process.argv.slice(2);
   const isDryRun = args.includes('--dry-run');
   const isForced = args.includes('--force');
-  const [draftPath] = args.filter((arg) => !arg.startsWith('--'));
+  const [draftArg] = args.filter((arg) => !arg.startsWith('--'));
 
-  if (!draftPath) {
+  // Чернетки за замовчуванням нема, на відміну від translate та image: опубліковану статтю не відредагуєш і не видалиш
+  if (!draftArg) {
     throw new Error(
-      'Usage: npm run publish-draft -- <path to a draft .md> [--dry-run] [--force]',
+      'Usage: npm run pub -- <draft: 1, 1.md or a path> [--dry-run] [--force]',
     );
   }
 
-  // The copies next to a draft look like drafts but are not: publishing one would put an old text on the site
+  const draftPath = resolveDraftPath(draftArg);
+
+  // Копії поруч із чернеткою схожі на чернетки, але ними не є: публікація такої поклала б на сайт старий текст
   const mainDraft = mainDraftOf(draftPath);
 
   if (mainDraft) {
@@ -40,7 +46,7 @@ const main = async () => {
     );
   }
 
-  // The file was edited by hand, so the rules run again here, before anything is sent
+  // Файл правили руками, тож правила запускаємо знову тут, до відправки чогось
   const problems = [
     ...findCyrillicFields(article).map(
       (field) => `${field}: contains Cyrillic text, translate it to English first`,
@@ -62,16 +68,23 @@ const main = async () => {
     `Ready: "${article.title}" | ${section} | ${article.tags.length} tags | body ${article.body.length} chars`,
   );
 
-  // Not blocking: a picture of our own may need no credit, but it is easy to forget one
-  if (article.photoCredit) {
+  // Не помилка: власне фото може не потребувати підпису, тож перед відправкою питаємо власника
+  let pictureWarning: string | null = null;
+
+  if (isPlaceholderPicture(article.mainPicture)) {
+    pictureWarning = 'the article has no photo: the placeholder will be shown';
+  } else if (article.photoCredit) {
     console.log(`Photo credit: ${article.photoCredit}`);
-  } else if (!isPlaceholderPicture(article.mainPicture)) {
-    console.warn(
-      'WARNING: the main picture has no photoCredit: fill the line in the draft, unless the picture is your own',
-    );
+  } else {
+    pictureWarning =
+      'the main picture has no photoCredit: fill the line in the draft, unless the picture is your own';
   }
 
-  // Another draft of the same article may already be live: the site is the judge
+  if (pictureWarning) {
+    console.warn(`WARNING: ${pictureWarning}`);
+  }
+
+  // Інша чернетка тієї самої статті могла вже вийти: суддя тут сайт
   let duplicate: PublishedMatch | null = null;
 
   if (!isForced) {
@@ -97,18 +110,27 @@ const main = async () => {
     );
   }
 
+  // Пробний запуск: усе перевірено, на сервер нічого не відправляємо
   if (isDryRun) {
     console.log('Dry run: nothing was sent');
 
     return;
   }
 
+  if (pictureWarning && !(await confirm('Publish anyway?'))) {
+    console.log('Not published');
+
+    return;
+  }
+
+  // Усе перевірено: логін адміна й відправка
   const publishing = getPublishingConfig();
   const token = await login(publishing);
   const published = await publishArticle(publishing, token, article);
 
   console.log(`Published: ${published.slug}`);
 
+  // Спершу позначаємо чернетку як опубліковану, лише потім переносимо в published/
   try {
     await markPublished(draftPath, published.slug);
   } catch (error) {
@@ -116,6 +138,21 @@ const main = async () => {
 
     console.warn(
       `WARNING: the article is live as "${published.slug}", but the file could not be marked (${reason}). Add publishedAs: "${published.slug}" to it by hand, or it can be published twice`,
+    );
+
+    // Непозначена чернетка лишається в drafts/, щоб позначку ще можна було дописати руками
+    return;
+  }
+
+  try {
+    await moveToPublished(draftPath);
+
+    console.log(`Draft moved to ${PUBLISHED_DIR}`);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+
+    console.warn(
+      `WARNING: the article is live and the file is marked, but it could not be moved to ${PUBLISHED_DIR} (${reason}): move it by hand`,
     );
   }
 };

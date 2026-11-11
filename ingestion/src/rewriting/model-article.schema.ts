@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-// What the model returns. Deliberately lenient: the SDK sends only the basic shape
-// to the API (no enum values, no length limits), so a strict schema here would just
-// throw away a whole paid reply over one wrong word. The real rules live in
-// article.schema.ts and run on our side, where a bad value becomes a problem in the
-// draft instead of a lost reply.
+// Те, що повертає модель. Схема навмисно м'яка: SDK передає в API лише базову форму
+// (без значень enum і без обмежень довжини), тож сувора схема просто викинула б
+// усю оплачену відповідь через одне хибне слово. Справжні правила живуть у
+// article.schema.ts і виконуються в нас: хибне значення стає проблемою в чернетці,
+// а не втраченою відповіддю.
 export const modelArticleSchema = z.object({
   usable: z.boolean(),
   reason: z.string(),

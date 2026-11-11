@@ -7,11 +7,11 @@ import {
   type ArticleDraft,
 } from "./article.schema";
 
-// .png on purpose: placehold.co serves SVG by default, which next/image refuses
+// Саме .png: placehold.co за замовчуванням віддає SVG, а next/image його не приймає
 const GRAY_PLACEHOLDER = 'https://placehold.co/1200x675.png';
 
-// Used when no picture is given or it could not be uploaded: our own branded picture
-// in Cloudinary, or the plain gray one when Cloudinary is not configured
+// Використовується, коли фото не дано або його не вдалось завантажити: наша фірмова
+// картинка в Cloudinary, а якщо Cloudinary не налаштовано, — проста сіра
 export const getPlaceholderPicture = (): string => {
   try {
     return getFallbackPictureUrl(getCloudinaryConfig().cloudName);
@@ -20,12 +20,14 @@ export const getPlaceholderPicture = (): string => {
   }
 };
 
-// Old drafts and the first published article carry the gray one
+// Старі чернетки й перша опублікована стаття мають сіру заглушку
 export const isPlaceholderPicture = (url: string): boolean =>
   url === getPlaceholderPicture() || url === GRAY_PLACEHOLDER;
 
+// Усі підкатегорії, які знає сервер
 const SUBCATEGORIES = Object.values(ArticleSubcategory);
 
+// Теги: нижній регістр, дефіси замість пробілів, без порожніх і повторів
 const normalizeTags = (tags: string[]): string[] => [
   ...new Set(
     tags
@@ -34,14 +36,14 @@ const normalizeTags = (tags: string[]): string[] => [
   ),
 ];
 
-// "Air" or " uav " still count; anything the server does not know becomes null
+// «Air» чи « uav » теж підходять; усе, чого сервер не знає, стає null
 export const toSubcategory = (value: string | null): ArticleDraft['subcategory'] => {
   const normalized = value?.trim().toUpperCase();
 
   return SUBCATEGORIES.find((subcategory) => subcategory === normalized) ?? null;
 };
 
-// The model decides what the article says; everything else about the record is ours
+// Що написано в статті, вирішує модель; усе інше в записі — наше
 export const buildArticle = (
   article: ModelArticle,
   {

@@ -3,10 +3,8 @@ import loadingStyles from './NewsLoading.module.scss';
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton';
 import { PageCoverSkeleton } from '@/components/ui/PageCoverSkeleton/PageCoverSkeleton';
 import { SectionsListSkeleton } from '@/app/news/_components/SectionsListSkeleton/SectionsListSkeleton';
-import { ArticleCardSkeleton } from '@/features/article/components/ArticleCardSkeleton/ArticleCardSkeleton';
-import { ArticleRowSkeleton } from '@/features/article/components/ArticleRowSkeleton/ArticleRowSkeleton';
+import { NewsListSkeleton } from '@/app/news/_components/NewsListSkeleton/NewsListSkeleton';
 
-const LATEST_ROWS = 6;
 export default function NewsLoading() {
   return (
     <div className={styles.page}>
@@ -25,26 +23,7 @@ export default function NewsLoading() {
       <div className={`container ${styles.page__inner}`}>
         <SectionsListSkeleton />
 
-        <div className={styles.topStories}>
-          <div className={styles.topStories__left}>
-            <ArticleCardSkeleton />
-          </div>
-          <div className={styles.topStories__right}>
-            <ArticleCardSkeleton hasDescription={false} />
-            <ArticleCardSkeleton hasDescription={false} />
-          </div>
-        </div>
-
-        <div className={styles.page__content}>
-          <div className={styles.latest}>
-            <Skeleton variant='title' className={loadingStyles.latestTitle} />
-            {Array.from({ length: LATEST_ROWS }, (_, index) => (
-              <div key={index} className={styles.latest__item}>
-                <ArticleRowSkeleton />
-              </div>
-            ))}
-          </div>
-        </div>
+        <NewsListSkeleton />
       </div>
     </div>
   );

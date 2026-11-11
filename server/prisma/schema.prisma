@@ -14,7 +14,6 @@ enum UserRole {
 
 enum ArticleType {
   NEWS
-  LONGREAD
 }
 
 enum ArticleStatus {

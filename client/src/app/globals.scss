@@ -297,9 +297,9 @@ main {
 // the flag blue): card label, subcategory title, icons; and --section-solid, the same
 // color as a background under white text (--color-cat-*-solid): a section cover and the
 // hero label pill. They differ only in the dark theme, where text needs a lighter shade
-// than a background under white text. Keys match NEWS_SECTIONS. Longread and the News
-// fallback have no color: `initial` makes var() use the component's own fallback instead
-// of inheriting the color of a parent section
+// than a background under white text. Keys match NEWS_SECTIONS. The News fallback
+// has no color: `initial` makes var() use the component's own fallback instead of
+// inheriting the color of a parent section
 @each $name in air, land, naval, space, cyber, uav {
   [data-section='#{$name}'] {
     --section-color: var(--color-cat-#{$name}-text);
@@ -312,7 +312,6 @@ main {
   --section-solid: var(--color-ukraine-blue);
 }
 
-[data-section='longread'],
 [data-section='news'] {
   --section-color: initial;
   --section-solid: initial;

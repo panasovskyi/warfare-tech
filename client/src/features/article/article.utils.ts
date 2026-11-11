@@ -2,19 +2,16 @@ import {
   NEWS_SECTIONS,
   type NewsSectionKey,
 } from '@/features/article/article.constants';
-import {
-  ArticleType,
-  type ArticleListItem,
-  type ArticleSubcategory,
+import type {
+  ArticleListItem,
+  ArticleSubcategory,
 } from '@/features/article/article.types';
 
-export type ArticleLabelSection = NewsSectionKey | 'longread' | 'news';
+export type ArticleLabelSection = NewsSectionKey | 'news';
 
 export function getArticleSection(
   article: ArticleListItem,
 ): ArticleLabelSection {
-  if (article.type === ArticleType.LONGREAD) return 'longread';
-
   if (article.isWarInUkraine) return 'ukraine';
 
   if (article.subcategory) {
@@ -33,10 +30,6 @@ type SectionLabelAndLink = {
 export function getSectionLabelAndLink(
   section: ArticleLabelSection,
 ): SectionLabelAndLink {
-  if (section === 'longread') {
-    return { label: 'Longread', sectionLabel: 'Longreads', href: '/longreads' };
-  }
-
   if (section === 'news') {
     return { label: 'News', sectionLabel: 'News', href: '/news' };
   }

@@ -152,41 +152,21 @@ export const createArticleSchema = z
   })
 
   .superRefine((data, ctx) => {
-    if (data.type === ArticleType.NEWS) {
-      if (data.isWarInUkraine && data.subcategory) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['subcategory'],
-          message: 'Subcategory is not allowed for War in Ukraine news',
-        });
-      }
-
-      if (!data.isWarInUkraine && !data.subcategory) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['subcategory'],
-          message:
-            'Subcategory is required for News articles if it is not related to war in Ukraine',
-        });
-      }
+    if (data.isWarInUkraine && data.subcategory) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['subcategory'],
+        message: 'Subcategory is not allowed for War in Ukraine news',
+      });
     }
 
-    if (data.type === ArticleType.LONGREAD) {
-      if (data.subcategory) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['subcategory'],
-          message: 'Subcategory is not allowed for Longreads',
-        });
-      }
-
-      if (data.isWarInUkraine) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['isWarInUkraine'],
-          message: 'War in Ukraine is not allowed for Longreads',
-        });
-      }
+    if (!data.isWarInUkraine && !data.subcategory) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['subcategory'],
+        message:
+          'Subcategory is required for News articles if it is not related to war in Ukraine',
+      });
     }
   })
 

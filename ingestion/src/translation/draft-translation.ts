@@ -2,6 +2,7 @@ import { splitDraft } from '../drafts/draft-file.schema';
 import { hasCyrillic } from './cyrillic';
 import type { TranslationItem } from './translate';
 
+// Частини чернетки, які можуть містити кирилицю: заголовок, опис, теги й текст
 export type DraftParts = {
   title: string;
   description: string;
@@ -9,13 +10,14 @@ export type DraftParts = {
   body: string;
 };
 
+// Ділить текст на абзаци за порожнім рядком
 const splitParagraphs = (body: string): string[] =>
   body
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
 
-// Only what contains Ukrainian is sent to the model: the rest of the draft is never touched
+// До моделі йде лише те, що містить українську: решта чернетки лишається недоторканою
 export const collectCyrillicItems = ({
   title,
   description,
@@ -47,14 +49,15 @@ export const collectCyrillicItems = ({
   return items;
 };
 
-// Only single-line values are rewritten: a title that the owner turned into a
-// multi-line YAML block is reported instead of being broken
+// Переписуються лише однорядкові значення: заголовок, який власник зробив
+// багаторядковим YAML-блоком, не ламається, а потрапляє в попередження
 const SINGLE_LINE = {
   title: /^title:[ \t]+(?![>|])\S.*$/m,
   description: /^description:[ \t]+(?![>|])\S.*$/m,
   tags: /^tags:[ \t]*\[.*\][ \t]*$/m,
 };
 
+// Замінює один рядок шапки; якщо значення багаторядкове — додає попередження замість того, щоб зламати
 const replaceFrontLine = (
   front: string,
   key: keyof typeof SINGLE_LINE,
@@ -67,11 +70,11 @@ const replaceFrontLine = (
     return front;
   }
 
-  // A function, so that "$&" or "$'" in a title is not read as a replacement pattern
+  // Функція, щоб «$&» чи «$'» у заголовку не прочиталися як шаблон заміни
   return front.replace(SINGLE_LINE[key], () => `${key}: ${value}`);
 };
 
-// Puts the translations back into the file text and changes nothing else
+// Повертає переклади в текст файла й нічого більше не змінює
 export const applyTranslations = (
   originalText: string,
   parts: DraftParts,
@@ -114,9 +117,9 @@ export const applyTranslations = (
   return { text: usesCrlf ? text.replace(/\n/g, '\r\n') : text, warnings };
 };
 
-// The title, the description and the whole text at once, for a draft that is translated
-// from its Ukrainian version: the number of paragraphs may differ from the old English
-// text, so the body is swapped as a whole. Tags, picture, credit and notes stay as they were.
+// Заголовок, опис і весь текст одразу — для чернетки, що перекладається зі своєї української
+// версії: кількість абзаців може відрізнятись від старого англійського тексту, тож текст
+// замінюється цілком. Теги, фото, підпис і нотатки лишаються як були.
 export const replaceArticleText = (
   originalText: string,
   article: { title: string; description: string; body: string },
