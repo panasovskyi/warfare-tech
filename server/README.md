@@ -120,7 +120,3 @@ npm run start:dev
 | `npm run lint`, `npm run format` | ESLint and Prettier |
 
 There are no automated tests yet.
-
-## Study notes
-
-The files `SHORT_NEST_FLOW.md`, `ALGORITHM_STEPS.md`, `STEPS_LOGIC.md` and `PRISMA_TYPES.md` are notes written while learning NestJS and Prisma. They are in Ukrainian.
