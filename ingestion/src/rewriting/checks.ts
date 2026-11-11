@@ -7,7 +7,7 @@ export type CheckInput = {
   sourceText: string;
 };
 
-// TODO: ліміти — перші припущення, відкалібрувати на справжніх чернетках
+// Ліміти — перші припущення
 // Скільки разів дозволено назвати видання в тексті (далі — лише «the outlet said»)
 const MAX_OUTLET_NAME_MENTIONS = 1;
 // Скільки разів дозволено написати «the outlet» або «the publication»

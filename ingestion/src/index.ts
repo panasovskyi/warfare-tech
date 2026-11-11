@@ -23,8 +23,6 @@ const USAGE = `Usage:
 const reasonOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-// TODO: пакетна обробка: список посилань або RSS замість однієї адреси за запуск (перевірка
-// дублів уже є; кожна стаття — окремий платний виклик, тож потрібен ліміт на запуск)
 // TODO: автотести: перевірки (checks, overlap, body-rules, читання й заміна у файлі чернетки)
 // поки були лише одноразовими скриптами
 
