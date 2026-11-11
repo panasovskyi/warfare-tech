@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { SectionBreadcrumbs } from '@/features/article/components/SectionBreadcrumbs/SectionBreadcrumbs';
 import { PageCover } from '@/components/ui/PageCover/PageCover';
@@ -10,11 +11,8 @@ import {
 import { SectionIcon } from '@/features/article/components/SectionIcon/SectionIcon';
 import styles from './NewsSectionPage.module.scss';
 import { SectionsList } from '@/app/news/_components/SectionsList/SectionsList';
-import { articleApi } from '@/features/article/article.api';
-import { ArticleType } from '@/features/article/article.types';
-import { Pagination } from '@/components/ui/Pagination/Pagination';
-import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
-import { ArticleCardGrid } from '@/features/article/components/ArticleCardGrid/ArticleCardGrid';
+import { SectionNewsList } from '@/app/news/_components/SectionNewsList/SectionNewsList';
+import { SectionNewsListSkeleton } from '@/app/news/_components/SectionNewsListSkeleton/SectionNewsListSkeleton';
 import { getPageNumber } from '@/lib/api/pagination';
 
 type Props = {
@@ -43,6 +41,12 @@ export async function generateMetadata({
         ? `${label} news`
         : `${label} news — page ${pageNumber}`,
     description,
+    alternates: {
+      canonical:
+        pageNumber === 1
+          ? `/news/${section}`
+          : `/news/${section}?page=${pageNumber}`,
+    },
   };
 }
 
@@ -52,19 +56,6 @@ export default async function NewsSectionPage({ params, searchParams }: Props) {
   const normalizedPage = getPageNumber(page);
 
   if (!isNewsSectionKey(section)) {
-    notFound();
-  }
-
-  const news = await articleApi.getArticles({
-    type: ArticleType.NEWS,
-    ...NEWS_SECTIONS[section].filter,
-    limit: 12,
-    page: normalizedPage,
-  });
-
-  const { items, total, totalPages } = news;
-
-  if (total > 0 && normalizedPage > totalPages) {
     notFound();
   }
 
@@ -89,30 +80,21 @@ export default async function NewsSectionPage({ params, searchParams }: Props) {
       <div className={`container ${styles.page__content}`}>
         <SectionsList activeSection={section} />
 
-        {items.length === 0 ? (
-          <EmptyState
-            title='No news to show right now'
-            description='Please check back a little later.'
-          />
-        ) : (
-          <section className={styles.news} aria-label={`${label} news`}>
-            <ul className={styles.news__list}>
-              {items.map((item) => (
-                <li key={item.id}>
-                  <ArticleCardGrid article={item} headingLevel={2} />
-                </li>
-              ))}
-            </ul>
-
-            <div className={styles.news__pagination}>
-              <Pagination
-                page={normalizedPage}
-                totalPages={totalPages}
-                basePath={`/news/${section}`}
-              />
-            </div>
-          </section>
-        )}
+        {/* loading.tsx не спрацьовує, коли міняється лише ?page=N: старий список висів би до
+            кінця запиту. key змушує Suspense показати заглушку на кожну нову сторінку */}
+        <Suspense
+          key={normalizedPage}
+          fallback={
+            <>
+              <p role='status' className='sr-only'>
+                Loading news…
+              </p>
+              <SectionNewsListSkeleton />
+            </>
+          }
+        >
+          <SectionNewsList section={section} page={normalizedPage} />
+        </Suspense>
       </div>
     </div>
   );
