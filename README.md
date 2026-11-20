@@ -18,7 +18,7 @@ This is a portfolio project built by one developer, not a newsroom. The articles
 | [`server/`](server/) | The REST API | NestJS 11, Prisma 7, PostgreSQL, Zod 4, JWT |
 | [`ingestion/`](ingestion/) | The article pipeline (runs locally) | Node, TypeScript, Claude API, Cloudinary |
 
-The three parts are separate npm projects. There is no shared workspace: each has its own `package.json` and is installed and run from its own folder.
+The three parts are separate npm projects. There is no shared workspace: each has its own `package.json` and is installed and run from its own folder. The website and the API have their own READMEs with more detail: [`client/README.md`](client/README.md) and [`server/README.md`](server/README.md).
 
 ## How it works
 
@@ -111,10 +111,6 @@ The other commands (`npm run image`, `npm run translate`, `npm run upload-image`
 | Images | Cloudinary |
 
 The `main` branch is deployed; `develop` is the working branch. The API has to be live before the website is built, because the build fetches the home page data.
-
-## Notes for readers of the code
-
-The working notes in this repository ([`BACKLOG.md`](BACKLOG.md), [`DEPLOY.md`](DEPLOY.md)) are written in Ukrainian. The code, the interface and the site content are in English.
 
 ## Content and photos
 
