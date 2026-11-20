@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header/Header';
 import { Footer } from '@/components/layout/Footer/Footer';
 import { THEME_INIT_SCRIPT } from '@/lib/theme';
 import { SITE_URL } from '@/lib/links';
+import { Analytics } from '@vercel/analytics/next';
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           {children}
         </main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
